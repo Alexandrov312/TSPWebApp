@@ -1,0 +1,23 @@
+﻿@using System.Text.Json
+@using WebApp23621759.Helpers
+@using WebApp23621759.Models.Common
+@model List<Notification>
+
+@{
+    var notificationsJson = TempData["Notifications"] as string;
+    var notifications = string.IsNullOrEmpty(notificationsJson)
+        ? new List<Notification>()
+        : JsonSerializer.Deserialize<List<Notification>>(notificationsJson);
+}
+
+@if (notifications.Any())
+{
+    <div id="toast-container">
+        @foreach (var n in notifications)
+        {
+            <div class="toast-notification @NotificationHelper.GetCssClass(n.Type)">
+                @n.Message
+            </div>
+        }
+    </div>
+}

@@ -69,6 +69,19 @@ namespace WebApp23621759.Services
             return items;
         }
 
+        public bool DeleteTask(int taskId)
+        {
+            using var connection = _databaseService.GetOpenConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = @"
+                DELETE FROM ""Tasks""
+                WHERE ""Id"" = @input";
+            command.Parameters.AddWithValue("@input", taskId);
+
+            int rowsAffected = command.ExecuteNonQuery();
+            return rowsAffected > 0;
+        }
+
         private static TaskItem MapTask(NpgsqlDataReader reader)
         {
             return new TaskItem()

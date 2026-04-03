@@ -1,4 +1,4 @@
-html {
+﻿html {
   font-size: 14px;
 }
 
@@ -22,7 +22,7 @@ body {
     background: linear-gradient(135deg, #dff5ec, #f6fbf8);
 }
 
-.auth-page {
+.page {
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -31,7 +31,7 @@ body {
     min-height: calc(100vh - 150px);
 }
 
-.auth-card {
+.card {
     width: 100%;
     max-width: 460px;
     background: #ffffff;
@@ -41,7 +41,7 @@ body {
     padding: 32px;
 }
 
-.auth-title {
+.title {
     text-align: center;
     margin-bottom: 24px;
     font-size: 32px;
@@ -53,47 +53,46 @@ body {
     flex-direction: column;
 }
 
-.field-group label{
+.form-group label{
     display: block;
     margin-bottom: 6px;
     font-weight: 600;
     text-align: left;
 }
 
-.field-group input{
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid #b8c7be;
-    border-radius: 10px;
-    font-size: 16px;
-    box-sizing: border-box;
-}
-
-.field-group input:focus{
-    outline: none;
-    border-color: #6fa98a;
-    box-shadow: 0 0 0 3px rgba(111, 169, 138, 0.15);
-}
+    .form-group input, select{
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #b8c7be;
+        border-radius: 10px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+    
+    .form-group input:focus{
+        outline: none;
+        border-color: #6fa98a;
+        box-shadow: 0 0 0 3px rgba(111, 169, 138, 0.15);
+    }
 
 .field-error{
-    min-height: 22px;
-    margin-top: 4px;
+    min-height: 40px;
 }
 
-.field-error span{
-    color: #d93025;
-    font-size: 13px;
-}
+    .field-error span{
+        color: #d93025;
+        font-size: 13px;
+    }
 
 .forgot-password{
     text-align: right;
     margin-bottom: 10px;
 }
 
-.forgot-password a{
-    text-decoration: none;
-    font-size: 14px;
-}
+    .forgot-password a{
+        text-decoration: none;
+        font-size: 14px;
+    }
 
 .message-box{
     min-height: 26px;
@@ -105,7 +104,7 @@ body {
     font-size: 14px;
 }
 
-.auth-btn {
+.primary-btn {
     width: 100%;
     padding: 12px;
     border: none;
@@ -117,9 +116,9 @@ body {
     margin-bottom: 18px;
 }
 
-.auth-btn:hover {
-    background: #cc3f2a;
-}
+    .primary-btn:hover {
+        background: #cc3f2a;
+    }
 
 .signup-row{
     text-align: center;
@@ -130,4 +129,95 @@ body {
     margin-left: 8px;
     text-decoration: none;
     font-weight: 600;
+}
+
+.priority-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 8px;
+}
+
+    .priority-selector input[type="radio"] {
+        display: none;
+    }
+
+    .priority-selector input[type="radio"]:checked + .priority-option {
+        border-color: #222;
+        transform: scale(1.03);
+        box-shadow: 0 0 0 2px rgba(0,0,0,0.08);
+    }
+
+.priority-option {
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    border: 2px solid transparent;
+    transition: 0.2s ease;
+    user-select: none;
+}
+
+    .priority-option:hover {
+        transform: scale(1.03);
+        opacity: 0.9;
+    }
+
+.priority-low {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.priority-medium {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.priority-high {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 9999;
+}
+
+.toast-notification {
+    min-width: 260px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    animation: fadeIn 0.3s ease;
+}
+
+.toast-success {
+    background: #2e7d32;
+}
+
+.toast-error {
+    background: #c62828;
+}
+
+.toast-info {
+    background: #1565c0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

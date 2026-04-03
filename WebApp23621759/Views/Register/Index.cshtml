@@ -1,19 +1,19 @@
-﻿@model WebApp23621759.Models.ViewModel.RegisterUserModel 
+﻿@model WebApp23621759.Models.ViewModel.RegisterUserModel
 
-<div class="auth-page">
-    <div class="auth-card">
-        <h2 class="auth-title">Register</h2>
+<div class="page">
+    <div class="card">
+        <h2 class="title">Register</h2>
 
         <form asp-action="Index" asp-controller="Register" method="post" class="auth-form">
-            <div class="field-group">
+            <div class="form-group">
                 <label asp-for="Username">👤 Username</label>
-                <input asp-for="Username" placeholder="Enter your username"/>
+                <input asp-for="Username" placeholder="Enter your username" />
                 <div class="field-error">
                     <span asp-validation-for="Username"></span>
                 </div>
             </div>
 
-            <div class="field-group">
+            <div class="form-group">
                 <label asp-for="Email">📧 Email</label>
                 <input asp-for="Email" placeholder="Enter your email" />
                 <div class="field-error">
@@ -21,23 +21,23 @@
                 </div>
             </div>
 
-            <div class="field-group">
+            <div class="form-group">
                 <label asp-for="Password">🔒 Password</label>
-                <input type="password" asp-for="Password" placeholder="Enter your password" />
+                <input asp-for="Password" type="password" placeholder="Enter your password" />
                 <div class="field-error">
                     <span asp-validation-for="Password"></span>
                 </div>
             </div>
 
-            <div class="field-group">
+            <div class="form-group">
                 <label asp-for="ConfirmPassword">🔒 Confirm password</label>
-                <input type="password" asp-for="ConfirmPassword" placeholder="Confirm your password" />
+                <input asp-for="ConfirmPassword" type="password" placeholder="Confirm your password" />
                 <div class="field-error">
                     <span asp-validation-for="ConfirmPassword"></span>
                 </div>
             </div>
 
-            <button type="submit" class="auth-btn">Register</button>
+            <button type="submit" class="primary-btn">Register</button>
 
             <div class="signup-row">
                 <span>Already have an account?</span>

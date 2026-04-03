@@ -1,0 +1,54 @@
+﻿@using WebApp23621759.Helpers
+@model WebApp23621759.Models.ViewModel.CreateTaskModel
+
+<div class="page">
+	<div class="card">
+		<h2 class="title">Create Task</h2>
+		<form asp-action="Index" asp-controller="CreateTask" method="post">
+			<div class="form-group">
+				<label asp-for="Title">Title</label>
+				<input asp-for="Title" placeholder="Enter title"/>
+				<div class="field-error">
+					<span asp-validation-for="Title"></span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label asp-for="Description">Description</label>
+				<input asp-for="Description" placeholder="Enter description" />
+				<div class="field-error">
+					<span asp-validation-for="Description"></span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label asp-for="DueDate">Due Date</label>
+				<input asp-for="DueDate" type="datetime-local" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+				<div class="field-error">
+					<span asp-validation-for="DueDate"></span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label asp-for="Priority">Priority</label>
+
+				<div class="priority-selector">
+					<input type="radio" asp-for="Priority" id="priority-low" value="Low" />
+					<label for="priority-low" class="priority-option priority-low">🟢 Low</label>
+
+					<input type="radio" asp-for="Priority" id="priority-medium" value="Medium" />
+					<label for="priority-medium" class="priority-option priority-medium">🟡 Medium</label>
+
+					<input type="radio" asp-for="Priority" id="priority-high" value="High" />
+					<label for="priority-high" class="priority-option priority-high">🔴 High</label>
+				</div>
+
+				<div class="field-error">
+					<span asp-validation-for="Priority"></span>
+				</div>
+			</div>
+
+			<button type="submit" class="primary-btn">Create task</button>
+		</form>
+	</div>
+</div>

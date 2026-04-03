@@ -33,10 +33,10 @@ namespace WebApp23621759.Database.DatabaseTables
 				INSERT INTO ""Users"" (""Username"", ""Email"", ""PasswordHash"", ""IsAdmin"")
 				VALUES (@username, @email, @passwordHash, @isAdmin);";
 
-			insertAdminCommand.Parameters.Add(new NpgsqlParameter("@username", "admin"));
-			insertAdminCommand.Parameters.Add(new NpgsqlParameter("@email", "admin@site.com"));
-			insertAdminCommand.Parameters.Add(new NpgsqlParameter("@passwordHash", PasswordService.Hash("admin123")));
-			insertAdminCommand.Parameters.Add(new NpgsqlParameter("@isAdmin", true));
+			insertAdminCommand.Parameters.AddWithValue("@username", "admin");
+			insertAdminCommand.Parameters.AddWithValue("@email", "admin@site.com");
+			insertAdminCommand.Parameters.AddWithValue("@passwordHash", PasswordService.Hash("admin123"));
+			insertAdminCommand.Parameters.AddWithValue("@isAdmin", true);
 
 			insertAdminCommand.ExecuteNonQuery();
 		}

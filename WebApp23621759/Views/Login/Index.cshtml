@@ -1,11 +1,11 @@
 ﻿@model WebApp23621759.Models.ViewModel.LoginUserModel
 
-<div class="auth-page">
-    <div class="auth-card">
-        <h2 class="auth-title">Login</h2>
+<div class="page">
+    <div class="card">
+        <h2 class="title">Login</h2>
 
         <form asp-action="Index" asp-controller="Login" method="post" class="auth-form">
-            <div class="field-group">
+            <div class="form-group">
                 <label asp-for="UsernameOrEmail">👤 Username / 📧 Email</label>
                 <input asp-for="UsernameOrEmail" placeholder="Enter your username or email" />
                 <div class="field-error">
@@ -13,7 +13,7 @@
                 </div>
             </div>
 
-            <div class="field-group">
+            <div class="form-group">
                 <label asp-for="Password">🔒 Password</label>
                 <input asp-for="Password" type="password" placeholder="Enter your password" />
                 <div class="field-error">
@@ -32,7 +32,7 @@
                 }
             </div>
 
-            <button type="submit" class="auth-btn">Login</button>
+            <button type="submit" class="primary-btn">Login</button>
 
             <div class="signup-row">
                 <span>Don't have an account?</span>

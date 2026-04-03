@@ -9,6 +9,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<DatabaseService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<TaskService>();
 
 //Логинът ще се пази чрез cookie
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

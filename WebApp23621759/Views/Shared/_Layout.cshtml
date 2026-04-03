@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="~/WebApp23621759.styles.css" asp-append-version="true" />
 </head>
 <body>
+    <partial name="_Notifications" />
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
@@ -24,6 +25,9 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="CreateTask" asp-action="Index">Create Task</a>
                         </li>
                     </ul>
 

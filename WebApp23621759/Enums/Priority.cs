@@ -1,9 +1,16 @@
-﻿namespace WebApp23621759.Enums
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace WebApp23621759.Enums
 {
     public enum Priority
     {
-        Low, 
-        Medium, 
+        [Display(Name = "Low Priority")]
+        Low,
+
+        [Display(Name = "Medium Priority")]
+        Medium,
+
+        [Display(Name = "High Priority")]
         High
     }
 }

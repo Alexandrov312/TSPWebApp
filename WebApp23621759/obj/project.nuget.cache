@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "9Wbes8jC5YM=",
+  "dgSpecHash": "CxuNRl8djJM=",
   "success": true,
-  "projectFilePath": "C:\\Projects\\VS Projects\\6tiSemestar\\TSPWebApp\\WebApp23621759\\WebApp23621759.csproj",
+  "projectFilePath": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\WebApp23621759.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Admin\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\6.0.0\\microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",
