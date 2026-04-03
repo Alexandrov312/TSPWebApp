@@ -1,0 +1,133 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+    background: linear-gradient(135deg, #dff5ec, #f6fbf8);
+}
+
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 15px;
+    min-height: calc(100vh - 150px);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 460px;
+    background: #ffffff;
+    border: 1px solid #d9e3dc;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    padding: 32px;
+}
+
+.auth-title {
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.auth-form{
+    display: flex;
+    flex-direction: column;
+}
+
+.field-group label{
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.field-group input{
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #b8c7be;
+    border-radius: 10px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.field-group input:focus{
+    outline: none;
+    border-color: #6fa98a;
+    box-shadow: 0 0 0 3px rgba(111, 169, 138, 0.15);
+}
+
+.field-error{
+    min-height: 22px;
+    margin-top: 4px;
+}
+
+.field-error span{
+    color: #d93025;
+    font-size: 13px;
+}
+
+.forgot-password{
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+.forgot-password a{
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.message-box{
+    min-height: 26px;
+    margin-bottom: 12px;
+}
+
+.error-message {
+    color: #d93025;
+    font-size: 14px;
+}
+
+.auth-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #e24a33;
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 18px;
+}
+
+.auth-btn:hover {
+    background: #cc3f2a;
+}
+
+.signup-row{
+    text-align: center;
+    font-size: 15px;
+}
+
+.signup-row a {
+    margin-left: 8px;
+    text-decoration: none;
+    font-weight: 600;
+}

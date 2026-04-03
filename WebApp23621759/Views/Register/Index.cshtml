@@ -1,0 +1,54 @@
+﻿@model WebApp23621759.Models.ViewModel.RegisterUserModel 
+
+<div class="auth-page">
+    <div class="auth-card">
+        <h2 class="auth-title">Register</h2>
+
+        <form asp-action="Index" asp-controller="Register" method="post" class="auth-form">
+            <div class="field-group">
+                <label asp-for="Username">👤 Username</label>
+                <input asp-for="Username" placeholder="Enter your username"/>
+                <div class="field-error">
+                    <span asp-validation-for="Username"></span>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label asp-for="Email">📧 Email</label>
+                <input asp-for="Email" placeholder="Enter your email" />
+                <div class="field-error">
+                    <span asp-validation-for="Email"></span>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label asp-for="Password">🔒 Password</label>
+                <input type="password" asp-for="Password" placeholder="Enter your password" />
+                <div class="field-error">
+                    <span asp-validation-for="Password"></span>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label asp-for="ConfirmPassword">🔒 Confirm password</label>
+                <input type="password" asp-for="ConfirmPassword" placeholder="Confirm your password" />
+                <div class="field-error">
+                    <span asp-validation-for="ConfirmPassword"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="auth-btn">Register</button>
+
+            <div class="signup-row">
+                <span>Already have an account?</span>
+                <a href="/Login">Login</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

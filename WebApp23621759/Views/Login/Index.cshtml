@@ -1,0 +1,49 @@
+﻿@model WebApp23621759.Models.ViewModel.LoginUserModel
+
+<div class="auth-page">
+    <div class="auth-card">
+        <h2 class="auth-title">Login</h2>
+
+        <form asp-action="Index" asp-controller="Login" method="post" class="auth-form">
+            <div class="field-group">
+                <label asp-for="UsernameOrEmail">👤 Username / 📧 Email</label>
+                <input asp-for="UsernameOrEmail" placeholder="Enter your username or email" />
+                <div class="field-error">
+                    <span asp-validation-for="UsernameOrEmail"></span>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label asp-for="Password">🔒 Password</label>
+                <input asp-for="Password" type="password" placeholder="Enter your password" />
+                <div class="field-error">
+                    <span asp-validation-for="Password"></span>
+                </div>
+            </div>
+
+            <div class="forgot-password">
+                <a href="">Forgot password?</a>
+            </div>
+
+            <div class="message-box">
+                @if (ViewBag.ErrorMessage != null)
+                {
+                    <div class="error-message">@ViewBag.ErrorMessage</div>
+                }
+            </div>
+
+            <button type="submit" class="auth-btn">Login</button>
+
+            <div class="signup-row">
+                <span>Don't have an account?</span>
+                <a href="/Register">Sign up</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
