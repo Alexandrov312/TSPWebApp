@@ -50,7 +50,8 @@
               "RelativeToolTip": "WebApp23621759\\Database\\DatabaseService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-03T08:31:14.482Z"
+              "WhenOpened": "2026-04-03T08:31:14.482Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -62,7 +63,8 @@
               "RelativeToolTip": "WebApp23621759\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-03T08:30:48.756Z"
+              "WhenOpened": "2026-04-03T08:30:48.756Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -87,7 +89,8 @@
               "RelativeToolTip": "WebApp23621759\\Database\\DatabaseTables\\UserTableInitializer.cs",
               "ViewState": "AgIAABMAAAAAAAAAAAAQwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-03T08:30:28.68Z"
+              "WhenOpened": "2026-04-03T08:30:28.68Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -99,7 +102,8 @@
               "RelativeToolTip": "WebApp23621759\\Database\\Helpers\\TableHelper.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-03T08:30:25.849Z"
+              "WhenOpened": "2026-04-03T08:30:25.849Z",
+              "EditorCaption": ""
             }
           ]
         },

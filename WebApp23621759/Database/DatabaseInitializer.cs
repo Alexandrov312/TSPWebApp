@@ -11,6 +11,7 @@ namespace WebApp23621759.Database
 			using var connection = databaseService.GetOpenConnection();
 
 			UserTableInitializer.EnsureTable(connection);
+			TaskTableInitializer.EnsureTable(connection);
 		}
 	}
 }
