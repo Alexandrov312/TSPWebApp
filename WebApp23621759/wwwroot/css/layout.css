@@ -1,0 +1,25 @@
+﻿.page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 15px;
+    min-height: calc(100vh - 150px);
+}
+
+.card {
+    width: 100%;
+    max-width: 460px;
+    background: #ffffff;
+    border: 1px solid #d9e3dc;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    padding: 32px;
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 32px;
+    font-weight: 700;
+}

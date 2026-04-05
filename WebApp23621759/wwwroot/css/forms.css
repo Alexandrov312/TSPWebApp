@@ -1,0 +1,46 @@
+﻿.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #b8c7be;
+    border-radius: 10px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #6fa98a;
+        box-shadow: 0 0 0 3px rgba(111, 169, 138, 0.15);
+    }
+
+.field-error {
+    min-height: 40px;
+}
+
+    .field-error span {
+        color: #d93025;
+        font-size: 13px;
+    }
+
+.message-box {
+    min-height: 26px;
+    margin-bottom: 12px;
+}
+
+.error-message {
+    color: #d93025;
+    font-size: 14px;
+}
+
+.table-form {
+    display: inline;
+}

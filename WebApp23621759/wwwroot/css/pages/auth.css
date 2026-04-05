@@ -1,0 +1,15 @@
+﻿
+.auth-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.forgot-password {
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+    .forgot-password a {
+        text-decoration: none;
+        font-size: 14px;
+    }

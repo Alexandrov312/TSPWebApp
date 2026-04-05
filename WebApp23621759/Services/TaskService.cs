@@ -46,27 +46,36 @@ namespace WebApp23621759.Services
             return MapTask(reader);
         }
 
-        public List<TaskItem> GetAllTasksByUserId(int userId)
+        public List<TaskItem> GetAllTasksByUserId(int userId, string sortBy, string direction)
         {
+            var tasks = new List<TaskItem>();
+
             using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
-            command.CommandText = @"
-				SELECT ""Id"", ""Title"", ""Description"", ""DueDate"", ""CreatedAt"",
-                        ""CompletedAt"", ""Status"", ""Priority"", ""UserId""
-				FROM ""Tasks""
-				WHERE ""UserId"" = @input;";
-            command.Parameters.AddWithValue("@input", userId);
+
+            string sortColumn = sortBy switch
+            {
+                "priority" => "\"Priority\"",
+                "status" => "\"Status\"",
+                "createdAt" => "\"CreatedAt\"",
+                _ => "\"DueDate\""
+            };
+
+            command.CommandText = $@"
+                SELECT ""Id"", ""Title"", ""Description"", ""DueDate"", ""CreatedAt"", ""CompletedAt"", ""Status"", ""Priority"", ""UserId""
+                FROM ""Tasks""
+                WHERE ""UserId"" = @userId
+                ORDER BY {sortColumn} {direction};";
+
+            command.Parameters.AddWithValue("@userId", userId);
 
             using var reader = command.ExecuteReader();
-
-            List<TaskItem> items = new List<TaskItem>();
-
             while (reader.Read())
             {
-                items.Add(MapTask(reader));
+                tasks.Add(MapTask(reader));
             }
 
-            return items;
+            return tasks;
         }
 
         public bool DeleteTask(int taskId)

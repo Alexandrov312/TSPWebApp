@@ -1,0 +1,52 @@
+﻿.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+.primary-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #e24a33;
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 18px;
+}
+
+    .primary-btn:hover {
+        background: #cc3f2a;
+    }
+
+.signup-row {
+    text-align: center;
+    font-size: 15px;
+}
+
+    .signup-row a {
+        margin-left: 8px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+.table-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    transition: 0.2s ease;
+}
+
+.edit-btn:hover {
+    background: #e8f0fe;
+}
+
+.delete-btn:hover {
+    background: #fde8e8;
+}

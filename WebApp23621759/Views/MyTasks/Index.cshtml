@@ -1,0 +1,101 @@
+﻿@using WebApp23621759.Helpers
+@model List<WebApp23621759.Models.Entities.TaskItem>
+
+@{
+    string currentSortBy = ViewBag.CurrentSortBy;
+    string currentDirection = ViewBag.CurrentDirection;
+
+    string GetNextDirection(string column)
+    {
+        if (currentSortBy == column)
+        {
+            return currentDirection == "ASC" ? "DESC" : "ASC";
+        }
+
+        return "ASC";
+    }
+}
+
+@{
+    string GetArrow(string column)
+    {
+        if (currentSortBy != column)
+        {
+            return "";
+        }
+
+        return currentDirection == "ASC" ? " ↑" : " ↓";
+    }
+}
+
+<div class="page">
+    <div class="card" style="max-width: 1100px;">
+        <h2 class="title">My Tasks</h2>
+
+        <div class="table-actions">
+            <a asp-action="Index"
+               asp-route-sortBy="dueDate"
+               asp-route-direction="@GetNextDirection("dueDate")">
+                Due Date @GetArrow("dueDate")
+            </a>
+
+            <a asp-action="Index"
+               asp-route-sortBy="priority"
+               asp-route-direction="@GetNextDirection("priority")">
+                Priority @GetArrow("priority")
+            </a>
+
+            <a asp-action="Index"
+               asp-route-sortBy="status"
+               asp-route-direction="@GetNextDirection("status")">
+                Status @GetArrow("status")
+            </a>
+
+            <a asp-action="Index"
+               asp-route-sortBy="createdAt"
+               asp-route-direction="@GetNextDirection("createdAt")">
+                Created Date @GetArrow("createdAt")
+            </a>
+        </div>
+
+        <table class="task-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Created At</th>
+                    <th>Options</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var task in Model)
+                {
+                    <tr >
+                        <td>@task.Title</td>
+                        <td>@task.Description</td>
+                        <td>@task.DueDate.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@task.Status</td>
+                        <td class="@PriorityHelper.GetCssClass(task.Priority)">@task.Priority</td>
+                        <td>@task.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td colspan="2">
+                            <button class="table-btn edit-btn">✏️</button>
+
+                            <form asp-action="Delete" method="post" class="table-form">
+                                <input type="hidden" name="id" value="@task.Id" />
+                                <input type="hidden" name="title" value="@task.Title" />
+                                <button 
+                                    type="submit" 
+                                    class="table-btn delete-btn">
+                                    🗑️
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
