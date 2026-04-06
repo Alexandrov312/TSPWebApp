@@ -83,15 +83,24 @@
                         <td colspan="2">
                             <button class="table-btn edit-btn">✏️</button>
 
-                            <form asp-action="Delete" method="post" class="table-form">
-                                <input type="hidden" name="id" value="@task.Id" />
-                                <input type="hidden" name="title" value="@task.Title" />
-                                <button 
-                                    type="submit" 
-                                    class="table-btn delete-btn">
-                                    🗑️
-                                </button>
-                            </form>
+                            <div class="delete-wrapper">
+                                <form asp-action="Delete" method="post" class="table-form">
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <input type="hidden" name="title" value="@task.Title" />
+
+                                    <button type="button" class="table-btn delete-btn show-popup">
+                                        🗑️
+                                    </button>
+
+                                    <div class="delete-popup">
+                                        <span>Delete task?</span>
+                                        <div class="popup-actions">
+                                            <button type="submit" class="confirm-btn">Yes</button>
+                                            <button type="button" class="cancel-btn">No</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 }

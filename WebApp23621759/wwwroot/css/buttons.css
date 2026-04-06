@@ -50,3 +50,7 @@
 .delete-btn:hover {
     background: #fde8e8;
 }
+
+button:active {
+    transform: scale(0.95);
+}

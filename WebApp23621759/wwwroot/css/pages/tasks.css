@@ -87,3 +87,72 @@
         color: #721c24;
         background-color: #f8d7da;
     }
+
+.delete-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.delete-popup {
+    position: absolute;
+    top: 120%;
+    right: 0;
+    background: white;
+    border: 1px solid #d9e3dc;
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    font-size: 14px;
+    display: none;
+    z-index: 10;
+    min-width: 140px;
+}
+
+    .delete-popup span {
+        display: block;
+        margin-bottom: 8px;
+    }
+
+.popup-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.confirm-btn {
+    background: #c62828;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+    .confirm-btn:hover {
+        background: #b71c1c;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(198, 40, 40, 0.3);
+    }
+
+.cancel-btn {
+    background: #f1f3f2;
+    color: #333;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+    .cancel-btn:hover {
+        background: #e0e0e0;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+.delete-popup.show {
+    display: block;
+}
