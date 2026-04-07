@@ -2,6 +2,7 @@
 using WebApp23621759.Database;
 using WebApp23621759.Enums;
 using WebApp23621759.Models.Entities;
+using WebApp23621759.Models.ViewModel;
 
 namespace WebApp23621759.Services
 {
@@ -89,6 +90,82 @@ namespace WebApp23621759.Services
 
             int rowsAffected = command.ExecuteNonQuery();
             return rowsAffected > 0;
+        }
+
+        public bool UpdateTask(EditTaskModel model, int userId)
+        {
+            using var connection = _databaseService.GetOpenConnection();
+            using var command = connection.CreateCommand();
+
+            command.CommandText = @"
+                UPDATE ""Tasks""
+                SET
+                    ""Title"" = @title,
+                    ""Description"" = @description,
+                    ""DueDate"" = @dueDate,
+                    ""Status"" = @status,
+                    ""Priority"" = @priority,
+                    ""CompletedAt"" = CASE
+                        WHEN @status = @completedStatus AND ""CompletedAt"" IS NULL THEN NOW()
+                        WHEN @status <> @completedStatus THEN NULL
+                        ELSE ""CompletedAt""
+                    END
+                WHERE ""Id"" = @id AND ""UserId"" = @userId;";
+
+            command.Parameters.AddWithValue("id", model.Id);
+            command.Parameters.AddWithValue("userId", userId);
+            command.Parameters.AddWithValue("title", model.Title);
+            command.Parameters.AddWithValue("description", (object?)model.Description ?? DBNull.Value);
+            command.Parameters.AddWithValue("dueDate", model.DueDate);
+            command.Parameters.AddWithValue("status", (int)model.Status);
+            command.Parameters.AddWithValue("priority", (int)model.Priority);
+            command.Parameters.AddWithValue("completedStatus", (int)Status.Completed);
+
+            int affectedRows = command.ExecuteNonQuery();
+            return affectedRows > 0;
+        }
+
+        public bool SetCompleted(int taskId, int userId)
+        {
+            using var connection = _databaseService.GetOpenConnection();
+            using var command = connection.CreateCommand();
+
+            command.CommandText = @"
+                UPDATE ""Tasks""
+                SET 
+                    ""Status"" = @status,
+                    ""CompletedAt"" = NOW()
+                WHERE ""Id"" = @id AND ""UserId"" = @userId;";
+
+            command.Parameters.AddWithValue("id", taskId);
+            command.Parameters.AddWithValue("userId", userId);
+            command.Parameters.AddWithValue("status", (int)Status.Completed);
+
+            int affectedRows = command.ExecuteNonQuery();
+            return affectedRows > 0;
+        }
+
+        public TaskItem GetById(int id, int userId)
+        {
+            using var connection = _databaseService.GetOpenConnection();
+            using var command = connection.CreateCommand();
+
+            command.CommandText = @"
+                SELECT ""Id"", ""Title"", ""Description"", ""DueDate"",
+                       ""CreatedAt"", ""CompletedAt"", ""Status"", ""Priority"", ""UserId""
+                FROM ""Tasks""
+                WHERE ""Id"" = @id AND ""UserId"" = @userId
+                LIMIT 1;";
+
+            command.Parameters.AddWithValue("id", id);
+            command.Parameters.AddWithValue("userId", userId);
+
+            using var reader = command.ExecuteReader();
+
+            if (!reader.Read())
+                return null;
+
+            return MapTask(reader);
         }
 
         private static TaskItem MapTask(NpgsqlDataReader reader)

@@ -1,4 +1,5 @@
-﻿@using WebApp23621759.Helpers
+﻿@using WebApp23621759.Enums
+@using WebApp23621759.Helpers
 @model List<WebApp23621759.Models.Entities.TaskItem>
 
 @{
@@ -29,7 +30,7 @@
 }
 
 <div class="page">
-    <div class="card" style="max-width: 1100px;">
+    <div class="card tasks-card">
         <h2 class="title">My Tasks</h2>
 
         <div class="table-actions">
@@ -58,53 +59,118 @@
             </a>
         </div>
 
-        <table class="task-table">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Due Date</th>
-                    <th>Status</th>
-                    <th>Priority</th>
-                    <th>Created At</th>
-                    <th>Options</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var task in Model)
-                {
-                    <tr >
-                        <td>@task.Title</td>
-                        <td>@task.Description</td>
-                        <td>@task.DueDate.ToString("dd.MM.yyyy HH:mm")</td>
-                        <td>@task.Status</td>
-                        <td class="@PriorityHelper.GetCssClass(task.Priority)">@task.Priority</td>
-                        <td>@task.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
-                        <td colspan="2">
-                            <button class="table-btn edit-btn">✏️</button>
-
-                            <div class="delete-wrapper">
-                                <form asp-action="Delete" method="post" class="table-form">
-                                    <input type="hidden" name="id" value="@task.Id" />
-                                    <input type="hidden" name="title" value="@task.Title" />
-
-                                    <button type="button" class="table-btn delete-btn show-popup">
-                                        🗑️
-                                    </button>
-
-                                    <div class="delete-popup">
-                                        <span>Delete task?</span>
-                                        <div class="popup-actions">
-                                            <button type="submit" class="confirm-btn">Yes</button>
-                                            <button type="button" class="cancel-btn">No</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </td>
+        <div class="table-wrapper">
+            <table class="task-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Created At</th>
+                        <th>Completed At</th>
+                        <th>Options</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var task in Model)
+                    {
+                        <tr class="task-row">
+                            <td>
+                                <span class="view-mode task-cell-display">@task.Title</span>
+                                <input form="edit-form-@task.Id" class="edit-mode form-input" type="text" name="Title" value="@task.Title" />
+                            </td>
+
+                            <td>
+                                <span class="view-mode task-cell-display">@task.Description</span>
+                                <input form="edit-form-@task.Id" class="edit-mode form-input" type="text" name="Description" value="@task.Description" />
+                            </td>
+
+                            <td>
+                                <span class="view-mode task-cell-display">@task.DueDate.ToString("dd.MM.yyyy HH:mm")</span>
+                                <input form="edit-form-@task.Id" class="edit-mode form-input" type="datetime-local" name="DueDate"
+                                       value="@task.DueDate.ToString("yyyy-MM-ddTHH:mm")" />
+                            </td>
+
+                            <td>
+                                <span class="view-mode task-cell-display">@task.Status</span>
+                                <select form="edit-form-@task.Id" class="edit-mode form-input" name="Status">
+                                    @foreach (var status in Enum.GetValues(typeof(Status)))
+                                    {
+                                        if ((Status)status == task.Status)
+                                        {
+                                            <option value="@((int)status)" selected>@status</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@((int)status)">@status</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+
+                            <td>
+                                <span class="view-mode task-cell-display priority-badge @PriorityHelper.GetCssClass(task.Priority)">
+                                    @task.Priority
+                                </span>
+
+                                <select form="edit-form-@task.Id" class="edit-mode form-input" name="Priority">
+                                    @foreach (var priority in Enum.GetValues(typeof(Priority)))
+                                    {
+                                        if ((Priority)priority == task.Priority)
+                                        {
+                                            <option value="@((int)priority)" selected>@priority</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@((int)priority)">@priority</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+
+                            <td>@task.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@(task.CompletedAt == null ? "Not finished" : task.CompletedAt?.ToString("dd.MM.yyyy HH:mm"))</td>
+
+                            <td class="options-cell">
+                                <form id="edit-form-@task.Id" asp-action="Update" method="post" class="hidden-edit-form">
+                                    <input type="hidden" name="Id" value="@task.Id" />
+                                </form>
+
+                                <div class="view-mode row-actions">
+                                    <form asp-action="MarkAsDone" method="post" class="table-form">
+                                        <input type="hidden" name="id" value="@task.Id" />
+                                        <button type="submit" class="option-btn option-btn-success done-btn" title="Mark as done">✅</button>
+                                    </form>
+                                    <button type="button" class="option-btn option-btn-warning edit-btn" title="Edit task">✏️</button>
+
+                                    <div class="delete-wrapper">
+                                        <form asp-action="Delete" method="post" class="table-form">
+                                            <input type="hidden" name="id" value="@task.Id" />
+
+                                            <button type="button" class="option-btn option-btn-danger delete-btn show-popup" title="Delete task">🗑️</button>
+
+                                            <div class="delete-popup">
+                                                <span>Delete task?</span>
+                                                <div class="popup-actions">
+                                                    <button type="submit" class="confirm-btn">Yes</button>
+                                                    <button type="button" class="cancel-btn">No</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="edit-mode row-actions">
+                                    <button type="submit" form="edit-form-@task.Id" class="option-btn option-btn-success save-btn" title="Save changes">💾</button>
+                                    <button type="button" class="option-btn option-btn-neutral cancel-edit-btn" title="Cancel edit">❌</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
