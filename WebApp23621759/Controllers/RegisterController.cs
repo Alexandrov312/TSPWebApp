@@ -24,7 +24,7 @@ namespace WebApp23621759.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Index(RegisterUserModel model)
+        public async Task<IActionResult> Index(RegisterUserViewModel model)
         {
             if (!ModelState.IsValid)
             {

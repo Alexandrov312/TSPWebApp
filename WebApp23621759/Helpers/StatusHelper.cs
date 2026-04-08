@@ -14,5 +14,15 @@ namespace WebApp23621759.Helpers
                 Status.Overdue => "status-overdue"
             };
         }
+        public static string GetCalendarCardClass(Status status)
+        {
+            return status switch
+            {
+                Status.Pending => "calendar-task-pending",
+                Status.InProgress => "calendar-task-in-progress",
+                Status.Completed => "calendar-task-completed",
+                Status.Overdue => "calendar-task-overdue"
+            };
+        }
     }
 }

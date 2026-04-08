@@ -92,7 +92,7 @@ namespace WebApp23621759.Services
             return rowsAffected > 0;
         }
 
-        public bool UpdateTask(EditTaskModel model, int userId)
+        public bool UpdateTask(EditTaskViewModel model, int userId)
         {
             using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
@@ -166,6 +166,67 @@ namespace WebApp23621759.Services
                 return null;
 
             return MapTask(reader);
+        }
+        public List<TaskItem> GetTasksForMonth(int userId, int year, int month)
+        {
+            var tasks = new List<TaskItem>();
+
+            DateTime startOfMonth = new DateTime(year, month, 1);
+            DateTime startOfNextMonth = startOfMonth.AddMonths(1);
+
+            using var connection = _databaseService.GetOpenConnection();
+            using var command = connection.CreateCommand();
+
+            command.CommandText = @"
+                SELECT ""Id"", ""Title"", ""Description"", ""DueDate"", ""CreatedAt"", ""CompletedAt"", ""Status"", ""Priority"", ""UserId""
+                FROM ""Tasks""
+                WHERE ""UserId"" = @userId
+                  AND ""DueDate"" >= @startOfMonth
+                  AND ""DueDate"" < @startOfNextMonth
+                ORDER BY ""DueDate"" ASC;";
+
+            command.Parameters.AddWithValue("userId", userId);
+            command.Parameters.AddWithValue("startOfMonth", startOfMonth);
+            command.Parameters.AddWithValue("startOfNextMonth", startOfNextMonth);
+
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                tasks.Add(MapTask(reader));
+            }
+
+            return tasks;
+        }
+
+        public bool ChangeStatus(int taskId, int userId, Status newStatus)
+        {
+            if (newStatus == Status.Overdue)
+            {
+                return false;
+            }
+
+            using var connection = _databaseService.GetOpenConnection();
+            using var command = connection.CreateCommand();
+
+            command.CommandText = @"
+                UPDATE ""Tasks""
+                SET
+                    ""Status"" = @status,
+                    ""CompletedAt"" = CASE
+                        WHEN @status = @completedStatus AND ""CompletedAt"" IS NULL THEN NOW()
+                        WHEN @status <> @completedStatus THEN NULL
+                        ELSE ""CompletedAt""
+                    END
+                WHERE ""Id"" = @id AND ""UserId"" = @userId AND ""Status"" <> @overdueStatus;";
+
+            command.Parameters.AddWithValue("id", taskId);
+            command.Parameters.AddWithValue("userId", userId);
+            command.Parameters.AddWithValue("status", (int)newStatus);
+            command.Parameters.AddWithValue("completedStatus", (int)Status.Completed);
+            command.Parameters.AddWithValue("overdueStatus", (int)Status.Overdue);
+
+            int affectedRows = command.ExecuteNonQuery();
+            return affectedRows > 0;
         }
 
         private static TaskItem MapTask(NpgsqlDataReader reader)

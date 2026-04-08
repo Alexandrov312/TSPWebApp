@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "bkwoSxFCipj0n9bAEhY/4gNoMuXTuVLtS5Pqq4sVsdw=",
+  "Hash": "UwTAF+yLe5xL4kvXQrmzT8B3jEJpa4tl5SoZC3wF/vs=",
   "Source": "WebApp23621759",
   "BasePath": "_content/WebApp23621759",
   "Mode": "Default",
@@ -148,6 +148,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\pages\\auth.css"
+    },
+    {
+      "Identity": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\pages\\calendar.css",
+      "SourceId": "WebApp23621759",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\",
+      "BasePath": "_content/WebApp23621759",
+      "RelativePath": "css/pages/calendar.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\pages\\calendar.css"
     },
     {
       "Identity": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\pages\\tasks.css",

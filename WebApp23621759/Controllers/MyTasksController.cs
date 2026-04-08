@@ -36,7 +36,7 @@ namespace WebApp23621759.Controllers
         }
 
         [HttpPost]
-        public IActionResult Update(EditTaskModel model)
+        public IActionResult Update(EditTaskViewModel model)
         {
             if (!ModelState.IsValid)
             {

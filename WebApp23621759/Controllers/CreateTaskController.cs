@@ -24,7 +24,7 @@ namespace WebApp23621759.Controllers
         }
 
         [HttpPost]
-        public IActionResult Index(CreateTaskModel model)
+        public IActionResult Index(CreateTaskViewModel model)
         {
             if (!ModelState.IsValid)
             {

@@ -25,6 +25,10 @@
       "PackagePath": "staticwebassets\\css\\pages\\auth.css"
     },
     {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\pages\\calendar.css",
+      "PackagePath": "staticwebassets\\css\\pages\\calendar.css"
+    },
+    {
       "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\pages\\tasks.css",
       "PackagePath": "staticwebassets\\css\\pages\\tasks.css"
     },
