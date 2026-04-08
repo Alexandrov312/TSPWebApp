@@ -71,7 +71,7 @@
     }
 
         .task-table tbody tr:hover {
-            background: #fafdfb;
+            filter: brightness(0.97);
         }
 
         .task-table tbody tr:last-child td {
@@ -102,6 +102,24 @@
     .task-table td:nth-child(5) {
         width: 140px; /* Priority */
     }
+
+/* Status row colors */
+
+.task-row.status-pending {
+    background-color: #f5f7fa; /* light gray-blue */
+}
+
+.task-row.status-in-progress {
+    background-color: #e3f2fd; /* light blue */
+}
+
+.task-row.status-completed {
+    background-color: #e8f5e9; /* light green */
+}
+
+.task-row.status-overdue {
+    background-color: #fdecea; /* light red */
+}
 
 /* Priority badge */
 .priority-badge {

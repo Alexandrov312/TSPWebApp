@@ -76,7 +76,7 @@
                 <tbody>
                     @foreach (var task in Model)
                     {
-                        <tr class="task-row">
+                        <tr class="task-row @StatusHelper.GetCssClass(task.Status)">
                             <td>
                                 <span class="view-mode task-cell-display">@task.Title</span>
                                 <input form="edit-form-@task.Id" class="edit-mode form-input" type="text" name="Title" value="@task.Title" />

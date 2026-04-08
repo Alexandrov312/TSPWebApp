@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApp23621759.Enums;
 using WebApp23621759.Helpers;
-using WebApp23621759.Models.Entities;
 using WebApp23621759.Models.ViewModel;
 using WebApp23621759.Services;
 
