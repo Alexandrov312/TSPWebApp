@@ -7,7 +7,7 @@
     var nextMonth = new DateTime(Model.Year, Model.Month, 1).AddMonths(1);
 }
 
-<div class="page">
+<div class="page calendar-page">
     <div class="calendar-layout">
         <div class="calendar-panel">
             <div class="calendar-header">
@@ -65,9 +65,9 @@
                         <div class="day-task-card @StatusHelper.GetCalendarCardClass(task.Status) @PriorityHelper.GetCalendarBorderClass(task.Priority)">
                             <div class="day-task-top">
                                 <div class="day-task-time">@task.DueDate.ToString("HH:mm")</div>
-                                <div class="day-task-priority-badge @PriorityHelper.GetCalendarBadgeClass(task.Priority)">
+                                <span class="priority-badge @PriorityHelper.GetCssClass(task.Priority)">
                                     @task.Priority
-                                </div>
+                                </span>
                             </div>
 
                             <div class="day-task-title">@task.Title</div>
@@ -83,8 +83,12 @@
                                     <input type="hidden" name="year" value="@Model.Year" />
                                     <input type="hidden" name="month" value="@Model.Month" />
                                     <input type="hidden" name="selectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+                                    <input type="hidden" name="title" value="@task.Title" />
 
-                                    <select name="newStatus" class="status-select" onchange="this.form.submit()" @(task.Status == Status.Overdue ? "disabled" : null)>
+                                    <select name="newStatus"
+                                            class="status-select"
+                                            onchange="this.form.submit()"
+                                    @(task.Status == Status.Overdue ? "disabled" : null)>
                                         @foreach (Status status in Enum.GetValues(typeof(Status)))
                                         {
                                             if (status == Status.Overdue)
@@ -109,7 +113,7 @@
                 }
                 else
                 {
-                    <p>No tasks for this day.</p>
+                    <p class="day-tasks-empty">No tasks for this day.</p>
                 }
             </div>
         </div>

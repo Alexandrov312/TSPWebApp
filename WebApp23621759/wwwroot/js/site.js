@@ -22,31 +22,96 @@ document.addEventListener("DOMContentLoaded", function () {
 //Слуша за всеки клик
 document.addEventListener("click", function (event) {
 
-    //показване на popup
+    // DONE POPUP
+    if (event.target.closest(".show-done-popup")) {
+        event.preventDefault();
+
+        document.querySelectorAll(".done-popup")
+            .forEach(p => p.classList.remove("show"));
+
+        document.querySelectorAll(".done-wrapper")
+            .forEach(w => w.classList.remove("popup-open"));
+
+        document.querySelectorAll(".delete-popup")
+            .forEach(p => p.classList.remove("show"));
+
+        document.querySelectorAll(".delete-wrapper")
+            .forEach(w => w.classList.remove("popup-open"));
+
+        const wrapper = event.target.closest(".done-wrapper");
+        const popup = wrapper.querySelector(".done-popup");
+
+        wrapper.classList.add("popup-open");
+        popup.classList.add("show");
+        return;
+    }
+
+    // cancel done
+    if (event.target.closest(".cancel-done-btn")) {
+        const popup = event.target.closest(".done-popup");
+        const wrapper = event.target.closest(".done-wrapper");
+
+        if (popup) {
+            popup.classList.remove("show");
+        }
+
+        if (wrapper) {
+            wrapper.classList.remove("popup-open");
+        }
+
+        return;
+    }
+
+    // DELETE POPUP
     if (event.target.closest(".show-popup")) {
         event.preventDefault();
 
-        //Премахва всички вече отворени popup прозорци
         document.querySelectorAll(".delete-popup")
             .forEach(p => p.classList.remove("show"));
+
+        document.querySelectorAll(".delete-wrapper")
+            .forEach(w => w.classList.remove("popup-open"));
+
+        document.querySelectorAll(".done-popup")
+            .forEach(p => p.classList.remove("show"));
+
+        document.querySelectorAll(".done-wrapper")
+            .forEach(w => w.classList.remove("popup-open"));
 
         const wrapper = event.target.closest(".delete-wrapper");
-        wrapper.querySelector(".delete-popup").classList.add("show");
+        const popup = wrapper.querySelector(".delete-popup");
+
+        wrapper.classList.add("popup-open");
+        popup.classList.add("show");
+        return;
     }
 
-    //cancel бутон
+    // cancel delete
     if (event.target.closest(".cancel-btn")) {
-        event.target.closest(".delete-popup").classList.remove("show");
+        const popup = event.target.closest(".delete-popup");
+        const wrapper = event.target.closest(".delete-wrapper");
+
+        if (popup) {
+            popup.classList.remove("show");
+        }
+
+        if (wrapper) {
+            wrapper.classList.remove("popup-open");
+        }
+
+        return;
     }
 
-    //клик извън popup
-    if (!event.target.closest(".delete-wrapper")) {
-        document.querySelectorAll(".delete-popup")
+    // click outside popups
+    if (!event.target.closest(".delete-wrapper") && !event.target.closest(".done-wrapper")) {
+        document.querySelectorAll(".delete-popup, .done-popup")
             .forEach(p => p.classList.remove("show"));
+
+        document.querySelectorAll(".delete-wrapper, .done-wrapper")
+            .forEach(w => w.classList.remove("popup-open"));
     }
 
-
-
+    // edit
     if (event.target.closest(".edit-btn")) {
         const currentRow = event.target.closest(".task-row");
 
@@ -54,7 +119,6 @@ document.addEventListener("click", function (event) {
             return;
         }
 
-        //Затваря всички други редове в edit режим
         document.querySelectorAll(".task-row.editing").forEach(row => {
             if (row !== currentRow) {
                 row.classList.remove("editing");
@@ -66,7 +130,7 @@ document.addEventListener("click", function (event) {
         return;
     }
 
-    //Натискане на cancel edit бутон
+    // cancel edit
     if (event.target.closest(".cancel-edit-btn")) {
         const row = event.target.closest(".task-row");
 

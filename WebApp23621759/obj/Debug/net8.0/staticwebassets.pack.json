@@ -5,16 +5,44 @@
       "PackagePath": "staticwebassets\\WebApp23621759.bundle.scp.css"
     },
     {
-      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\buttons.css",
-      "PackagePath": "staticwebassets\\css\\buttons.css"
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\base\\layout.css",
+      "PackagePath": "staticwebassets\\css\\base\\layout.css"
     },
     {
-      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\forms.css",
-      "PackagePath": "staticwebassets\\css\\forms.css"
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\base\\typography.css",
+      "PackagePath": "staticwebassets\\css\\base\\typography.css"
     },
     {
-      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\layout.css",
-      "PackagePath": "staticwebassets\\css\\layout.css"
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\components\\badges.css",
+      "PackagePath": "staticwebassets\\css\\components\\badges.css"
+    },
+    {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\components\\buttons.css",
+      "PackagePath": "staticwebassets\\css\\components\\buttons.css"
+    },
+    {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\components\\cards.css",
+      "PackagePath": "staticwebassets\\css\\components\\cards.css"
+    },
+    {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\components\\forms.css",
+      "PackagePath": "staticwebassets\\css\\components\\forms.css"
+    },
+    {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\components\\popups.css",
+      "PackagePath": "staticwebassets\\css\\components\\popups.css"
+    },
+    {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\components\\selectors.css",
+      "PackagePath": "staticwebassets\\css\\components\\selectors.css"
+    },
+    {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\components\\subtasks.css",
+      "PackagePath": "staticwebassets\\css\\components\\subtasks.css"
+    },
+    {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\components\\tables.css",
+      "PackagePath": "staticwebassets\\css\\components\\tables.css"
     },
     {
       "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\notifications.css",
@@ -27,6 +55,10 @@
     {
       "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\pages\\calendar.css",
       "PackagePath": "staticwebassets\\css\\pages\\calendar.css"
+    },
+    {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\pages\\create-task.css",
+      "PackagePath": "staticwebassets\\css\\pages\\create-task.css"
     },
     {
       "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\css\\pages\\tasks.css",
@@ -43,6 +75,10 @@
     {
       "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\favicon.ico",
       "PackagePath": "staticwebassets\\favicon.ico"
+    },
+    {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\create-task.js",
+      "PackagePath": "staticwebassets\\js\\create-task.js"
     },
     {
       "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\site.js",

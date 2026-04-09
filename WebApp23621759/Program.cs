@@ -10,6 +10,7 @@ builder.Services.AddScoped<DatabaseService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<TaskService>();
+builder.Services.AddScoped<SubTaskService>();
 
 //Логинът ще се пази чрез cookie
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

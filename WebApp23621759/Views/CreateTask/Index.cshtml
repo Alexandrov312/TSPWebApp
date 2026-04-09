@@ -1,54 +1,153 @@
 ﻿@using WebApp23621759.Helpers
 @model WebApp23621759.Models.ViewModel.CreateTaskViewModel
 
-<div class="page">
-	<div class="card">
-		<h2 class="title">Create Task</h2>
-		<form asp-action="Index" asp-controller="CreateTask" method="post">
-			<div class="form-group">
-				<label asp-for="Title">Title</label>
-				<input asp-for="Title" placeholder="Enter title"/>
-				<div class="field-error">
-					<span asp-validation-for="Title"></span>
-				</div>
-			</div>
+<div class="page create-task-page">
+    <div class="create-task-layout">
 
-			<div class="form-group">
-				<label asp-for="Description">Description</label>
-				<input asp-for="Description" placeholder="Enter description" />
-				<div class="field-error">
-					<span asp-validation-for="Description"></span>
-				</div>
-			</div>
+        <div class="panel-card create-task-card">
+            <h2 class="title">Create Task</h2>
 
-			<div class="form-group">
-				<label asp-for="DueDate">Due Date</label>
-				<input asp-for="DueDate" type="datetime-local" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
-				<div class="field-error">
-					<span asp-validation-for="DueDate"></span>
-				</div>
-			</div>
+            <form asp-action="Index" asp-controller="CreateTask" method="post" id="create-task-form">
+                <div asp-validation-summary="ModelOnly" class="error-message"></div>
 
-			<div class="form-group">
-				<label asp-for="Priority">Priority</label>
+                <div class="form-group">
+                    <label asp-for="Title">Title</label>
+                    <input asp-for="Title" placeholder="Enter title" />
+                    <div class="field-error">
+                        <span asp-validation-for="Title"></span>
+                    </div>
+                </div>
 
-				<div class="priority-selector">
-					<input type="radio" asp-for="Priority" id="priority-low" value="Low" />
-					<label for="priority-low" class="priority-option priority-low">🟢 Low</label>
+                <div class="form-group">
+                    <label asp-for="Description">Description</label>
+                    <textarea asp-for="Description" class="form-textarea" placeholder="Enter description"></textarea>
+                    <div class="field-error">
+                        <span asp-validation-for="Description"></span>
+                    </div>
+                </div>
 
-					<input type="radio" asp-for="Priority" id="priority-medium" value="Medium" />
-					<label for="priority-medium" class="priority-option priority-medium">🟡 Medium</label>
+                <div class="form-group">
+                    <label asp-for="DueDate">Due Date</label>
+                    <input asp-for="DueDate"
+                           type="datetime-local"
+                           value="@Model.DueDate.ToString("yyyy-MM-ddTHH:mm")"
+                           min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                    <div class="field-error">
+                        <span asp-validation-for="DueDate"></span>
+                    </div>
+                </div>
 
-					<input type="radio" asp-for="Priority" id="priority-high" value="High" />
-					<label for="priority-high" class="priority-option priority-high">🔴 High</label>
-				</div>
+                <div class="form-group">
+                    <label asp-for="Priority">Priority</label>
 
-				<div class="field-error">
-					<span asp-validation-for="Priority"></span>
-				</div>
-			</div>
+                    <div class="priority-selector">
+                        <input type="radio" asp-for="Priority" id="priority-low" value="Low" />
+                        <label for="priority-low" class="priority-option priority-low">🟢 Low</label>
 
-			<button type="submit" class="primary-btn">Create task</button>
-		</form>
-	</div>
+                        <input type="radio" asp-for="Priority" id="priority-medium" value="Medium" />
+                        <label for="priority-medium" class="priority-option priority-medium">🟡 Medium</label>
+
+                        <input type="radio" asp-for="Priority" id="priority-high" value="High" />
+                        <label for="priority-high" class="priority-option priority-high">🔴 High</label>
+                    </div>
+
+                    <div class="field-error">
+                        <span asp-validation-for="Priority"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="primary-btn">Create task</button>
+            </form>
+        </div>
+
+        <div class="panel-card subtasks-card">
+            <div class="subtasks-header">
+                <h2 class="title subtasks-title">Subtasks</h2>
+                <span class="subtasks-counter">
+                    <span id="subtask-count">0</span>/10
+                </span>
+            </div>
+
+            <div id="subtasks-scroll-area" class="subtasks-scroll-area">
+                <div id="subtasks-container" class="subtasks-container">
+                    @if (Model.SubTasks != null && Model.SubTasks.Any())
+                    {
+                        for (int i = 0; i < Model.SubTasks.Count; i++)
+                        {
+                            <div class="subtask-item">
+                                <div class="subtask-item-header">
+                                    <h4 class="subtask-item-title">#@(i + 1)</h4>
+                                    <button type="button" class="remove-subtask-btn">✕</button>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Title</label>
+                                    <input name="SubTasks[@i].Title"
+                                           value="@Model.SubTasks[i].Title"
+                                           placeholder="Enter subtask title"
+                                           class="subtask-title-input" />
+                                    <div class="field-error">
+                                        <span asp-validation-for="SubTasks[@i].Title"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    <textarea name="SubTasks[@i].Description"
+                                              class="form-textarea"
+                                              placeholder="Enter subtask description">@Model.SubTasks[i].Description</textarea>
+                                    <div class="field-error"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Depends on</label>
+                                    <select name="SubTasks[@i].BlockedByIndex" class="subtask-dependency-select">
+                                        <option value="">No dependency</option>
+                                    </select>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <button type="button" id="add-subtask-btn" class="add-subtask-btn">
+                + Add subtask
+            </button>
+        </div>
+    </div>
 </div>
+
+<template id="subtask-template">
+    <div class="subtask-item">
+        <div class="subtask-item-header">
+            <h4 class="subtask-item-title">#</h4>
+            <button type="button" class="remove-subtask-btn">✕</button>
+        </div>
+
+        <div class="form-group">
+            <label>Title</label>
+            <input data-name="Title" placeholder="Enter subtask title" class="subtask-title-input" />
+            <div class="field-error">
+                <span></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea data-name="Description" class="form-textarea" placeholder="Enter subtask description"></textarea>
+            <div class="field-error"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Depends on</label>
+            <select data-name="BlockedByIndex" class="subtask-dependency-select">
+                <option value="">No dependency</option>
+            </select>
+        </div>
+    </div>
+</template>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

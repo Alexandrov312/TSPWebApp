@@ -1,0 +1,82 @@
+﻿.subtasks-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.subtask-item {
+    background: #fafdfb;
+    border: 1px solid #d9e3dc;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+.subtask-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.subtask-item-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3a33;
+}
+
+.remove-subtask-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 10px;
+    background: #fde8e8;
+    color: #b42318;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 700;
+    transition: 0.2s ease;
+}
+
+    .remove-subtask-btn:hover {
+        background: #fbd5d5;
+        transform: scale(1.04);
+    }
+
+.add-subtask-btn {
+    width: 100%;
+    min-height: 50px;
+    border: 2px dashed #b8c7be;
+    border-radius: 14px;
+    background: #f8fbf9;
+    color: #2f5d46;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+    .add-subtask-btn:hover {
+        background: #eef6f1;
+        border-color: #8bb79f;
+    }
+
+.form-textarea {
+    width: 100%;
+    min-height: 110px;
+    resize: vertical;
+    padding: 12px 14px;
+    border: 1px solid #b8c7be;
+    border-radius: 10px;
+    font-size: 16px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+    .form-textarea:focus {
+        outline: none;
+        border-color: #6fa98a;
+        box-shadow: 0 0 0 3px rgba(111, 169, 138, 0.15);
+    }

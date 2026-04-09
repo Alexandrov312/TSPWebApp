@@ -80,7 +80,7 @@ namespace WebApp23621759.Controllers
         }
 
         [HttpPost]
-        public IActionResult ChangeStatus(int taskId, Status newStatus, int year, int month, DateTime selectedDate)
+        public IActionResult ChangeStatus(int taskId, Status newStatus, int year, int month, DateTime selectedDate, string title)
         {
             int userId = UserHelper.GetUserId(User);
 
@@ -92,7 +92,7 @@ namespace WebApp23621759.Controllers
             }
             else
             {
-                NotificationHelper.AddNotification(TempData, "Task status updated!", NotificationType.Success);
+                NotificationHelper.AddNotification(TempData, "Task \""+title+"\" status updated!", NotificationType.Success);
             }
 
             return RedirectToAction("Index", new

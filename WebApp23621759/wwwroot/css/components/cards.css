@@ -1,0 +1,10 @@
+﻿.panel-card {
+    background: #ffffff;
+    border: 1px solid #d9e3dc;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.panel-card-padded {
+    padding: 28px;
+}

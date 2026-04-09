@@ -1,0 +1,39 @@
+﻿.priority-badge,
+.day-task-priority-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.priority-low {
+    background: #d4edda;
+    color: #155724;
+}
+
+.priority-medium {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.priority-high {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.priority-border-low {
+    border-color: #8fbf9f;
+}
+
+.priority-border-medium {
+    border-color: #e0b84b;
+}
+
+.priority-border-high {
+    border-color: #d97a7a;
+}

@@ -1,4 +1,22 @@
-﻿
+﻿.page-auth {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 15px;
+    min-height: calc(100vh - 150px);
+}
+
+.card-auth {
+    width: 100%;
+    max-width: 460px;
+    background: #ffffff;
+    border: 1px solid #d9e3dc;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    padding: 32px;
+}
+
 .auth-form {
     display: flex;
     flex-direction: column;
@@ -12,4 +30,15 @@
     .forgot-password a {
         text-decoration: none;
         font-size: 14px;
+    }
+
+.signup-row {
+    text-align: center;
+    font-size: 15px;
+}
+
+    .signup-row a {
+        margin-left: 8px;
+        text-decoration: none;
+        font-weight: 600;
     }

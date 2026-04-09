@@ -1,0 +1,47 @@
+﻿.table-wrapper {
+    overflow-x: auto;
+}
+
+.task-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+    .task-table thead {
+        background: #f3f7f4;
+    }
+
+    .task-table th {
+        text-align: center;
+        padding: 16px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #2d3a33;
+        border-bottom: 1px solid #d9e3dc;
+        white-space: nowrap;
+    }
+
+    .task-table td {
+        text-align: center;
+        padding: 16px 14px;
+        border-bottom: 1px solid #e6ece8;
+        vertical-align: middle;
+        font-size: 15px;
+        height: 72px;
+    }
+
+.options-cell {
+    min-width: 220px;
+}
+
+.row-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}

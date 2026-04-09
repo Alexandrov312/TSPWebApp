@@ -10,25 +10,18 @@ namespace WebApp23621759.Helpers
             {
                 Priority.Low => "priority-low",
                 Priority.Medium => "priority-medium",
-                Priority.High => "priority-high"
+                Priority.High => "priority-high",
+                _ => ""
             };
         }
         public static string GetCalendarBorderClass(Priority priority)
         {
             return priority switch
             {
-                Priority.Low => "calendar-priority-low",
-                Priority.Medium => "calendar-priority-medium",
-                Priority.High => "calendar-priority-high"
-            };
-        }
-        public static string GetCalendarBadgeClass(Priority priority)
-        {
-            return priority switch
-            {
-                Priority.Low => "calendar-priority-badge-low",
-                Priority.Medium => "calendar-priority-badge-medium",
-                Priority.High => "calendar-priority-badge-high"
+                Priority.Low => "priority-border-low",
+                Priority.Medium => "priority-border-medium",
+                Priority.High => "priority-border-high",
+                _ => ""
             };
         }
     }

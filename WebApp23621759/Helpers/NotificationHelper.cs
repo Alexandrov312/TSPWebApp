@@ -39,6 +39,7 @@ namespace WebApp23621759.Helpers
                 NotificationType.Success => "toast-success",
                 NotificationType.Error => "toast-error",
                 NotificationType.Info => "toast-info",
+                _ => ""
             };
         }
     }

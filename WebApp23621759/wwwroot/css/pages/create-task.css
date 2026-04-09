@@ -1,0 +1,95 @@
+﻿.create-task-page {
+    align-items: flex-start;
+    padding: 40px 20px;
+}
+
+.create-task-layout {
+    width: min(1400px, 100%);
+    display: grid;
+    grid-template-columns: minmax(420px, 1fr) minmax(420px, 1fr);
+    gap: 28px;
+    align-items: start;
+}
+
+.create-task-card,
+.subtasks-card {
+    padding: 28px;
+    height: 760px;
+    min-height: 760px;
+    max-height: 760px;
+    box-sizing: border-box;
+}
+
+.create-task-card {
+    overflow: hidden;
+}
+
+.subtasks-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.subtasks-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+.subtasks-title {
+    margin-bottom: 0;
+}
+
+.subtasks-counter {
+    font-size: 15px;
+    font-weight: 700;
+    color: #5b6b63;
+}
+
+.subtasks-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 6px;
+    margin-bottom: 18px;
+}
+
+    .subtasks-scroll-area::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .subtasks-scroll-area::-webkit-scrollbar-track {
+        background: #eef3f0;
+        border-radius: 999px;
+    }
+
+    .subtasks-scroll-area::-webkit-scrollbar-thumb {
+        background: #b8c9bf;
+        border-radius: 999px;
+    }
+
+        .subtasks-scroll-area::-webkit-scrollbar-thumb:hover {
+            background: #9fb3a8;
+        }
+
+.add-subtask-btn {
+    flex-shrink: 0;
+}
+
+@media (max-width: 1000px) {
+    .create-task-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .create-task-card,
+    .subtasks-card {
+        height: auto;
+        min-height: auto;
+        max-height: none;
+    }
+
+    .subtasks-scroll-area {
+        max-height: 500px;
+    }
+}

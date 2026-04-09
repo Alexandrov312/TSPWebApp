@@ -10,7 +10,7 @@ namespace WebApp23621759.Models.ViewModel
         public string Title { get; set; }
 
         [Required(ErrorMessage = "Description is required")]
-        [StringLength(500)]
+        [StringLength(2500)]
         public string Description { get; set; }
 
         [Required(ErrorMessage = "Due date is required")]
@@ -19,5 +19,6 @@ namespace WebApp23621759.Models.ViewModel
 
         [Required(ErrorMessage = "Priority is required")]
         public Priority Priority { get; set; }
+        public List<CreateSubTaskInputModel> SubTasks { get; set; } = new();
     }
 }
