@@ -81,6 +81,10 @@
       "PackagePath": "staticwebassets\\js\\create-task.js"
     },
     {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\my-tasks.js",
+      "PackagePath": "staticwebassets\\js\\my-tasks.js"
+    },
+    {
       "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\site.js",
       "PackagePath": "staticwebassets\\js\\site.js"
     },

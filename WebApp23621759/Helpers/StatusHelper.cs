@@ -37,5 +37,14 @@ namespace WebApp23621759.Helpers
                 _ => Status.Pending
             };
         }
+
+        public static string GetDisplayName(Status status)
+        {
+            return status switch
+            {
+                Status.InProgress => "In Progress",
+                _ => status.ToString()
+            };
+        }
     }
 }

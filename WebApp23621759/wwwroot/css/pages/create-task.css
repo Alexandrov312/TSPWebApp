@@ -46,6 +46,10 @@
     font-size: 15px;
     font-weight: 700;
     color: #5b6b63;
+    display: inline-block;
+    transform-origin: center;
+    transform: scale(1);
+    transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .subtasks-scroll-area {
@@ -92,4 +96,14 @@
     .subtasks-scroll-area {
         max-height: 500px;
     }
+}
+
+.add-subtask-btn.limit-reached {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.limit-reached-blink {
+    color: #c62828;
+    transform: scale(1.06);
 }

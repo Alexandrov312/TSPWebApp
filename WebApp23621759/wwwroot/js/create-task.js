@@ -3,7 +3,21 @@
     const addButton = document.getElementById("add-subtask-btn");
     const template = document.getElementById("subtask-template");
     const counter = document.getElementById("subtask-count");
+    const counterWrapper = document.getElementById("subtasks-counter");
     const maxSubtasks = 10;
+    const counterBlinkClass = "limit-reached-blink";
+    let blinkTimeoutId;
+
+    function blinkCounter() {
+        clearTimeout(blinkTimeoutId);
+        counterWrapper.classList.remove(counterBlinkClass);
+        void counterWrapper.offsetWidth;
+        counterWrapper.classList.add(counterBlinkClass);
+
+        blinkTimeoutId = setTimeout(function () {
+            counterWrapper.classList.remove(counterBlinkClass);
+        }, 200);
+    }
 
     function getItems() {
         return Array.from(container.querySelectorAll(".subtask-item"));
@@ -24,7 +38,7 @@
             : `#${index + 1}`;
     }
 
-    // 🔴 КЛЮЧОВО: проверка за цикъл (DFS)
+    //DFS
     function createsCycle(currentIndex, candidateDependencyIndex, items) {
         let visited = new Set();
 
@@ -58,7 +72,7 @@
             items.forEach((otherItem, otherIndex) => {
                 if (otherIndex === index) return;
 
-                // ❗ НЕ позволявай цикли
+                //не позволява цикли
                 if (createsCycle(index, otherIndex, items)) return;
 
                 const option = document.createElement("option");
@@ -103,13 +117,26 @@
         });
 
         counter.textContent = items.length;
-        addButton.disabled = items.length >= maxSubtasks;
+
+        if (items.length >= maxSubtasks) {
+            addButton.classList.add("limit-reached");
+        } else {
+            addButton.classList.remove("limit-reached");
+        }
 
         refreshDependencyOptions();
     }
 
     addButton.addEventListener("click", function () {
-        if (getItems().length >= maxSubtasks) return;
+        const items = getItems();
+
+        if (items.length >= maxSubtasks) {
+            addButton.classList.add("limit-reached");
+            blinkCounter();
+            return;
+        }
+
+        addButton.classList.remove("limit-reached");
 
         const clone = template.content.cloneNode(true);
         container.appendChild(clone);

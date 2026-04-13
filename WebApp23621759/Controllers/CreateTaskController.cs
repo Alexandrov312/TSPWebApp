@@ -35,50 +35,6 @@ namespace WebApp23621759.Controllers
         {
             model.SubTasks ??= new List<CreateSubTaskInputModel>();
 
-            if (model.SubTasks.Count > 10)
-            {
-                ModelState.AddModelError("", "You can add up to 10 subtasks.");
-            }
-
-            for (int i = 0; i < model.SubTasks.Count; i++)
-            {
-                if (string.IsNullOrWhiteSpace(model.SubTasks[i].Title))
-                {
-                    ModelState.AddModelError($"SubTasks[{i}].Title", "Subtask title is required.");
-                }
-            }
-
-            bool HasCycle(int start, List<CreateSubTaskInputModel> tasks)
-            {
-                var visited = new HashSet<int>();
-
-                bool Dfs(int current)
-                {
-                    if (current == start) return true;
-                    if (visited.Contains(current)) return false;
-
-                    visited.Add(current);
-
-                    var dep = tasks[current].BlockedByIndex;
-                    if (!dep.HasValue) return false;
-
-                    return Dfs(dep.Value);
-                }
-
-                var first = tasks[start].BlockedByIndex;
-                if (!first.HasValue) return false;
-
-                return Dfs(first.Value);
-            }
-
-            for (int i = 0; i < model.SubTasks.Count; i++)
-            {
-                if (HasCycle(i, model.SubTasks))
-                {
-                    ModelState.AddModelError($"SubTasks[{i}].BlockedByIndex", "Circular dependency detected.");
-                }
-            }
-
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -93,12 +49,28 @@ namespace WebApp23621759.Controllers
                 model.Priority,
                 userId);
 
+            var createdSubTasks = new List<WebApp23621759.Models.Entities.SubTaskItem>();
+
             foreach (var subTask in model.SubTasks)
             {
-                _subTaskService.CreateSubTask(
+                createdSubTasks.Add(_subTaskService.CreateSubTask(
                     subTask.Title,
                     subTask.Description,
                     createdTask.Id,
+                    userId));
+            }
+
+            for (int i = 0; i < model.SubTasks.Count; i++)
+            {
+                int? blockedByIndex = model.SubTasks[i].BlockedByIndex;
+                if (!blockedByIndex.HasValue || blockedByIndex.Value < 0 || blockedByIndex.Value >= createdSubTasks.Count)
+                {
+                    continue;
+                }
+
+                _subTaskService.UpdateDependency(
+                    createdSubTasks[i].Id,
+                    createdSubTasks[blockedByIndex.Value].Id,
                     userId);
             }
 

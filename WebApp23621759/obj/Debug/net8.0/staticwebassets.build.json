@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "s4tz7l2Y1FVEaCDji1umth5zQMqTAZDV9uwQEJw3p/w=",
+  "Hash": "M8WcGKSpqiDmKbLMHhKzxsTkUcY8vqrUFcDwldtn+E4=",
   "Source": "WebApp23621759",
   "BasePath": "_content/WebApp23621759",
   "Mode": "Default",
@@ -414,6 +414,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\js\\create-task.js"
+    },
+    {
+      "Identity": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\my-tasks.js",
+      "SourceId": "WebApp23621759",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\",
+      "BasePath": "_content/WebApp23621759",
+      "RelativePath": "js/my-tasks.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\js\\my-tasks.js"
     },
     {
       "Identity": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\site.js",

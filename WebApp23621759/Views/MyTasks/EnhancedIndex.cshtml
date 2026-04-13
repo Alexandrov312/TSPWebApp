@@ -1,0 +1,257 @@
+@using WebApp23621759.Enums
+@using WebApp23621759.Helpers
+@model List<WebApp23621759.Models.ViewModel.MyTaskItemViewModel>
+
+@{
+    string currentSortBy = ViewBag.CurrentSortBy;
+    string currentDirection = ViewBag.CurrentDirection;
+
+    string GetNextDirection(string column)
+    {
+        if (currentSortBy == column)
+        {
+            return currentDirection == "ASC" ? "DESC" : "ASC";
+        }
+
+        return "ASC";
+    }
+
+    string GetArrow(string column)
+    {
+        if (currentSortBy != column)
+        {
+            return "";
+        }
+
+        return currentDirection == "ASC" ? " ↑" : " ↓";
+    }
+}
+
+<div class="page tasks-page">
+    <div class="panel-card tasks-card">
+        <div class="tasks-card-header">
+            <h2 class="title tasks-title">My Tasks</h2>
+
+            <div class="table-actions">
+                <a asp-action="Index"
+                   asp-route-sortBy="dueDate"
+                   asp-route-direction="@GetNextDirection("dueDate")">
+                    Due Date @GetArrow("dueDate")
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-sortBy="priority"
+                   asp-route-direction="@GetNextDirection("priority")">
+                    Priority @GetArrow("priority")
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-sortBy="status"
+                   asp-route-direction="@GetNextDirection("status")">
+                    Status @GetArrow("status")
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-sortBy="createdAt"
+                   asp-route-direction="@GetNextDirection("createdAt")">
+                    Created Date @GetArrow("createdAt")
+                </a>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="task-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Created At</th>
+                        <th>Completed At</th>
+                        <th>Progress</th>
+                        <th>Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var taskItem in Model)
+                    {
+                        var task = taskItem.Task;
+
+                        <tr class="task-row task-summary-row @StatusHelper.GetCssClass(task.Status) @TaskDateHelper.GetRowDateClass(task)"
+                            data-task-row-id="@task.Id">
+                            <td data-task-field="title">
+                                <span class="view-mode task-cell-display">@task.Title</span>
+                                <input form="edit-form-@task.Id"
+                                       class="edit-mode form-input"
+                                       type="text"
+                                       name="Title"
+                                       value="@task.Title" />
+                            </td>
+
+                            <td data-task-field="description">
+                                <span class="view-mode task-cell-display">@task.Description</span>
+                                <input form="edit-form-@task.Id"
+                                       class="edit-mode form-input"
+                                       type="text"
+                                       name="Description"
+                                       value="@task.Description" />
+                            </td>
+
+                            <td data-task-field="dueDate">
+                                <span class="view-mode task-cell-display">@task.DueDate.ToString("dd.MM.yyyy HH:mm")</span>
+                                <input form="edit-form-@task.Id"
+                                       class="edit-mode form-input"
+                                       type="datetime-local"
+                                       name="DueDate"
+                                       value="@task.DueDate.ToString("yyyy-MM-ddTHH:mm")" />
+                            </td>
+
+                            <td data-task-field="status">
+                                <span class="view-mode task-cell-display">@StatusHelper.GetDisplayName(task.Status)</span>
+                                <select form="edit-form-@task.Id" class="edit-mode form-input" name="Status">
+                                    @foreach (Status status in Enum.GetValues(typeof(Status)))
+                                    {
+                                        if (status == Status.Overdue)
+                                        {
+                                            continue;
+                                        }
+
+                                        if (status == task.Status)
+                                        {
+                                            <option value="@((int)status)" selected>@StatusHelper.GetDisplayName(status)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@((int)status)">@StatusHelper.GetDisplayName(status)</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+
+                            <td data-task-field="priority">
+                                <span class="view-mode task-cell-display">
+                                    <span class="priority-badge @PriorityHelper.GetCssClass(task.Priority)">
+                                        @task.Priority
+                                    </span>
+                                </span>
+
+                                <select form="edit-form-@task.Id" class="edit-mode form-input" name="Priority">
+                                    @foreach (Priority priority in Enum.GetValues(typeof(Priority)))
+                                    {
+                                        if (priority == task.Priority)
+                                        {
+                                            <option value="@((int)priority)" selected>@priority</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@((int)priority)">@priority</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+
+                            <td data-task-field="createdAt">
+                                <span class="task-cell-display">@task.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+                            </td>
+
+                            <td data-task-field="completedAt">
+                                <span class="task-cell-display">
+                                    @(task.CompletedAt == null ? "Not finished" : task.CompletedAt?.ToString("dd.MM.yyyy HH:mm"))
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="task-progress" data-task-progress-id="@task.Id">
+                                    <div class="task-progress-bar">
+                                        <div class="task-progress-fill task-progress-fill-projected" style="width: @taskItem.ProjectedCompletionPercentage%;"></div>
+                                        <div class="task-progress-fill task-progress-fill-completed" style="width: @taskItem.CompletionPercentage%;"></div>
+                                    </div>
+                                    <div class="task-progress-text">
+                                        @taskItem.CompletionPercentage% (@taskItem.CompletedSubTaskCount/@taskItem.TotalSubTaskCount)
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="options-cell">
+                                <form id="edit-form-@task.Id" asp-action="Update" method="post" class="task-update-form task-ajax-form" data-task-id="@task.Id">
+                                    <input type="hidden" name="Id" value="@task.Id" />
+                                </form>
+
+                                <div class="view-mode row-actions">
+                                    <div class="done-wrapper">
+                                        <form asp-action="MarkAsDone" method="post" class="table-form task-done-form task-ajax-form" data-task-id="@task.Id">
+                                            <input type="hidden" name="id" value="@task.Id" />
+
+                                            <button type="button"
+                                                    class="option-btn option-btn-success show-done-popup"
+                                                    title="Mark as done">
+                                                ✅
+                                            </button>
+
+                                            <div class="done-popup">
+                                                <span>Mark task as done?</span>
+                                                <div class="popup-actions">
+                                                    <button type="submit" class="popup-btn popup-btn-confirm">Yes</button>
+                                                    <button type="button" class="popup-btn popup-btn-cancel cancel-done-btn">No</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <button type="button"
+                                            class="option-btn option-btn-warning edit-btn"
+                                            title="Edit task">
+                                        ✏️
+                                    </button>
+
+                                    <div class="delete-wrapper">
+                                        <form asp-action="Delete" method="post" class="table-form task-delete-form task-ajax-form" data-task-id="@task.Id">
+                                            <input type="hidden" name="id" value="@task.Id" />
+
+                                            <button type="button"
+                                                    class="option-btn option-btn-danger show-popup"
+                                                    title="Delete task">
+                                                🗑️
+                                            </button>
+
+                                            <div class="delete-popup">
+                                                <span>Delete task?</span>
+                                                <div class="popup-actions">
+                                                    <button type="submit" class="popup-btn popup-btn-danger">Yes</button>
+                                                    <button type="button" class="popup-btn popup-btn-cancel cancel-btn">No</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="edit-mode row-actions">
+                                    <button type="submit"
+                                            form="edit-form-@task.Id"
+                                            class="option-btn option-btn-success save-btn"
+                                            title="Save changes">
+                                        💾
+                                    </button>
+
+                                    <button type="button"
+                                            class="option-btn option-btn-neutral cancel-edit-btn"
+                                            title="Cancel edit">
+                                        ❌
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr class="subtasks-row" data-task-details-id="@task.Id">
+                            <td colspan="9">
+                                <partial name="_TaskSubTasksPanel" model="taskItem" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -5,9 +5,9 @@
 
 .done-popup,
 .delete-popup {
-    position: absolute;
-    top: 120%;
-    right: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
     background: white;
     border: 1px solid #d9e3dc;
     border-radius: 12px;

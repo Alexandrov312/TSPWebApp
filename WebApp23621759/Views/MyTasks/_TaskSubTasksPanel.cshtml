@@ -1,0 +1,122 @@
+@using WebApp23621759.Helpers
+@model WebApp23621759.Models.ViewModel.MyTaskItemViewModel
+
+<div class="task-subtasks-panel" data-task-panel-id="@Model.Task.Id">
+    <div class="task-subtasks-panel-header">
+        <h3 class="task-subtasks-title">Subtasks</h3>
+        <div class="task-subtasks-panel-actions">
+            <span class="task-subtasks-count">@Model.SubTasks.Count total</span>
+            <form asp-action="AddSubTask" method="post" class="subtask-add-form">
+                <input type="hidden" name="taskId" value="@Model.Task.Id" />
+                <button type="submit" class="subtask-action-btn subtask-add-btn">+ Add subtask</button>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.SubTasks.Any())
+    {
+        <div class="subtask-list">
+            @foreach (var subTask in Model.SubTasks)
+            {
+                <div class="subtask-entry @StatusHelper.GetCssClass(subTask.Status) @(subTask.BlockedBySubTaskId.HasValue ? "has-dependency" : "")"
+                     style="--subtask-depth:@subTask.Depth"
+                     data-subtask-id="@subTask.Id"
+                     data-task-id="@subTask.TaskId">
+                    <div class="subtask-summary">
+                        <div class="subtask-summary-content">
+                            <div class="subtask-title-row">
+                                <form asp-action="CycleSubTaskStatus" method="post" class="subtask-cycle-form">
+                                    <input type="hidden" name="id" value="@subTask.Id" />
+                                    <button type="submit"
+                                            class="subtask-action-btn subtask-status-btn @StatusHelper.GetCssClass(subTask.Status)"
+                                            title="Cycle status">
+                                        @StatusHelper.GetDisplayName(subTask.Status)
+                                    </button>
+                                </form>
+
+                                <span class="subtask-title inline-editable"
+                                      data-inline-field="title"
+                                      contenteditable="true"
+                                      spellcheck="false">@subTask.Title</span>
+                            </div>
+
+                            <div class="subtask-meta">
+                                <span>Completed: @(subTask.CompletedAt?.ToString("dd.MM.yyyy HH:mm") ?? "Not finished")</span>
+                                <span class="subtask-dependency-slot">
+                                    <button type="button"
+                                            class="subtask-dependency-badge inline-dependency-trigger @(string.IsNullOrWhiteSpace(subTask.BlockedByTitle) ? "is-empty" : "")">
+                                        @(string.IsNullOrWhiteSpace(subTask.BlockedByTitle) ? "Add dependency" : $"Depends on: {subTask.BlockedByTitle}")
+                                    </button>
+
+                                    <select class="form-input subtask-inline-dependency-select">
+                                        <option value="">No dependency</option>
+                                        @foreach (var dependencyOption in subTask.DependencyOptions)
+                                        {
+                                            if (dependencyOption.Id == subTask.BlockedBySubTaskId)
+                                            {
+                                                <option value="@dependencyOption.Id" selected>@dependencyOption.Title</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@dependencyOption.Id">@dependencyOption.Title</option>
+                                            }
+                                        }
+                                    </select>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="subtask-actions">
+                            <span class="subtask-inline-hint">Click text to edit</span>
+                            <div class="delete-wrapper subtask-delete-wrapper">
+                                <form asp-action="DeleteSubTask" method="post" class="subtask-delete-form">
+                                    <input type="hidden" name="id" value="@subTask.Id" />
+                                    <button type="button" class="subtask-action-btn subtask-delete-btn show-popup" title="Delete subtask">🗑️</button>
+                                    <div class="delete-popup subtask-delete-popup">
+                                        <span>Delete subtask?</span>
+                                        <div class="popup-actions">
+                                            <button type="submit" class="popup-btn popup-btn-danger">Yes</button>
+                                            <button type="button" class="popup-btn popup-btn-cancel cancel-btn">No</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="subtask-expand-row">
+                        <button type="button"
+                                class="subtask-toggle-btn"
+                                data-subtask-toggle
+                                aria-expanded="false"
+                                title="Show description">
+                            <span class="subtask-toggle-icon" aria-hidden="true"></span>
+                            <span class="subtask-toggle-text">Description</span>
+                        </button>
+                    </div>
+
+                    <div class="subtask-description">
+                        <div class="subtask-description-label">Description</div>
+                        <div class="subtask-description-text inline-editable"
+                             data-inline-field="description"
+                             contenteditable="true"
+                             spellcheck="false">
+                            @(string.IsNullOrWhiteSpace(subTask.Description) ? "No description" : subTask.Description)
+                        </div>
+                    </div>
+
+                    <form asp-action="UpdateSubTask" method="post" class="subtask-edit-form">
+                        <input type="hidden" name="Id" value="@subTask.Id" />
+                        <input type="hidden" name="Title" value="@subTask.Title" />
+                        <input type="hidden" name="Description" value="@subTask.Description" />
+                        <input type="hidden" name="BlockedBySubTaskId" value="@(subTask.BlockedBySubTaskId?.ToString() ?? string.Empty)" />
+                    </form>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="no-subtasks-message">This task has no subtasks yet.</div>
+    }
+</div>

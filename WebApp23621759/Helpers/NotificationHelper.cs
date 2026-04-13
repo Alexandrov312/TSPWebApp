@@ -10,6 +10,7 @@ namespace WebApp23621759.Helpers
         //Чрез този ключ се записват нотификациите в TempData
         private const string Key = "Notifications";
         //ITempDataDictionary tempData - съхранява данни между HTTP request-ове
+        //server-side
         public static void AddNotification(ITempDataDictionary tempData, string message, NotificationType type)
         {
             List<Notification> notifications;

@@ -63,7 +63,7 @@
         <div class="panel-card subtasks-card">
             <div class="subtasks-header">
                 <h2 class="title subtasks-title">Subtasks</h2>
-                <span class="subtasks-counter">
+                <span id="subtasks-counter" class="subtasks-counter">
                     <span id="subtask-count">0</span>/10
                 </span>
             </div>
@@ -83,6 +83,7 @@
                                 <div class="form-group">
                                     <label>Title</label>
                                     <input name="SubTasks[@i].Title"
+                                           form="create-task-form"
                                            value="@Model.SubTasks[i].Title"
                                            placeholder="Enter subtask title"
                                            class="subtask-title-input" />
@@ -94,6 +95,7 @@
                                 <div class="form-group">
                                     <label>Description</label>
                                     <textarea name="SubTasks[@i].Description"
+                                              form="create-task-form"
                                               class="form-textarea"
                                               placeholder="Enter subtask description">@Model.SubTasks[i].Description</textarea>
                                     <div class="field-error"></div>
@@ -101,7 +103,9 @@
 
                                 <div class="form-group">
                                     <label>Depends on</label>
-                                    <select name="SubTasks[@i].BlockedByIndex" class="subtask-dependency-select">
+                                    <select name="SubTasks[@i].BlockedByIndex"
+                                            form="create-task-form"
+                                            class="subtask-dependency-select">
                                         <option value="">No dependency</option>
                                     </select>
                                 </div>
@@ -127,7 +131,10 @@
 
         <div class="form-group">
             <label>Title</label>
-            <input data-name="Title" placeholder="Enter subtask title" class="subtask-title-input" />
+            <input data-name="Title"
+                   form="create-task-form"
+                   placeholder="Enter subtask title"
+                   class="subtask-title-input" />
             <div class="field-error">
                 <span></span>
             </div>
@@ -135,13 +142,18 @@
 
         <div class="form-group">
             <label>Description</label>
-            <textarea data-name="Description" class="form-textarea" placeholder="Enter subtask description"></textarea>
+            <textarea data-name="Description"
+                      form="create-task-form"
+                      class="form-textarea"
+                      placeholder="Enter subtask description"></textarea>
             <div class="field-error"></div>
         </div>
 
         <div class="form-group">
             <label>Depends on</label>
-            <select data-name="BlockedByIndex" class="subtask-dependency-select">
+            <select data-name="BlockedByIndex"
+                    form="create-task-form"
+                    class="subtask-dependency-select">
                 <option value="">No dependency</option>
             </select>
         </div>

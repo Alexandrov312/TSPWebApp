@@ -16,7 +16,6 @@ namespace WebApp23621759.Database.DatabaseTables
                             ""Title"" VARCHAR(150) NOT NULL,
                             ""Description"" TEXT,
                             ""Status"" INT NOT NULL,
-                            ""CreatedAt"" TIMESTAMP NOT NULL DEFAULT NOW(),
                             ""CompletedAt"" TIMESTAMP NULL,
                             ""TaskId"" INT NOT NULL,
                             ""UserId"" INT NOT NULL,
@@ -40,6 +39,12 @@ namespace WebApp23621759.Database.DatabaseTables
                     ";
                 createTableCommand.ExecuteNonQuery();
             }
+
+            using var dropCreatedAtColumnCommand = connection.CreateCommand();
+            dropCreatedAtColumnCommand.CommandText = @"
+                ALTER TABLE ""SubTasks""
+                DROP COLUMN IF EXISTS ""CreatedAt"";";
+            dropCreatedAtColumnCommand.ExecuteNonQuery();
         }
     }
 }
