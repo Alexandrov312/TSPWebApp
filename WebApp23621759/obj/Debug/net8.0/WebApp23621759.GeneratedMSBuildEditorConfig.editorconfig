@@ -22,6 +22,10 @@ build_property._RazorSourceGeneratorDebug =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FsZW5kYXJcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/Calendar/_DayTasksList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FsZW5kYXJcX0RheVRhc2tzTGlzdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/CreateTask/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3JlYXRlVGFza1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -36,10 +40,6 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/Login/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTG9naW5cSW5kZXguY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/MyTasks/EnhancedIndex.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTXlUYXNrc1xFbmhhbmNlZEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/MyTasks/Index.cshtml]

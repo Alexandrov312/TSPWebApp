@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using WebApp23621759.Models.ViewModel;
 using WebApp23621759.Services;
 using System.Security.Claims;
 using WebApp23621759.Models.Entities;
+using WebApp23621759.Models.ViewModel.Auth;
 
 namespace WebApp23621759.Controllers
 {

@@ -2,8 +2,8 @@
 using WebApp23621759.Database;
 using WebApp23621759.Enums;
 using WebApp23621759.Models.Entities;
-using WebApp23621759.Models.ViewModel;
 using WebApp23621759.Helpers;
+using WebApp23621759.Models.ViewModel.SubTasks;
 
 namespace WebApp23621759.Services
 {
@@ -16,7 +16,80 @@ namespace WebApp23621759.Services
             _databaseService = databaseService;
         }
 
-        public SubTaskItem CreateSubTask(string title, string description, int blockedBySubTaskId, int taskId, int userId)
+        //Валидира целия списък с нови подзадачи преди да се запише каквото и да е в базата
+        public (bool IsValid, string ErrorMessage) ValidateNewSubTasks(List<CreateSubTaskInputModel> subTasks)
+        {
+            if (subTasks == null || subTasks.Count == 0)
+            {
+                return (true, string.Empty);
+            }
+
+            for (int i = 0; i < subTasks.Count; i++)
+            {
+                int? blockedByIndex = subTasks[i].BlockedByIndex;
+                if (!blockedByIndex.HasValue)
+                {
+                    continue;
+                }
+
+                if (blockedByIndex.Value < 0 || blockedByIndex.Value >= subTasks.Count)
+                {
+                    return (false, $"Subtask \"{subTasks[i].Title}\" has an invalid dependency.");
+                }
+
+                if (blockedByIndex.Value == i)
+                {
+                    return (false, $"Subtask \"{subTasks[i].Title}\" cannot depend on itself.");
+                }
+
+                if (CreatesNewSubTaskCycle(i, blockedByIndex.Value, subTasks))
+                {
+                    return (false, $"Subtask \"{subTasks[i].Title}\" creates a circular dependency.");
+                }
+            }
+
+            return (true, string.Empty);
+        }
+
+        //Създава всички нови подзадачи и връзките между тях, след като списъкът е преминал валидация
+        public List<SubTaskItem> CreateSubTasks(List<CreateSubTaskInputModel> subTasks, int taskId, int userId)
+        {
+            var validationResult = ValidateNewSubTasks(subTasks);
+            if (!validationResult.IsValid)
+            {
+                throw new InvalidOperationException(validationResult.ErrorMessage);
+            }
+
+            var createdSubTasks = new List<SubTaskItem>();
+
+            foreach (var subTask in subTasks)
+            {
+                createdSubTasks.Add(CreateSubTask(
+                    subTask.Title,
+                    subTask.Description,
+                    null,
+                    taskId,
+                    userId));
+            }
+
+            for (int i = 0; i < subTasks.Count; i++)
+            {
+                int? blockedByIndex = subTasks[i].BlockedByIndex;
+                if (!blockedByIndex.HasValue)
+                {
+                    continue;
+                }
+
+                UpdateDependency(
+                    createdSubTasks[i].Id,
+                    createdSubTasks[blockedByIndex.Value].Id,
+                    userId);
+            }
+
+            return createdSubTasks;
+        }
+
+        public SubTaskItem CreateSubTask(string title, string description, int ?blockedBySubTaskId, int taskId, int userId)
         {
             using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
@@ -42,33 +115,6 @@ namespace WebApp23621759.Services
             {
                 command.Parameters.AddWithValue("blockedBySubTaskId", DBNull.Value);
             }
-
-            using var reader = command.ExecuteReader();
-            if (!reader.Read())
-            {
-                return null;
-            }
-
-            return MapSubTask(reader);
-        }
-
-        public SubTaskItem CreateSubTask(string title, string description, int taskId, int userId)
-        {
-            using var connection = _databaseService.GetOpenConnection();
-            using var command = connection.CreateCommand();
-            command.CommandText = @"
-                INSERT INTO ""SubTasks""
-                    (""Title"", ""Description"", ""Status"", ""CompletedAt"", ""TaskId"", ""UserId"", ""BlockedBySubTaskId"")
-                VALUES
-                    (@title, @description, @status, NULL, @taskId, @userId, NULL)
-                RETURNING
-                    ""Id"", ""Title"", ""Description"", ""Status"", ""CompletedAt"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId"";";
-
-            command.Parameters.AddWithValue("title", title);
-            command.Parameters.AddWithValue("description", description ?? string.Empty);
-            command.Parameters.AddWithValue("status", (int)Status.Pending);
-            command.Parameters.AddWithValue("taskId", taskId);
-            command.Parameters.AddWithValue("userId", userId);
 
             using var reader = command.ExecuteReader();
             if (!reader.Read())
@@ -361,16 +407,19 @@ namespace WebApp23621759.Services
 
         private int? ResolveBlockedBySubTaskId(int subTaskId, int taskId, int userId, int? blockedBySubTaskId)
         {
+            //Проверка дали има зададена зависимост
             if (!blockedBySubTaskId.HasValue || blockedBySubTaskId.Value <= 0)
             {
                 return null;
             }
 
+            //Проверка дали самата зависимост не сочи към себе си
             if (blockedBySubTaskId.Value == subTaskId)
             {
                 return null;
             }
 
+            //Проверка дали съществува самата зависимост
             var subTasks = GetAllSubTasks(taskId, userId);
             var dependency = subTasks.FirstOrDefault(subTask => subTask.Id == blockedBySubTaskId.Value);
             if (dependency == null)
@@ -378,6 +427,7 @@ namespace WebApp23621759.Services
                 return null;
             }
 
+            //Проверка дали създава безкраен циъкл
             if (CreatesCycle(subTaskId, blockedBySubTaskId.Value, subTasks))
             {
                 return null;
@@ -415,11 +465,31 @@ namespace WebApp23621759.Services
             return false;
         }
 
-        private static void ResetDependentSubTasks(
-            NpgsqlConnection connection,
-            int rootSubTaskId,
-            int userId,
-            List<SubTaskItem> allSubTasks)
+        //Проверява дали нова зависимост между подзадачи в create екрана създава цикъл по индексите им
+        private static bool CreatesNewSubTaskCycle(int currentSubTaskIndex, int candidateDependencyIndex, List<CreateSubTaskInputModel> subTasks)
+        {
+            var visited = new HashSet<int>();
+            int? nextIndex = candidateDependencyIndex;
+
+            while (nextIndex.HasValue)
+            {
+                if (!visited.Add(nextIndex.Value))
+                {
+                    break;
+                }
+
+                if (nextIndex.Value == currentSubTaskIndex)
+                {
+                    return true;
+                }
+
+                nextIndex = subTasks[nextIndex.Value].BlockedByIndex;
+            }
+
+            return false;
+        }
+
+        private static void ResetDependentSubTasks(NpgsqlConnection connection, int rootSubTaskId, int userId, List<SubTaskItem> allSubTasks)
         {
             var dependentsByParentId = allSubTasks
                 .Where(subTask => subTask.BlockedBySubTaskId.HasValue)

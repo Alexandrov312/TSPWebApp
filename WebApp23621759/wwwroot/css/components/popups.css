@@ -6,8 +6,8 @@
 .done-popup,
 .delete-popup {
     position: fixed;
-    top: 0;
-    left: 0;
+    top: -9999px;
+    left: -9999px;
     background: white;
     border: 1px solid #d9e3dc;
     border-radius: 12px;
@@ -16,12 +16,19 @@
     display: none;
     z-index: 1001;
     min-width: 180px;
+    text-align: center;
 }
 
     .done-popup.show,
     .delete-popup.show {
         display: block;
     }
+
+.done-popup span,
+.delete-popup span {
+    display: block;
+    margin-bottom: 10px;
+}
 
 .popup-actions {
     display: flex;

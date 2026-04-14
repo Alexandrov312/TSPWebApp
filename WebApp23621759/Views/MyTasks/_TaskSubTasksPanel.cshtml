@@ -1,7 +1,9 @@
-@using WebApp23621759.Helpers
-@model WebApp23621759.Models.ViewModel.MyTaskItemViewModel
+﻿@using WebApp23621759.Helpers
+@model WebApp23621759.Models.ViewModel.Tasks.MyTaskItemViewModel
 
-<div class="task-subtasks-panel" data-task-panel-id="@Model.Task.Id">
+<div class="task-subtasks-panel"
+     data-task-panel-id="@Model.Task.Id"
+     data-subtasks-endpoint="@Url.Action("SubTasksPanel", ViewContext.RouteData.Values["controller"]?.ToString(), new { taskId = Model.Task.Id })">
     <div class="task-subtasks-panel-header">
         <h3 class="task-subtasks-title">Subtasks</h3>
         <div class="task-subtasks-panel-actions">
@@ -96,7 +98,6 @@
                     </div>
 
                     <div class="subtask-description">
-                        <div class="subtask-description-label">Description</div>
                         <div class="subtask-description-text inline-editable"
                              data-inline-field="description"
                              contenteditable="true"
@@ -120,3 +121,4 @@
         <div class="no-subtasks-message">This task has no subtasks yet.</div>
     }
 </div>
+

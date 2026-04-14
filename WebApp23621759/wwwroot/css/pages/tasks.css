@@ -209,6 +209,10 @@
     display: none;
 }
 
+.task-row.editing .static-view-mode {
+    display: flex;
+}
+
 /* Inputs */
 .form-input {
     width: 100%;
@@ -306,7 +310,7 @@
 
 .task-subtasks-title {
     margin: 0;
-    font-size: 20px;
+    font-size: 18px;
     color: #234634;
 }
 
@@ -327,7 +331,7 @@
     border: 1px solid #d7e3dc;
     border-radius: 16px;
     background: white;
-    overflow: hidden;
+    overflow: visible;
     margin-left: calc(var(--subtask-depth, 0) * 36px);
     transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
@@ -360,7 +364,6 @@
 }
 
 .subtask-entry:hover {
-    transform: translateY(-1px);
     box-shadow: 0 12px 24px rgba(36, 70, 52, 0.08);
 }
 
@@ -368,12 +371,6 @@
 .subtask-entry.editing {
     border-color: #9cc4ac;
     box-shadow: 0 14px 26px rgba(46, 125, 50, 0.08);
-}
-
-.subtask-entry.popup-active {
-    overflow: visible;
-    z-index: 250;
-    transform: none;
 }
 
 .subtask-summary {
@@ -496,15 +493,6 @@
 
 .subtask-entry.expanded .subtask-description {
     display: block;
-}
-
-.subtask-description-label {
-    margin-bottom: 8px;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #6a7f73;
 }
 
 .subtask-description-text {

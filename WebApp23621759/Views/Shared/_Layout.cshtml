@@ -31,15 +31,13 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/notifications.css" asp-append-version="true" />
 
-    <!-- Scripts -->
-    <script src="~/js/create-task.js" asp-append-version="true"></script>
-
     <link rel="stylesheet" href="~/WebApp23621759.styles.css" asp-append-version="true" />
 </head>
 <body>
     <partial name="_Notifications" />
 
     <div id="notification-container" class="notification-container"></div>
+    <div id="toast-container"></div>
 
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
@@ -112,7 +110,6 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/my-tasks.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -1,0 +1,142 @@
+@using WebApp23621759.Enums
+@using WebApp23621759.Helpers
+@model WebApp23621759.Models.ViewModel.Calendar.CalendarViewModel
+
+<div class="calendar-day-tasks-content"
+     data-day-tasks-endpoint="@Url.Action("DayTasksList", "Calendar", new { year = Model.Year, month = Model.Month, selectedDate = Model.SelectedDate.ToString("yyyy-MM-dd") })"
+     data-selected-date="@Model.SelectedDate.ToString("yyyy-MM-dd")"
+     data-year="@Model.Year"
+     data-month="@Model.Month">
+    <div class="day-tasks-list">
+        @if (Model.SelectedDayTasks.Any())
+        {
+            @foreach (var taskItem in Model.SelectedDayTasks)
+            {
+                var task = taskItem.Task;
+
+                <div class="day-task-card @StatusHelper.GetCalendarCardClass(task.Status)"
+                     data-calendar-task-id="@task.Id">
+                    <div class="day-task-top">
+                        <div class="day-task-time">Until: @task.DueDate.ToString("dd/MM/yyyy HH:mm")</div>
+
+                        <div class="calendar-priority-slot">
+                            <button type="button"
+                                    class="priority-badge @PriorityHelper.GetCssClass(task.Priority) calendar-priority-trigger">
+                                @task.Priority
+                            </button>
+
+                            <select class="form-input calendar-priority-select">
+                                @foreach (Priority priority in Enum.GetValues(typeof(Priority)))
+                                {
+                                    if (priority == task.Priority)
+                                    {
+                                        <option value="@((int)priority)" selected>@priority</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@((int)priority)">@priority</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="day-task-title calendar-inline-editable"
+                         data-calendar-field="title"
+                         contenteditable="true"
+                         spellcheck="false">@task.Title</div>
+
+                    <div class="day-task-description calendar-inline-editable"
+                         data-calendar-field="description"
+                         contenteditable="true"
+                         spellcheck="false">@(string.IsNullOrWhiteSpace(task.Description) ? "Task description" : task.Description)</div>
+
+                    <div class="calendar-task-progress-block">
+                        <div class="task-progress" data-task-progress-id="@task.Id">
+                            <div class="task-progress-bar">
+                                <div class="task-progress-fill task-progress-fill-projected" style="width: @taskItem.ProjectedCompletionPercentage%;"></div>
+                                <div class="task-progress-fill task-progress-fill-completed" style="width: @taskItem.CompletionPercentage%;"></div>
+                            </div>
+                            <div class="task-progress-text">
+                                @taskItem.CompletionPercentage% (@taskItem.CompletedSubTaskCount/@taskItem.TotalSubTaskCount)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="calendar-task-footer">
+                        <div class="calendar-task-status-text @StatusHelper.GetCssClass(task.Status)">
+                            @StatusHelper.GetDisplayName(task.Status)
+                        </div>
+
+                        <div class="calendar-task-actions">
+                            <div class="done-wrapper">
+                                <form asp-action="MarkAsDone" method="post" class="calendar-task-done-form calendar-task-ajax-form">
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <input type="hidden" name="year" value="@Model.Year" />
+                                    <input type="hidden" name="month" value="@Model.Month" />
+                                    <input type="hidden" name="selectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+
+                                    <button type="button" class="option-btn option-btn-success show-done-popup" title="Mark as done">&#x2705;</button>
+
+                                    <div class="done-popup">
+                                        <span>Mark task as done?</span>
+                                        <div class="popup-actions">
+                                            <button type="submit" class="popup-btn popup-btn-confirm">Yes</button>
+                                            <button type="button" class="popup-btn popup-btn-cancel cancel-done-btn">No</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="delete-wrapper">
+                                <form asp-action="Delete" method="post" class="calendar-task-delete-form calendar-task-ajax-form">
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <input type="hidden" name="year" value="@Model.Year" />
+                                    <input type="hidden" name="month" value="@Model.Month" />
+                                    <input type="hidden" name="selectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+
+                                    <button type="button" class="option-btn option-btn-danger show-popup" title="Delete task">&#x1F5D1;&#xFE0F;</button>
+
+                                    <div class="delete-popup">
+                                        <span>Delete task?</span>
+                                        <div class="popup-actions">
+                                            <button type="submit" class="popup-btn popup-btn-danger">Yes</button>
+                                            <button type="button" class="popup-btn popup-btn-cancel cancel-btn">No</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="calendar-subtasks-panel-wrap">
+                        <partial name="~/Views/MyTasks/_TaskSubTasksPanel.cshtml" model="taskItem" />
+                    </div>
+
+                    <form asp-action="UpdateTask" method="post" class="calendar-task-update-form">
+                        <input type="hidden" name="Id" value="@task.Id" />
+                        <input type="hidden" name="Title" value="@task.Title" />
+                        <input type="hidden" name="Description" value="@task.Description" />
+                        <input type="hidden" name="DueDate" value="@task.DueDate.ToString("yyyy-MM-ddTHH:mm")" />
+                        <input type="hidden" name="Priority" value="@((int)task.Priority)" />
+                        <input type="hidden" name="year" value="@Model.Year" />
+                        <input type="hidden" name="month" value="@Model.Month" />
+                        <input type="hidden" name="selectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+                    </form>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="day-tasks-empty">No tasks for this day.</p>
+        }
+    </div>
+
+    <form asp-action="CreateTask" method="post" class="calendar-create-task-form">
+        <input type="hidden" name="year" value="@Model.Year" />
+        <input type="hidden" name="month" value="@Model.Month" />
+        <input type="hidden" name="selectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+        <button type="submit" class="calendar-fab" title="Add new task">+</button>
+    </form>
+</div>
+

@@ -77,12 +77,32 @@
       "PackagePath": "staticwebassets\\favicon.ico"
     },
     {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\calendar.js",
+      "PackagePath": "staticwebassets\\js\\calendar.js"
+    },
+    {
       "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\create-task.js",
       "PackagePath": "staticwebassets\\js\\create-task.js"
     },
     {
       "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\my-tasks.js",
       "PackagePath": "staticwebassets\\js\\my-tasks.js"
+    },
+    {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\myTasks\\shared.js",
+      "PackagePath": "staticwebassets\\js\\myTasks\\shared.js"
+    },
+    {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\myTasks\\subtask-actions.js",
+      "PackagePath": "staticwebassets\\js\\myTasks\\subtask-actions.js"
+    },
+    {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\myTasks\\subtask-panel.js",
+      "PackagePath": "staticwebassets\\js\\myTasks\\subtask-panel.js"
+    },
+    {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\myTasks\\task-actions.js",
+      "PackagePath": "staticwebassets\\js\\myTasks\\task-actions.js"
     },
     {
       "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\site.js",

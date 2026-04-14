@@ -1,6 +1,6 @@
 ﻿@using WebApp23621759.Enums
 @using WebApp23621759.Helpers
-@model List<WebApp23621759.Models.Entities.TaskItem>
+@model List<WebApp23621759.Models.ViewModel.Tasks.MyTaskItemViewModel>
 
 @{
     string currentSortBy = ViewBag.CurrentSortBy;
@@ -70,14 +70,18 @@
                         <th>Priority</th>
                         <th>Created At</th>
                         <th>Completed At</th>
+                        <th>Progress</th>
                         <th>Options</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var task in Model)
+                    @foreach (var taskItem in Model)
                     {
-                        <tr class="task-row @StatusHelper.GetCssClass(task.Status) @TaskDateHelper.GetRowDateClass(task)">
-                            <td>
+                        var task = taskItem.Task;
+
+                        <tr class="task-row task-summary-row @StatusHelper.GetCssClass(task.Status) @TaskDateHelper.GetRowDateClass(task)"
+                            data-task-row-id="@task.Id">
+                            <td data-task-field="title">
                                 <span class="view-mode task-cell-display">@task.Title</span>
                                 <input form="edit-form-@task.Id"
                                        class="edit-mode form-input"
@@ -86,7 +90,7 @@
                                        value="@task.Title" />
                             </td>
 
-                            <td>
+                            <td data-task-field="description">
                                 <span class="view-mode task-cell-display">@task.Description</span>
                                 <input form="edit-form-@task.Id"
                                        class="edit-mode form-input"
@@ -95,7 +99,7 @@
                                        value="@task.Description" />
                             </td>
 
-                            <td>
+                            <td data-task-field="dueDate">
                                 <span class="view-mode task-cell-display">@task.DueDate.ToString("dd.MM.yyyy HH:mm")</span>
                                 <input form="edit-form-@task.Id"
                                        class="edit-mode form-input"
@@ -104,29 +108,11 @@
                                        value="@task.DueDate.ToString("yyyy-MM-ddTHH:mm")" />
                             </td>
 
-                            <td>
-                                <span class="view-mode task-cell-display">@task.Status</span>
-                                <select form="edit-form-@task.Id" class="edit-mode form-input" name="Status">
-                                    @foreach (Status status in Enum.GetValues(typeof(Status)))
-                                    {
-                                        if (status == Status.Overdue)
-                                        {
-                                            continue;
-                                        }
-
-                                        if (status == task.Status)
-                                        {
-                                            <option value="@((int)status)" selected>@status</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="@((int)status)">@status</option>
-                                        }
-                                    }
-                                </select>
+                            <td data-task-field="status">
+                                <span class="view-mode static-view-mode task-cell-display">@StatusHelper.GetDisplayName(task.Status)</span>
                             </td>
 
-                            <td>
+                            <td data-task-field="priority">
                                 <span class="view-mode task-cell-display">
                                     <span class="priority-badge @PriorityHelper.GetCssClass(task.Priority)">
                                         @task.Priority
@@ -148,24 +134,36 @@
                                 </select>
                             </td>
 
-                            <td>
+                            <td data-task-field="createdAt">
                                 <span class="task-cell-display">@task.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
                             </td>
 
-                            <td>
+                            <td data-task-field="completedAt">
                                 <span class="task-cell-display">
                                     @(task.CompletedAt == null ? "Not finished" : task.CompletedAt?.ToString("dd.MM.yyyy HH:mm"))
                                 </span>
                             </td>
 
+                            <td>
+                                <div class="task-progress" data-task-progress-id="@task.Id">
+                                    <div class="task-progress-bar">
+                                        <div class="task-progress-fill task-progress-fill-projected" style="width: @taskItem.ProjectedCompletionPercentage%;"></div>
+                                        <div class="task-progress-fill task-progress-fill-completed" style="width: @taskItem.CompletionPercentage%;"></div>
+                                    </div>
+                                    <div class="task-progress-text">
+                                        @taskItem.CompletionPercentage% (@taskItem.CompletedSubTaskCount/@taskItem.TotalSubTaskCount)
+                                    </div>
+                                </div>
+                            </td>
+
                             <td class="options-cell">
-                                <form id="edit-form-@task.Id" asp-action="Update" method="post">
+                                <form id="edit-form-@task.Id" asp-action="Update" method="post" class="task-update-form task-ajax-form" data-task-id="@task.Id">
                                     <input type="hidden" name="Id" value="@task.Id" />
                                 </form>
 
                                 <div class="view-mode row-actions">
                                     <div class="done-wrapper">
-                                        <form asp-action="MarkAsDone" method="post" class="table-form">
+                                        <form asp-action="MarkAsDone" method="post" class="table-form task-done-form task-ajax-form" data-task-id="@task.Id">
                                             <input type="hidden" name="id" value="@task.Id" />
 
                                             <button type="button"
@@ -191,7 +189,7 @@
                                     </button>
 
                                     <div class="delete-wrapper">
-                                        <form asp-action="Delete" method="post" class="table-form">
+                                        <form asp-action="Delete" method="post" class="table-form task-delete-form task-ajax-form" data-task-id="@task.Id">
                                             <input type="hidden" name="id" value="@task.Id" />
 
                                             <button type="button"
@@ -227,9 +225,23 @@
                                 </div>
                             </td>
                         </tr>
+
+                        <tr class="subtasks-row" data-task-details-id="@task.Id">
+                            <td colspan="9">
+                                <partial name="_TaskSubTasksPanel" model="taskItem" />
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/myTasks/shared.js" asp-append-version="true"></script>
+    <script src="~/js/myTasks/subtask-panel.js" asp-append-version="true"></script>
+    <script src="~/js/myTasks/task-actions.js" asp-append-version="true"></script>
+    <script src="~/js/myTasks/subtask-actions.js" asp-append-version="true"></script>
+}
+

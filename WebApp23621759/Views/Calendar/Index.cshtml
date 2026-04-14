@@ -1,6 +1,6 @@
 ﻿@using WebApp23621759.Enums
 @using WebApp23621759.Helpers
-@model WebApp23621759.Models.ViewModel.CalendarViewModel
+@model WebApp23621759.Models.ViewModel.Calendar.CalendarViewModel
 
 @{
     var previousMonth = new DateTime(Model.Year, Model.Month, 1).AddMonths(-1);
@@ -56,66 +56,15 @@
 
         <div class="day-tasks-panel">
             <h3>Tasks for @Model.SelectedDate.ToString("dd.MM.yyyy")</h3>
-
-            <div class="day-tasks-list">
-                @if (Model.SelectedDayTasks.Any())
-                {
-                    @foreach (var task in Model.SelectedDayTasks)
-                    {
-                        <div class="day-task-card @StatusHelper.GetCalendarCardClass(task.Status) @PriorityHelper.GetCalendarBorderClass(task.Priority)">
-                            <div class="day-task-top">
-                                <div class="day-task-time">@task.DueDate.ToString("HH:mm")</div>
-                                <span class="priority-badge @PriorityHelper.GetCssClass(task.Priority)">
-                                    @task.Priority
-                                </span>
-                            </div>
-
-                            <div class="day-task-title">@task.Title</div>
-
-                            @if (!string.IsNullOrWhiteSpace(task.Description))
-                            {
-                                <div class="day-task-description">@task.Description</div>
-                            }
-
-                            <div class="day-task-bottom">
-                                <form asp-action="ChangeStatus" method="post" class="status-form">
-                                    <input type="hidden" name="taskId" value="@task.Id" />
-                                    <input type="hidden" name="year" value="@Model.Year" />
-                                    <input type="hidden" name="month" value="@Model.Month" />
-                                    <input type="hidden" name="selectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
-                                    <input type="hidden" name="title" value="@task.Title" />
-
-                                    <select name="newStatus"
-                                            class="status-select"
-                                            onchange="this.form.submit()"
-                                    @(task.Status == Status.Overdue ? "disabled" : null)>
-                                        @foreach (Status status in Enum.GetValues(typeof(Status)))
-                                        {
-                                            if (status == Status.Overdue)
-                                            {
-                                                continue;
-                                            }
-
-                                            if (status == task.Status)
-                                            {
-                                                <option value="@((int)status)" selected>@status</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@((int)status)">@status</option>
-                                            }
-                                        }
-                                    </select>
-                                </form>
-                            </div>
-                        </div>
-                    }
-                }
-                else
-                {
-                    <p class="day-tasks-empty">No tasks for this day.</p>
-                }
-            </div>
+            <partial name="_DayTasksList" model="Model" />
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/calendar.js" asp-append-version="true"></script>
+    <script src="~/js/myTasks/shared.js" asp-append-version="true"></script>
+    <script src="~/js/myTasks/subtask-panel.js" asp-append-version="true"></script>
+    <script src="~/js/myTasks/task-actions.js" asp-append-version="true"></script>
+    <script src="~/js/myTasks/subtask-actions.js" asp-append-version="true"></script>
+}

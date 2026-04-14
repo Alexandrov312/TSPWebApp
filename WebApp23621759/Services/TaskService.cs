@@ -2,7 +2,7 @@
 using WebApp23621759.Database;
 using WebApp23621759.Enums;
 using WebApp23621759.Models.Entities;
-using WebApp23621759.Models.ViewModel;
+using WebApp23621759.Models.ViewModel.Tasks;
 
 namespace WebApp23621759.Services
 {
@@ -227,6 +227,79 @@ namespace WebApp23621759.Services
 
             int affectedRows = command.ExecuteNonQuery();
             return affectedRows > 0;
+        }
+
+        public TaskItem SyncStatusWithSubTasks(int taskId, int userId)
+        {
+            var task = GetById(taskId, userId);
+            if (task == null)
+            {
+                return null;
+            }
+
+            var subTaskStatuses = GetSubTaskStatuses(taskId, userId);
+            if (subTaskStatuses.Count == 0)
+            {
+                return task;
+            }
+
+            Status targetStatus;
+            if (subTaskStatuses.All(status => status == Status.Completed))
+            {
+                targetStatus = Status.Completed;
+            }
+            else if (task.Status == Status.Completed || subTaskStatuses.Any(status => status == Status.InProgress || status == Status.Completed))
+            {
+                targetStatus = Status.InProgress;
+            }
+            else
+            {
+                targetStatus = Status.Pending;
+            }
+
+            using var connection = _databaseService.GetOpenConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = @"
+                UPDATE ""Tasks""
+                SET
+                    ""Status"" = @status,
+                    ""CompletedAt"" = CASE
+                        WHEN @status = @completedStatus AND ""CompletedAt"" IS NULL THEN NOW()
+                        WHEN @status <> @completedStatus THEN NULL
+                        ELSE ""CompletedAt""
+                    END
+                WHERE ""Id"" = @id AND ""UserId"" = @userId;";
+
+            command.Parameters.AddWithValue("id", taskId);
+            command.Parameters.AddWithValue("userId", userId);
+            command.Parameters.AddWithValue("status", (int)targetStatus);
+            command.Parameters.AddWithValue("completedStatus", (int)Status.Completed);
+            command.ExecuteNonQuery();
+
+            return GetById(taskId, userId);
+        }
+
+        private List<Status> GetSubTaskStatuses(int taskId, int userId)
+        {
+            var statuses = new List<Status>();
+
+            using var connection = _databaseService.GetOpenConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = @"
+                SELECT ""Status""
+                FROM ""SubTasks""
+                WHERE ""TaskId"" = @taskId AND ""UserId"" = @userId;";
+
+            command.Parameters.AddWithValue("taskId", taskId);
+            command.Parameters.AddWithValue("userId", userId);
+
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                statuses.Add((Status)reader.GetInt32(0));
+            }
+
+            return statuses;
         }
 
         private static TaskItem MapTask(NpgsqlDataReader reader)

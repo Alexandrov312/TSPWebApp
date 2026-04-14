@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApp23621759.Enums;
 using WebApp23621759.Helpers;
-using WebApp23621759.Models.ViewModel;
+using WebApp23621759.Models.ViewModel.Tasks;
 using WebApp23621759.Services;
 
 namespace WebApp23621759.Controllers
@@ -33,10 +33,19 @@ namespace WebApp23621759.Controllers
         [HttpPost]
         public IActionResult Index(CreateTaskViewModel model)
         {
-            model.SubTasks ??= new List<CreateSubTaskInputModel>();
-
             if (!ModelState.IsValid)
             {
+                return View(model);
+            }
+
+            var validationResult = _subTaskService.ValidateNewSubTasks(model.SubTasks);
+            if (!validationResult.IsValid)
+            {
+                NotificationHelper.AddNotification(
+                    TempData,
+                    validationResult.ErrorMessage,
+                    NotificationType.Error);
+
                 return View(model);
             }
 
@@ -49,30 +58,7 @@ namespace WebApp23621759.Controllers
                 model.Priority,
                 userId);
 
-            var createdSubTasks = new List<WebApp23621759.Models.Entities.SubTaskItem>();
-
-            foreach (var subTask in model.SubTasks)
-            {
-                createdSubTasks.Add(_subTaskService.CreateSubTask(
-                    subTask.Title,
-                    subTask.Description,
-                    createdTask.Id,
-                    userId));
-            }
-
-            for (int i = 0; i < model.SubTasks.Count; i++)
-            {
-                int? blockedByIndex = model.SubTasks[i].BlockedByIndex;
-                if (!blockedByIndex.HasValue || blockedByIndex.Value < 0 || blockedByIndex.Value >= createdSubTasks.Count)
-                {
-                    continue;
-                }
-
-                _subTaskService.UpdateDependency(
-                    createdSubTasks[i].Id,
-                    createdSubTasks[blockedByIndex.Value].Id,
-                    userId);
-            }
+            _subTaskService.CreateSubTasks(model.SubTasks, createdTask.Id, userId);
 
             NotificationHelper.AddNotification(
                 TempData,

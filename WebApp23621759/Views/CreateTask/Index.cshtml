@@ -1,5 +1,5 @@
 ﻿@using WebApp23621759.Helpers
-@model WebApp23621759.Models.ViewModel.CreateTaskViewModel
+@model WebApp23621759.Models.ViewModel.Tasks.CreateTaskViewModel
 
 <div class="page create-task-page">
     <div class="create-task-layout">
@@ -98,7 +98,9 @@
                                               form="create-task-form"
                                               class="form-textarea"
                                               placeholder="Enter subtask description">@Model.SubTasks[i].Description</textarea>
-                                    <div class="field-error"></div>
+                                    <div class="field-error">
+                                        <span asp-validation-for="SubTasks[@i].Description"></span>
+                                    </div>
                                 </div>
 
                                 <div class="form-group">
@@ -162,4 +164,6 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/create-task.js" asp-append-version="true"></script>
 }
+

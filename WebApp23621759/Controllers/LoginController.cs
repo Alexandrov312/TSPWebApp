@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using WebApp23621759.Models.ViewModel;
+using WebApp23621759.Models.ViewModel.Auth;
 using WebApp23621759.Services;
 
 namespace WebApp23621759.Controllers
 {
-	public class LoginController : Controller
+    public class LoginController : Controller
 	{
 		private readonly UserService _userService;
 		private readonly AuthService _authService;
