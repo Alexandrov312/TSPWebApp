@@ -1,9 +1,7 @@
-document.addEventListener("DOMContentLoaded", function () {
+﻿document.addEventListener("DOMContentLoaded", function () {
     const taskPanels = document.querySelectorAll(".task-subtasks-panel[data-task-panel-id]");
-    if (taskPanels.length === 0) {
-        return;
-    }
-
+    //Инициализира съществуващите панели, но listener-ите по-долу се закачат винаги
+    //Така работят и панели, които се появяват по-късно чрез AJAX в Calendar
     taskPanels.forEach(panel => {
         refreshDependencyOptions(panel.dataset.taskPanelId);
     });
@@ -126,6 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        //Изчаква browser-а да премести focus-а, за да провери дали editor-ът наистина е напуснат
         window.setTimeout(() => {
             if (!subtaskEntry.contains(document.activeElement)) {
                 closeDependencyEditor(subtaskEntry);

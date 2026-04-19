@@ -1,13 +1,18 @@
 ﻿@using WebApp23621759.Helpers
 @model WebApp23621759.Models.ViewModel.Tasks.MyTaskItemViewModel
 
+@* Панел за подзадачи – използва се и при AJAX презареждане *@
 <div class="task-subtasks-panel"
      data-task-panel-id="@Model.Task.Id"
      data-subtasks-endpoint="@Url.Action("SubTasksPanel", ViewContext.RouteData.Values["controller"]?.ToString(), new { taskId = Model.Task.Id })">
+
     <div class="task-subtasks-panel-header">
         <h3 class="task-subtasks-title">Subtasks</h3>
+
         <div class="task-subtasks-panel-actions">
             <span class="task-subtasks-count">@Model.SubTasks.Count total</span>
+
+            @* AJAX форма за добавяне на нова подзадача *@
             <form asp-action="AddSubTask" method="post" class="subtask-add-form">
                 <input type="hidden" name="taskId" value="@Model.Task.Id" />
                 <button type="submit" class="subtask-action-btn subtask-add-btn">+ Add subtask</button>
@@ -24,9 +29,11 @@
                      style="--subtask-depth:@subTask.Depth"
                      data-subtask-id="@subTask.Id"
                      data-task-id="@subTask.TaskId">
+
                     <div class="subtask-summary">
                         <div class="subtask-summary-content">
                             <div class="subtask-title-row">
+                                @* Смяна на статуса в цикъл: Pending → In Progress → Completed *@
                                 <form asp-action="CycleSubTaskStatus" method="post" class="subtask-cycle-form">
                                     <input type="hidden" name="id" value="@subTask.Id" />
                                     <button type="submit"
@@ -36,6 +43,7 @@
                                     </button>
                                 </form>
 
+                                @* Inline редакция на заглавие – обработва се от JavaScript *@
                                 <span class="subtask-title inline-editable"
                                       data-inline-field="title"
                                       contenteditable="true"
@@ -44,6 +52,8 @@
 
                             <div class="subtask-meta">
                                 <span>Completed: @(subTask.CompletedAt?.ToString("dd.MM.yyyy HH:mm") ?? "Not finished")</span>
+
+                                @* Dependency selector – позволява избор само на валидни зависимости *@
                                 <span class="subtask-dependency-slot">
                                     <button type="button"
                                             class="subtask-dependency-badge inline-dependency-trigger @(string.IsNullOrWhiteSpace(subTask.BlockedByTitle) ? "is-empty" : "")">
@@ -70,10 +80,14 @@
 
                         <div class="subtask-actions">
                             <span class="subtask-inline-hint">Click text to edit</span>
+
                             <div class="delete-wrapper subtask-delete-wrapper">
+                                @* AJAX форма за изтриване на подзадача *@
                                 <form asp-action="DeleteSubTask" method="post" class="subtask-delete-form">
                                     <input type="hidden" name="id" value="@subTask.Id" />
                                     <button type="button" class="subtask-action-btn subtask-delete-btn show-popup" title="Delete subtask">🗑️</button>
+
+                                    @* Popup за потвърждение при изтриване *@
                                     <div class="delete-popup subtask-delete-popup">
                                         <span>Delete subtask?</span>
                                         <div class="popup-actions">
@@ -98,6 +112,7 @@
                     </div>
 
                     <div class="subtask-description">
+                        @* Inline редакция на описание *@
                         <div class="subtask-description-text inline-editable"
                              data-inline-field="description"
                              contenteditable="true"
@@ -106,6 +121,7 @@
                         </div>
                     </div>
 
+                    @* Скрит form – JavaScript записва текущите стойности тук и го праща при update *@
                     <form asp-action="UpdateSubTask" method="post" class="subtask-edit-form">
                         <input type="hidden" name="Id" value="@subTask.Id" />
                         <input type="hidden" name="Title" value="@subTask.Title" />
@@ -121,4 +137,3 @@
         <div class="no-subtasks-message">This task has no subtasks yet.</div>
     }
 </div>
-

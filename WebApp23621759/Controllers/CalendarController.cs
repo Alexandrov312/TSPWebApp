@@ -22,12 +22,14 @@ namespace WebApp23621759.Controllers
             _subTaskService = subTaskService;
         }
 
+        //Зарежда основната calendar страница
         public IActionResult Index(int year = 0, int month = 0, string selectedDate = null)
         {
             int userId = UserHelper.GetUserId(User);
             return View(BuildCalendarViewModel(year, month, selectedDate, userId));
         }
 
+        //AJAX заявка; връща списъка със задачи за избрания ден
         [HttpGet]
         public IActionResult DayTasksList(int year = 0, int month = 0, string selectedDate = null)
         {
@@ -35,6 +37,7 @@ namespace WebApp23621759.Controllers
             return PartialView("_DayTasksList", BuildCalendarViewModel(year, month, selectedDate, userId));
         }
 
+        //AJAX заявка; връща панела с подзадачите за конкретна задача
         [HttpGet]
         public IActionResult SubTasksPanel(int taskId)
         {
@@ -45,6 +48,7 @@ namespace WebApp23621759.Controllers
                 return NotFound();
             }
 
+            //Преизползва partial view-то от MyTasks, за да няма дублиране на UI
             return PartialView("~/Views/MyTasks/_TaskSubTasksPanel.cshtml", BuildTaskItemViewModel(task, userId));
         }
 
@@ -57,6 +61,7 @@ namespace WebApp23621759.Controllers
 
             if (!updated)
             {
+                //Ако заявката е дошла през JavaScript/fetch, връща JSON вместо redirect
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
                     return Json(new
@@ -67,11 +72,14 @@ namespace WebApp23621759.Controllers
                     });
                 }
 
+                //При нормална заявка записва съобщение в TempData и после ще redirect-не
                 NotificationHelper.AddNotification(TempData, "Task was not found or does not belong to you.", NotificationType.Error);
             }
             else
             {
                 var updatedTask = _taskService.GetById(taskId, userId);
+
+                //AJAX режимът връща готови данни за обновяване на UI-то без презареждане
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
                     var taskViewModel = updatedTask == null
@@ -84,12 +92,16 @@ namespace WebApp23621759.Controllers
                         taskId,
                         message = $"Task \"{title}\" status updated!",
                         notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Success),
+
+                        //Ако задачата не може да се презареди, връща fallback стойности
                         taskStatusValue = updatedTask == null ? (int)newStatus : (int)updatedTask.Status,
                         taskStatusDisplayName = updatedTask == null ? StatusHelper.GetDisplayName(newStatus) : StatusHelper.GetDisplayName(updatedTask.Status),
                         taskStatusCssClass = updatedTask == null ? string.Empty : StatusHelper.GetCssClass(updatedTask.Status),
                         taskCalendarStatusCssClass = updatedTask == null ? string.Empty : StatusHelper.GetCalendarCardClass(updatedTask.Status),
                         taskCompletedAtText = updatedTask?.CompletedAt?.ToString("dd.MM.yyyy HH:mm") ?? "Not finished",
                         taskRowDateCssClass = updatedTask == null ? string.Empty : TaskDateHelper.GetRowDateClass(updatedTask),
+
+                        //Данни за прогреса на задачата според подзадачите
                         completionPercentage = taskViewModel?.CompletionPercentage ?? 0,
                         projectedCompletionPercentage = taskViewModel?.ProjectedCompletionPercentage ?? 0,
                         completedSubTaskCount = taskViewModel?.CompletedSubTaskCount ?? 0,
@@ -101,6 +113,7 @@ namespace WebApp23621759.Controllers
                 NotificationHelper.AddNotification(TempData, $"Task \"{title}\" status updated!", NotificationType.Success);
             }
 
+            //При не-AJAX заявка връща потребителя към същия месец и избран ден
             return RedirectToAction("Index", new
             {
                 year,
@@ -124,6 +137,7 @@ namespace WebApp23621759.Controllers
                 return JsonError("Task was not found or does not belong to you.");
             }
 
+            //Запазва текущия статус от базата, вместо да разчита на стойност от клиента
             model.Status = (TaskStatus)(int)currentTask.Status;
 
             bool updated = _taskService.UpdateTask(model, userId);
@@ -160,7 +174,9 @@ namespace WebApp23621759.Controllers
                 return JsonError("Task was not found or does not belong to you.");
             }
 
+            //При завършване на главната задача приключват и всички нейни подзадачи
             _subTaskService.SetAllCompletedForTask(id, userId);
+
             bool updated = _taskService.SetCompleted(id, userId);
             if (!updated)
             {
@@ -208,6 +224,8 @@ namespace WebApp23621759.Controllers
         {
             int userId = UserHelper.GetUserId(User);
             DateTime now = DateTime.Now;
+
+            //Създава задачата за избрания ден, но запазва текущия час и минути
             DateTime dueDate = selectedDate.Date
                 .AddHours(now.Hour)
                 .AddMinutes(now.Minute);
@@ -257,6 +275,7 @@ namespace WebApp23621759.Controllers
                 return JsonError("Subtask could not be reloaded after update.");
             }
 
+            //След промяна на подзадача синхронизира статуса и прогреса на главната задача
             var syncedTask = _taskService.SyncStatusWithSubTasks(updatedSubTask.TaskId, userId);
             if (syncedTask == null)
             {
@@ -265,6 +284,8 @@ namespace WebApp23621759.Controllers
 
             var taskViewModel = BuildTaskItemViewModel(syncedTask, userId);
             List<SubTaskItem> allSubTasks = _subTaskService.GetAllSubTasks(updatedSubTask.TaskId);
+
+            //Намира заглавието на подзадачата, от която зависи текущата
             string? blockedByTitle = allSubTasks
                 .FirstOrDefault(candidate => candidate.Id == updatedSubTask.BlockedBySubTaskId)
                 ?.Title;
@@ -292,6 +313,8 @@ namespace WebApp23621759.Controllers
                 completedSubTaskCount = taskViewModel.CompletedSubTaskCount,
                 inProgressSubTaskCount = taskViewModel.InProgressSubTaskCount,
                 totalSubTaskCount = taskViewModel.TotalSubTaskCount,
+
+                //Връща позволените dependency опции, за да не се допускат невалидни зависимости
                 validDependencyIds = SubTaskHelper.BuildDependencyOptions(updatedSubTask, allSubTasks)
                     .Select(option => option.Id)
                     .ToList()
@@ -309,7 +332,9 @@ namespace WebApp23621759.Controllers
                 return JsonError("Subtask was not found or does not belong to you.");
             }
 
+            //Изчислява какъв ще бъде следващият статус за съобщението към клиента
             Status nextStatus = StatusHelper.GetNextStatus(subTask.Status);
+
             bool updated = _subTaskService.ChangeStatus(id, userId);
             if (!updated)
             {
@@ -372,6 +397,7 @@ namespace WebApp23621759.Controllers
                 });
             }
 
+            //Създава подзадача с начални стойности
             var createdSubTask = _subTaskService.CreateSubTask("New subtask", string.Empty, null, taskId, userId);
             if (createdSubTask == null)
             {
@@ -438,6 +464,7 @@ namespace WebApp23621759.Controllers
                 });
             }
 
+            //След изтриване на подзадача преизчислява състоянието на главната задача
             var parentTask = _taskService.SyncStatusWithSubTasks(subTask.TaskId, userId);
             var taskViewModel = parentTask == null ? null : BuildTaskItemViewModel(parentTask, userId);
 
@@ -447,6 +474,8 @@ namespace WebApp23621759.Controllers
                 taskId = subTask.TaskId,
                 message = $"Subtask \"{subTask.Title}\" deleted.",
                 notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Success),
+
+                //Ако родителската задача не може да се зареди, използва fallback Pending стойности
                 taskStatusValue = parentTask == null ? (int)Status.Pending : (int)parentTask.Status,
                 taskStatusDisplayName = parentTask == null ? StatusHelper.GetDisplayName(Status.Pending) : StatusHelper.GetDisplayName(parentTask.Status),
                 taskStatusCssClass = parentTask == null ? StatusHelper.GetCssClass(Status.Pending) : StatusHelper.GetCssClass(parentTask.Status),
@@ -461,12 +490,14 @@ namespace WebApp23621759.Controllers
             });
         }
 
+        //Строи view model за една задача заедно с всичките ѝ подзадачи
         private MyTaskItemViewModel BuildTaskItemViewModel(TaskItem task, int userId)
         {
             List<SubTaskItem> subTasks = _subTaskService.GetAllSubTasks(task.Id);
             return TaskViewModelHelper.BuildTaskItemViewModel(task, subTasks);
         }
 
+        //Строи целия модел за calendar страницата
         private CalendarViewModel BuildCalendarViewModel(int year, int month, string selectedDate, int userId)
         {
             DateTime now = DateTime.Now;
@@ -474,10 +505,13 @@ namespace WebApp23621759.Controllers
             int currentMonth = month == 0 ? now.Month : month;
 
             DateTime firstDayOfMonth = new DateTime(currentYear, currentMonth, 1);
+
+            //Ако няма избрана дата, използва днешната
             DateTime selected = string.IsNullOrEmpty(selectedDate)
                 ? DateTime.Today
                 : DateTime.Parse(selectedDate).Date;
 
+            //Взима всички задачи за текущия месец за конкретния потребител
             var monthTasks = _taskService.GetTasksForMonth(userId, currentYear, currentMonth);
 
             var model = new CalendarViewModel
@@ -488,12 +522,15 @@ namespace WebApp23621759.Controllers
                 SelectedDate = selected
             };
 
+            //Преобразува DayOfWeek така, че календарът да започва от понеделник
             int offset = ((int)firstDayOfMonth.DayOfWeek + 6) % 7;
             DateTime gridStart = firstDayOfMonth.AddDays(-offset);
 
+            //6 реда по 7 дни = 42 клетки в календарната решетка
             for (int i = 0; i < 42; i++)
             {
                 DateTime date = gridStart.AddDays(i);
+
                 var dayTasks = monthTasks
                     .Where(task => task.DueDate.Date == date.Date)
                     .ToList();
@@ -508,6 +545,7 @@ namespace WebApp23621759.Controllers
                 });
             }
 
+            //Списъкът със задачи за избрания ден в десния панел
             model.SelectedDayTasks = monthTasks
                 .Where(task => task.DueDate.Date == selected.Date)
                 .OrderBy(task => task.DueDate)
@@ -517,6 +555,7 @@ namespace WebApp23621759.Controllers
             return model;
         }
 
+        //Помощен метод за еднакъв JSON отговор при грешка
         private JsonResult JsonError(string message)
         {
             return Json(new

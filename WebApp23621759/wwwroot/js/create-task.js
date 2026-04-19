@@ -4,13 +4,16 @@
     const template = document.getElementById("subtask-template");
     const counter = document.getElementById("subtask-count");
     const counterWrapper = document.getElementById("subtasks-counter");
-    const maxSubtasks = 10;
+    const maxSubtasks = 15;
     const counterBlinkClass = "limit-reached-blink";
     let blinkTimeoutId;
 
+    //Примигва брояча при опит за добавяне над лимита
     function blinkCounter() {
         clearTimeout(blinkTimeoutId);
         counterWrapper.classList.remove(counterBlinkClass);
+
+        //Форсира reflow, за да може анимацията да се пусне отново веднага
         void counterWrapper.offsetWidth;
         counterWrapper.classList.add(counterBlinkClass);
 
@@ -19,16 +22,22 @@
         }, 200);
     }
 
+    //Връща всички текущо добавени подзадачи от формата
     function getItems() {
         return Array.from(container.querySelectorAll(".subtask-item"));
     }
 
+    //Взима избраната зависимост от dropdown-а на конкретна подзадача
     function getSelectedDependencyIndex(item) {
         const select = item.querySelector(".subtask-dependency-select");
-        if (!select || select.value === "") return null;
+        if (!select || select.value === "") {
+            return null;
+        }
+
         return parseInt(select.value, 10);
     }
 
+    //Генерира текста, който се показва в dependency dropdown-а
     function getSubtaskDisplayName(item, index) {
         const titleInput = item.querySelector(".subtask-title-input");
         const titleValue = titleInput ? titleInput.value.trim() : "";
@@ -39,19 +48,28 @@
     }
 
     //DFS
+    //Проверява дали избрана зависимост би създала цикъл между подзадачите
     function createsCycle(currentIndex, candidateDependencyIndex, items) {
-        let visited = new Set();
+        const visited = new Set();
 
+        //Обхожда веригата от зависимости, докато стигне край или се върне в началото
         function dfs(index) {
-            if (index === currentIndex) return true;
+            if (index === currentIndex) {
+                return true;
+            }
 
-            if (visited.has(index)) return false;
+            if (visited.has(index)) {
+                return false;
+            }
+
             visited.add(index);
 
             const item = items[index];
             const next = getSelectedDependencyIndex(item);
 
-            if (next === null) return false;
+            if (next === null) {
+                return false;
+            }
 
             return dfs(next);
         }
@@ -59,21 +77,28 @@
         return dfs(candidateDependencyIndex);
     }
 
+    //Пресмята отново валидните dependency опции за всяка подзадача
     function refreshDependencyOptions() {
         const items = getItems();
 
         items.forEach((item, index) => {
             const select = item.querySelector(".subtask-dependency-select");
-            if (!select) return;
+            if (!select) {
+                return;
+            }
 
             const currentValue = select.value;
             select.innerHTML = `<option value="">No dependency</option>`;
 
             items.forEach((otherItem, otherIndex) => {
-                if (otherIndex === index) return;
+                if (otherIndex === index) {
+                    return;
+                }
 
                 //не позволява цикли
-                if (createsCycle(index, otherIndex, items)) return;
+                if (createsCycle(index, otherIndex, items)) {
+                    return;
+                }
 
                 const option = document.createElement("option");
                 option.value = otherIndex;
@@ -81,7 +106,7 @@
                 select.appendChild(option);
             });
 
-            if ([...select.options].some(o => o.value === currentValue)) {
+            if ([...select.options].some(option => option.value === currentValue)) {
                 select.value = currentValue;
             } else {
                 select.value = "";
@@ -89,6 +114,7 @@
         });
     }
 
+    //Преномерира input полетата, за да може ASP.NET да bind-не масива правилно
     function refreshIndexes() {
         const items = getItems();
 
@@ -143,9 +169,11 @@
         refreshIndexes();
     });
 
-    container.addEventListener("click", function (e) {
-        const removeButton = e.target.closest(".remove-subtask-btn");
-        if (!removeButton) return;
+    container.addEventListener("click", function (event) {
+        const removeButton = event.target.closest(".remove-subtask-btn");
+        if (!removeButton) {
+            return;
+        }
 
         const item = removeButton.closest(".subtask-item");
         if (item) {
@@ -154,14 +182,14 @@
         }
     });
 
-    container.addEventListener("input", function (e) {
-        if (e.target.classList.contains("subtask-title-input")) {
+    container.addEventListener("input", function (event) {
+        if (event.target.classList.contains("subtask-title-input")) {
             refreshDependencyOptions();
         }
     });
 
-    container.addEventListener("change", function (e) {
-        if (e.target.classList.contains("subtask-dependency-select")) {
+    container.addEventListener("change", function (event) {
+        if (event.target.classList.contains("subtask-dependency-select")) {
             refreshDependencyOptions();
         }
     });

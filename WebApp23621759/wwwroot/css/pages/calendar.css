@@ -1,7 +1,7 @@
 .page.calendar-page {
     align-items: flex-start;
     justify-content: flex-start;
-    padding: 20px 8px 20px 2px;
+    padding: 20px 0px 20px 0px;
     overflow-x: hidden;
 }
 

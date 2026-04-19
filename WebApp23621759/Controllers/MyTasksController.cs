@@ -21,11 +21,16 @@ namespace WebApp23621759.Controllers
             _subTaskService = subTaskService;
         }
 
+        //Зарежда страницата с всички задачи на текущия потребител
         public IActionResult Index(string sortBy = "dueDate", string direction = "ASC")
         {
             int userId = UserHelper.GetUserId(User);
+
+            //Взима задачите на потребителя според избраната подредба
             var tasks = _taskService.GetAllTasksByUserId(userId, sortBy, direction);
-            var taskViewModels = tasks.Select(task => BuildTaskItemViewModel(task, userId)).ToList();
+
+            //Подготвя view model за всяка задача, включително подзадачите ѝ
+            var taskViewModels = tasks.Select(task => BuildTaskItemViewModel(task)).ToList();
 
             ViewBag.CurrentSortBy = sortBy;
             ViewBag.CurrentDirection = direction;
@@ -42,8 +47,9 @@ namespace WebApp23621759.Controllers
             {
                 return NotFound();
             }
+
             //Връща се малка част от HTML-а, не цялата страница
-            return PartialView("_TaskSubTasksPanel", BuildTaskItemViewModel(task, userId));
+            return PartialView("_TaskSubTasksPanel", BuildTaskItemViewModel(task));
         }
 
         [HttpPost]
@@ -83,10 +89,10 @@ namespace WebApp23621759.Controllers
                 return JsonError("Task was not found or does not belong to you.");
             }
 
+            //Запазва текущия статус от базата, вместо да разчита на стойност от клиента
             model.Status = (TaskStatus)(int)currentTask.Status;
 
             bool updated = _taskService.UpdateTask(model, userId);
-
             if (!updated)
             {
                 return JsonError("Task was not found or does not belong to you.");
@@ -130,10 +136,10 @@ namespace WebApp23621759.Controllers
                 return JsonError("Task was not found or does not belong to you.");
             }
 
+            //При завършване на главната задача приключва и всички нейни подзадачи
             _subTaskService.SetAllCompletedForTask(id, userId);
 
             bool updated = _taskService.SetCompleted(id, userId);
-
             if (!updated)
             {
                 return JsonError("Task was not found or does not belong to you.");
@@ -144,7 +150,7 @@ namespace WebApp23621759.Controllers
             var refreshedTask = _taskService.GetById(id, userId);
             if (refreshedTask != null)
             {
-                var taskViewModel = BuildTaskItemViewModel(refreshedTask, userId);
+                var taskViewModel = BuildTaskItemViewModel(refreshedTask);
 
                 return Json(new
                 {
@@ -162,6 +168,8 @@ namespace WebApp23621759.Controllers
                     completedSubTaskCount = taskViewModel.CompletedSubTaskCount,
                     inProgressSubTaskCount = taskViewModel.InProgressSubTaskCount,
                     totalSubTaskCount = taskViewModel.TotalSubTaskCount,
+
+                    //Връща id-тата на завършените подзадачи, за да може UI-то да се синхронизира правилно
                     completedSubTaskIds = taskViewModel.SubTasks
                         .Where(subTask => subTask.Status == Status.Completed)
                         .Select(subTask => subTask.Id)
@@ -191,14 +199,17 @@ namespace WebApp23621759.Controllers
             var updatedSubTask = _subTaskService.GetById(model.Id);
             if (updatedSubTask != null)
             {
+                //След промяна на подзадача синхронизира статуса и прогреса на главната задача
                 var syncedTask = _taskService.SyncStatusWithSubTasks(updatedSubTask.TaskId, userId);
                 if (syncedTask == null)
                 {
                     return JsonError("Task could not be reloaded after subtask update.");
                 }
 
-                var taskViewModel = BuildTaskItemViewModel(syncedTask, userId);
+                var taskViewModel = BuildTaskItemViewModel(syncedTask);
                 List<SubTaskItem> allSubTasks = _subTaskService.GetAllSubTasks(updatedSubTask.TaskId);
+
+                //Намира заглавието на подзадачата, от която зависи текущата
                 string? blockedByTitle = allSubTasks
                     .FirstOrDefault(candidate => candidate.Id == updatedSubTask.BlockedBySubTaskId)
                     ?.Title;
@@ -226,6 +237,8 @@ namespace WebApp23621759.Controllers
                     completedSubTaskCount = taskViewModel.CompletedSubTaskCount,
                     inProgressSubTaskCount = taskViewModel.InProgressSubTaskCount,
                     totalSubTaskCount = taskViewModel.TotalSubTaskCount,
+
+                    //Връща позволените dependency опции, за да не се допускат невалидни зависимости
                     validDependencyIds = SubTaskHelper.BuildDependencyOptions(updatedSubTask, allSubTasks)
                         .Select(option => option.Id)
                         .ToList()
@@ -246,9 +259,10 @@ namespace WebApp23621759.Controllers
                 return JsonError("Subtask was not found or does not belong to you.");
             }
 
+            //Изчислява какъв ще бъде следващият статус за съобщението към клиента
             Status nextStatus = StatusHelper.GetNextStatus(subTask.Status);
-            bool updated = _subTaskService.ChangeStatus(id, userId);
 
+            bool updated = _subTaskService.ChangeStatus(id, userId);
             if (!updated)
             {
                 return Json(new
@@ -266,7 +280,7 @@ namespace WebApp23621759.Controllers
 
             if (refreshedSubTask != null && parentTask != null)
             {
-                var taskViewModel = BuildTaskItemViewModel(parentTask, userId);
+                var taskViewModel = BuildTaskItemViewModel(parentTask);
 
                 return Json(new
                 {
@@ -295,12 +309,12 @@ namespace WebApp23621759.Controllers
             return JsonError("Subtask could not be reloaded after status change.");
         }
 
-        private MyTaskItemViewModel BuildTaskItemViewModel(TaskItem task, int userId)
+        //Строи view model за една задача заедно с всичките ѝ подзадачи
+        private MyTaskItemViewModel BuildTaskItemViewModel(TaskItem task)
         {
             List<SubTaskItem> subTasks = _subTaskService.GetAllSubTasks(task.Id);
             return TaskViewModelHelper.BuildTaskItemViewModel(task, subTasks);
         }
-
 
         [HttpPost]
         public IActionResult AddSubTask(int taskId)
@@ -318,6 +332,7 @@ namespace WebApp23621759.Controllers
                 });
             }
 
+            //Създава подзадача с начални стойности
             var createdSubTask = _subTaskService.CreateSubTask("New subtask", string.Empty, null, taskId, userId);
             if (createdSubTask == null)
             {
@@ -335,7 +350,7 @@ namespace WebApp23621759.Controllers
                 return JsonError("Task could not be reloaded after subtask creation.");
             }
 
-            var taskViewModel = BuildTaskItemViewModel(syncedTask, userId);
+            var taskViewModel = BuildTaskItemViewModel(syncedTask);
 
             return Json(new
             {
@@ -384,8 +399,9 @@ namespace WebApp23621759.Controllers
                 });
             }
 
+            //След изтриване на подзадача преизчислява състоянието на главната задача
             var parentTask = _taskService.SyncStatusWithSubTasks(subTask.TaskId, userId);
-            var taskViewModel = parentTask == null ? null : BuildTaskItemViewModel(parentTask, userId);
+            var taskViewModel = parentTask == null ? null : BuildTaskItemViewModel(parentTask);
 
             return Json(new
             {
@@ -393,6 +409,8 @@ namespace WebApp23621759.Controllers
                 taskId = subTask.TaskId,
                 message = $"Subtask \"{subTask.Title}\" deleted.",
                 notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Success),
+
+                //Ако родителската задача не може да се зареди, използва fallback Pending стойности
                 taskStatusValue = parentTask == null ? (int)Status.Pending : (int)parentTask.Status,
                 taskStatusDisplayName = parentTask == null ? StatusHelper.GetDisplayName(Status.Pending) : StatusHelper.GetDisplayName(parentTask.Status),
                 taskStatusCssClass = parentTask == null ? StatusHelper.GetCssClass(Status.Pending) : StatusHelper.GetCssClass(parentTask.Status),
@@ -407,8 +425,7 @@ namespace WebApp23621759.Controllers
             });
         }
 
-        
-
+        //Помощен метод за еднакъв JSON отговор при грешка
         private JsonResult JsonError(string message)
         {
             return Json(new
@@ -420,5 +437,3 @@ namespace WebApp23621759.Controllers
         }
     }
 }
-
-

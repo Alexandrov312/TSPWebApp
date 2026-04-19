@@ -1,24 +1,35 @@
-@using WebApp23621759.Enums
+﻿@using WebApp23621759.Enums
 @using WebApp23621759.Helpers
 @model WebApp23621759.Models.ViewModel.Calendar.CalendarViewModel
 
+@*
+    Endpoint е URL адрес, който сочи към метод в контролера и позволява на клиента (браузър/JavaScript) 
+    да изпрати заявка и да получи отговор (HTML или JSON).
+*@
+@* Контейнерът държи данни за текущия ден и endpoint-а за AJAX презареждане *@
 <div class="calendar-day-tasks-content"
      data-day-tasks-endpoint="@Url.Action("DayTasksList", "Calendar", new { year = Model.Year, month = Model.Month, selectedDate = Model.SelectedDate.ToString("yyyy-MM-dd") })"
      data-selected-date="@Model.SelectedDate.ToString("yyyy-MM-dd")"
      data-year="@Model.Year"
      data-month="@Model.Month">
+
     <div class="day-tasks-list">
+        @* Ако има задачи за избрания ден *@
         @if (Model.SelectedDayTasks.Any())
         {
             @foreach (var taskItem in Model.SelectedDayTasks)
             {
                 var task = taskItem.Task;
 
+                @* Карта за една задача *@
                 <div class="day-task-card @StatusHelper.GetCalendarCardClass(task.Status)"
                      data-calendar-task-id="@task.Id">
+
+                    @* Горна част: срок + приоритет *@
                     <div class="day-task-top">
                         <div class="day-task-time">Until: @task.DueDate.ToString("dd/MM/yyyy HH:mm")</div>
 
+                        @* Inline редакция на приоритет *@
                         <div class="calendar-priority-slot">
                             <button type="button"
                                     class="priority-badge @PriorityHelper.GetCssClass(task.Priority) calendar-priority-trigger">
@@ -41,16 +52,23 @@
                         </div>
                     </div>
 
+                    @* Inline editable заглавие *@
                     <div class="day-task-title calendar-inline-editable"
                          data-calendar-field="title"
                          contenteditable="true"
-                         spellcheck="false">@task.Title</div>
+                         spellcheck="false">
+                        @task.Title
+                    </div>
 
+                    @* Inline editable описание *@
                     <div class="day-task-description calendar-inline-editable"
                          data-calendar-field="description"
                          contenteditable="true"
-                         spellcheck="false">@(string.IsNullOrWhiteSpace(task.Description) ? "Task description" : task.Description)</div>
+                         spellcheck="false">
+                        @(string.IsNullOrWhiteSpace(task.Description) ? "Task description" : task.Description)
+                    </div>
 
+                    @* Прогрес бар на задачата (на база подзадачи) *@
                     <div class="calendar-task-progress-block">
                         <div class="task-progress" data-task-progress-id="@task.Id">
                             <div class="task-progress-bar">
@@ -63,12 +81,15 @@
                         </div>
                     </div>
 
+                    @* Footer: статус + действия *@
                     <div class="calendar-task-footer">
                         <div class="calendar-task-status-text @StatusHelper.GetCssClass(task.Status)">
                             @StatusHelper.GetDisplayName(task.Status)
                         </div>
 
                         <div class="calendar-task-actions">
+
+                            @* Маркиране като завършена *@
                             <div class="done-wrapper">
                                 <form asp-action="MarkAsDone" method="post" class="calendar-task-done-form calendar-task-ajax-form">
                                     <input type="hidden" name="id" value="@task.Id" />
@@ -78,6 +99,7 @@
 
                                     <button type="button" class="option-btn option-btn-success show-done-popup" title="Mark as done">&#x2705;</button>
 
+                                    @* Popup за потвърждение *@
                                     <div class="done-popup">
                                         <span>Mark task as done?</span>
                                         <div class="popup-actions">
@@ -88,6 +110,7 @@
                                 </form>
                             </div>
 
+                            @* Изтриване на задача *@
                             <div class="delete-wrapper">
                                 <form asp-action="Delete" method="post" class="calendar-task-delete-form calendar-task-ajax-form">
                                     <input type="hidden" name="id" value="@task.Id" />
@@ -97,6 +120,7 @@
 
                                     <button type="button" class="option-btn option-btn-danger show-popup" title="Delete task">&#x1F5D1;&#xFE0F;</button>
 
+                                    @* Popup за потвърждение *@
                                     <div class="delete-popup">
                                         <span>Delete task?</span>
                                         <div class="popup-actions">
@@ -109,10 +133,12 @@
                         </div>
                     </div>
 
+                    @* Панел с подзадачи (reuse от MyTasks) *@
                     <div class="calendar-subtasks-panel-wrap">
                         <partial name="~/Views/MyTasks/_TaskSubTasksPanel.cshtml" model="taskItem" />
                     </div>
 
+                    @* Скрита форма за update (използва се при inline редакция) *@
                     <form asp-action="UpdateTask" method="post" class="calendar-task-update-form">
                         <input type="hidden" name="Id" value="@task.Id" />
                         <input type="hidden" name="Title" value="@task.Title" />
@@ -128,10 +154,12 @@
         }
         else
         {
+            @* Ако няма задачи за деня *@
             <p class="day-tasks-empty">No tasks for this day.</p>
         }
     </div>
 
+    @* Floating бутон за създаване на нова задача *@
     <form asp-action="CreateTask" method="post" class="calendar-create-task-form">
         <input type="hidden" name="year" value="@Model.Year" />
         <input type="hidden" name="month" value="@Model.Month" />
@@ -139,4 +167,3 @@
         <button type="submit" class="calendar-fab" title="Add new task">+</button>
     </form>
 </div>
-

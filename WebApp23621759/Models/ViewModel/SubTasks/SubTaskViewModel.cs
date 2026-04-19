@@ -11,9 +11,8 @@ namespace WebApp23621759.Models.ViewModel.SubTasks
         [StringLength(100)]
         public string Title { get; set; }
 
-        [Required(ErrorMessage = "Description is required")]
         [StringLength(2500)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
         public int? BlockedBySubTaskId { get; set; }
     }
 }

@@ -14,15 +14,5 @@ namespace WebApp23621759.Helpers
                 _ => ""
             };
         }
-        public static string GetCalendarBorderClass(Priority priority)
-        {
-            return priority switch
-            {
-                Priority.Low => "priority-border-low",
-                Priority.Medium => "priority-border-medium",
-                Priority.High => "priority-border-high",
-                _ => ""
-            };
-        }
     }
 }

@@ -111,8 +111,9 @@ namespace WebApp23621759.Services
             return MapUser(reader);
         }
 
-		//reader -> User
-		private static User MapUser(NpgsqlDataReader reader)
+        //Преобразуване на данни от една структура/формат в друга
+        //reader -> User
+        private static User MapUser(NpgsqlDataReader reader)
 		{
             return new User
             {

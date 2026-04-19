@@ -2,8 +2,10 @@
 
 //Изпраща POST заявка чрез fetch към form.action и връща JSON отговора
 async function postForm(form, body) {
+    //form.action - URL-ът, към който сочи формата.
     const response = await fetch(form.action, {
         method: "POST",
+        //Тази заявка идва от JavaScript/AJAX
         headers: {
             "X-Requested-With": "XMLHttpRequest"
         },
@@ -34,6 +36,7 @@ function updateTaskProgress(taskId, completionPercentage, projectedCompletionPer
     }
 
     if (projectedFill) {
+        //Синята част никога не трябва да остава по-къса от зелената
         const projectedWidth = Math.max(projectedCompletionPercentage ?? completionPercentage, completionPercentage);
         projectedFill.style.width = `${projectedWidth}%`;
     }
@@ -125,11 +128,6 @@ function applyStatusSelectClass(selectElement, statusCssClass) {
     if (statusCssClass) {
         selectElement.classList.add(statusCssClass);
     }
-}
-
-//Нормализира текст от contenteditable елемент
-function normalizeEditableValue(element) {
-    return element?.textContent?.replace(/\u00A0/g, " ").trim() ?? "";
 }
 
 window.postForm = postForm;

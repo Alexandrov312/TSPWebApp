@@ -1,4 +1,4 @@
-const popupViewportMargin = 12;
+﻿const popupViewportMargin = 12;
 const popupOffset = 10;
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -16,6 +16,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const wrapper = event.target.closest(".done-wrapper");
             const popup = wrapper.querySelector(".done-popup");
             wrapper.classList.add("popup-open");
+
+            //Прави popup-а измерим, преди да стане видим на правилното място
             popup.style.visibility = "hidden";
             popup.classList.add("show");
             positionTaskPopup(wrapper, popup);
@@ -58,6 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
+            //Позволява само един главен ред да е в edit mode по едно и също време
             document.querySelectorAll(".task-row.editing").forEach(row => {
                 if (row !== currentRow) {
                     row.classList.remove("editing");
@@ -259,17 +262,28 @@ function applyTaskUpdateResult(result) {
     const statusSelect = summaryRow.querySelector('select[name="Status"]');
     const prioritySelect = summaryRow.querySelector('select[name="Priority"]');
 
-    if (titleCell) titleCell.textContent = result.title;
-    if (descriptionCell) descriptionCell.textContent = result.description;
-    if (dueDateCell) dueDateCell.textContent = result.dueDateText;
-    if (statusCell) statusCell.textContent = result.statusDisplayName;
-    if (completedAtCell) completedAtCell.textContent = result.completedAtText;
+    if (titleCell) {
+        titleCell.textContent = result.title;
+    }
+    if (descriptionCell) {
+        descriptionCell.textContent = result.description;
+    }
+    if (dueDateCell) {
+        dueDateCell.textContent = result.dueDateText;
+    }
+    if (statusCell) {
+        statusCell.textContent = result.statusDisplayName;
+    }
+    if (completedAtCell) {
+        completedAtCell.textContent = result.completedAtText;
+    }
 
     if (priorityBadge) {
         priorityBadge.textContent = result.priorityDisplayName;
         priorityBadge.className = `priority-badge ${result.priorityCssClass}`;
     }
 
+    //Обновява и default стойностите, за да работи cancel коректно след успешен save
     if (titleInput) {
         titleInput.value = result.title;
         titleInput.defaultValue = result.title;

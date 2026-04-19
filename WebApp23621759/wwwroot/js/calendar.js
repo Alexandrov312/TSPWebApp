@@ -1,4 +1,4 @@
-const CALENDAR_DEFAULT_DESCRIPTION = "Task description";
+﻿const CALENDAR_DEFAULT_DESCRIPTION = "Task description";
 
 document.addEventListener("DOMContentLoaded", function () {
     if (!document.querySelector(".calendar-page")) {
@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        //Затваря отворения priority editor, ако кликът е извън картата
         document.querySelectorAll(".day-task-card.priority-editing").forEach(card => {
             if (!card.contains(event.target)) {
                 closeCalendarPriorityEditor(card);
@@ -114,6 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        //Изчаква browser-а да премести focus-а към следващия елемент
         window.setTimeout(() => {
             if (!taskCard.contains(document.activeElement)) {
                 closeCalendarPriorityEditor(taskCard);
@@ -152,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-//??????? ??????? ?? ???????? ?????? ? Calendar ? ?????????? ???? ?????? ?????
+//Изпраща редакция на главна задача от Calendar и презарежда десния панел
 async function submitCalendarTaskUpdate(form) {
     if (form.dataset.isSubmitting === "true") {
         return;
@@ -173,7 +175,7 @@ async function submitCalendarTaskUpdate(form) {
     await reloadCalendarDayTasksContent(result.taskId);
 }
 
-//??????? add/delete/done action ?? ???????? ?????? ? ???????? task cards ??????
+//Обработва add/delete/done action-и на главните задачи в Calendar
 async function submitCalendarTaskAction(form) {
     if (typeof hideAllTaskPopups === "function") {
         hideAllTaskPopups();
@@ -195,10 +197,11 @@ async function submitCalendarTaskAction(form) {
         return;
     }
 
+    //Запазва разгъната готовата карта, когато това е нужно след refresh
     await reloadCalendarDayTasksContent(form.matches(".calendar-task-done-form") ? result.taskId : null);
 }
 
-//?????????? ???? ???????????? ??? ???????? ?? ???????? ??? ? Calendar
+//Презарежда само десния панел със задачите за избрания ден в Calendar
 async function reloadCalendarDayTasksContent(expandedTaskId) {
     const currentContent = document.querySelector(".calendar-day-tasks-content");
     if (!currentContent) {
@@ -236,6 +239,7 @@ async function reloadCalendarDayTasksContent(expandedTaskId) {
         }
     });
 
+    //След подмяна на HTML-а dependency dropdown-ите трябва да се пресметнат отново
     document.querySelectorAll(".task-subtasks-panel[data-task-panel-id]").forEach(panel => {
         refreshDependencyOptions(panel.dataset.taskPanelId);
     });
@@ -243,7 +247,7 @@ async function reloadCalendarDayTasksContent(expandedTaskId) {
     syncSelectedDayTaskDot();
 }
 
-//??????? ???????? ????????? ?? inline ???????? ? select-? ?? ?????????
+//Записва текущите inline стойности в hidden form-а на главната задача
 function saveCalendarTaskChanges(taskCard) {
     const editForm = taskCard.querySelector(".calendar-task-update-form");
     if (!(editForm instanceof HTMLFormElement)) {
@@ -273,7 +277,7 @@ function saveCalendarTaskChanges(taskCard) {
     submitCalendarTaskUpdate(editForm);
 }
 
-//?????? inline ????????? ?? ?????????? ?? ???????? ??????
+//Отваря inline editor-а за приоритета на главната задача
 function openCalendarPriorityEditor(taskCard) {
     document.querySelectorAll(".day-task-card.priority-editing").forEach(card => {
         if (card !== taskCard) {
@@ -289,7 +293,7 @@ function openCalendarPriorityEditor(taskCard) {
     }
 }
 
-//??????? ????????? editor-? ? ????? ???????? ????????
+//Затваря priority editor-а и връща текущата избрана стойност
 function closeCalendarPriorityEditor(taskCard, selectedValue) {
     taskCard.classList.remove("priority-editing");
 
@@ -300,12 +304,12 @@ function closeCalendarPriorityEditor(taskCard, selectedValue) {
     }
 }
 
-//????????? ???? ?????? ? ????? ???????????? ??????? ????? ? ????????
+//Проверява дали кликът е върху интерактивен елемент в картата на главна задача
 function isCalendarInteractiveElement(element) {
     return !!element.closest("button, a, form, input, select, textarea, label, .popup-actions, .subtask-actions, .subtask-edit-form, .inline-editable, .inline-dependency-trigger, .calendar-subtasks-panel-wrap, .calendar-inline-editable, .calendar-priority-trigger");
 }
 
-//??????? ??? ?????? ?????? ? ??????????? ?? ?????? ??????
+//Разгъва или свива панела с подзадачите на избраната главна задача
 function toggleCalendarTaskDetails(taskCard) {
     const shouldExpand = !taskCard.classList.contains("expanded");
 
@@ -318,7 +322,7 @@ function toggleCalendarTaskDetails(taskCard) {
     taskCard.classList.toggle("expanded", shouldExpand);
 }
 
-//????? ??? ???? ??????? ?? ???????? ??? ?????? ???? ???? ??? ?????? ???? ????????? ???????
+//Слага или маха task-dot на избрания ден според това дали има задачи
 function syncSelectedDayTaskDot() {
     const selectedDay = document.querySelector(".calendar-day.selected");
     if (!selectedDay) {

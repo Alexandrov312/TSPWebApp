@@ -2,6 +2,7 @@
 @using WebApp23621759.Helpers
 @model WebApp23621759.Models.ViewModel.Calendar.CalendarViewModel
 
+@* Изчислява предишния и следващия месец за бутоните за навигация *@
 @{
     var previousMonth = new DateTime(Model.Year, Model.Month, 1).AddMonths(-1);
     var nextMonth = new DateTime(Model.Year, Model.Month, 1).AddMonths(1);
@@ -56,6 +57,8 @@
 
         <div class="day-tasks-panel">
             <h3>Tasks for @Model.SelectedDate.ToString("dd.MM.yyyy")</h3>
+
+            @* Зарежда списъка със задачи за избрания ден *@
             <partial name="_DayTasksList" model="Model" />
         </div>
     </div>

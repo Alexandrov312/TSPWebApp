@@ -1,4 +1,4 @@
-//Превключва отворено или затворено състояние на реда с подзадачите
+﻿//Превключва отворено или затворено състояние на реда с подзадачите
 function toggleTaskDetails(taskRow) {
     if (taskRow.classList.contains("editing")) {
         return;
@@ -12,6 +12,7 @@ function toggleTaskDetails(taskRow) {
 
     const shouldOpen = !detailsRow.classList.contains("open");
 
+    //Държи отворен само един главен ред с подзадачи в даден момент
     document.querySelectorAll(".task-summary-row.expanded").forEach(row => {
         if (row !== taskRow) {
             row.classList.remove("expanded");
@@ -69,6 +70,7 @@ async function reloadTaskSubTasksPanel(taskId, expandedSubTaskId) {
         return;
     }
 
+    //След всеки refresh преизчислява валидните dependency опции
     refreshDependencyOptions(taskId);
 
     expandedIds.forEach(subTaskId => {
@@ -115,7 +117,7 @@ function syncDependencyOptions(selectElement, validDependencyIds) {
     });
 }
 
-//Пресява dependency опциите на всяка подзадача спрямо текущото състояние в UI
+//Пресмята dependency опциите на всяка подзадача спрямо текущото състояние в UI
 function refreshDependencyOptions(taskId) {
     if (!taskId) {
         return;
