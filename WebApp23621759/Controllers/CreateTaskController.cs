@@ -33,6 +33,8 @@ namespace WebApp23621759.Controllers
         [HttpPost]
         public IActionResult Index(CreateTaskViewModel model)
         {
+            NormalizeSubTaskDescriptions(model);
+
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -66,6 +68,17 @@ namespace WebApp23621759.Controllers
                 NotificationType.Success);
 
             return RedirectToAction("Index");
+        }
+
+        private static void NormalizeSubTaskDescriptions(CreateTaskViewModel model)
+        {
+            foreach (var subTask in model.SubTasks)
+            {
+                if (string.IsNullOrWhiteSpace(subTask.Description))
+                {
+                    subTask.Description = "No description";
+                }
+            }
         }
     }
 }

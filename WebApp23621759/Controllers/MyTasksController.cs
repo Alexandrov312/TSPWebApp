@@ -22,7 +22,7 @@ namespace WebApp23621759.Controllers
         }
 
         //Зарежда страницата с всички задачи на текущия потребител
-        public IActionResult Index(string sortBy = "dueDate", string direction = "ASC")
+        public IActionResult Index(string sortBy = "dueDate", string direction = "ASC", int? kanbanTaskId = null, string source = "mytasks", string? returnUrl = null)
         {
             int userId = UserHelper.GetUserId(User);
 
@@ -34,6 +34,9 @@ namespace WebApp23621759.Controllers
 
             ViewBag.CurrentSortBy = sortBy;
             ViewBag.CurrentDirection = direction;
+            ViewBag.InitialKanbanTaskId = kanbanTaskId;
+            ViewBag.KanbanSource = source;
+            ViewBag.KanbanReturnUrl = returnUrl;
             return View(taskViewModels);
         }
 
@@ -50,6 +53,46 @@ namespace WebApp23621759.Controllers
 
             //Връща се малка част от HTML-а, не цялата страница
             return PartialView("_TaskSubTasksPanel", BuildTaskItemViewModel(task));
+        }
+
+        [HttpGet]
+        public IActionResult KanbanPanel(int taskId, string source = "mytasks", string? returnUrl = null)
+        {
+            int userId = UserHelper.GetUserId(User);
+            var task = _taskService.GetById(taskId, userId);
+            if (task == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.KanbanSource = source;
+            ViewBag.KanbanReturnUrl = returnUrl;
+            return PartialView("_TaskKanbanPanel", BuildTaskItemViewModel(task));
+        }
+
+        [HttpPost]
+        public IActionResult Create()
+        {
+            int userId = UserHelper.GetUserId(User);
+            var createdTask = _taskService.CreateTask(
+                "New task",
+                "Task description",
+                DateTime.Now.AddDays(1),
+                Priority.Medium,
+                userId);
+
+            if (createdTask == null)
+            {
+                return JsonError("Task could not be created.");
+            }
+
+            return Json(new
+            {
+                success = true,
+                taskId = createdTask.Id,
+                message = "New task added.",
+                notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Success)
+            });
         }
 
         [HttpPost]
@@ -292,6 +335,96 @@ namespace WebApp23621759.Controllers
                     statusDisplayName = StatusHelper.GetDisplayName(refreshedSubTask.Status),
                     statusCssClass = StatusHelper.GetCssClass(refreshedSubTask.Status),
                     completedAt = refreshedSubTask.CompletedAt?.ToString("dd.MM.yyyy HH:mm") ?? "Not finished",
+                    taskStatusValue = (int)parentTask.Status,
+                    taskStatusDisplayName = StatusHelper.GetDisplayName(parentTask.Status),
+                    taskStatusCssClass = StatusHelper.GetCssClass(parentTask.Status),
+                    taskCalendarStatusCssClass = StatusHelper.GetCalendarCardClass(parentTask.Status),
+                    taskCompletedAtText = parentTask.CompletedAt?.ToString("dd.MM.yyyy HH:mm") ?? "Not finished",
+                    taskRowDateCssClass = TaskDateHelper.GetRowDateClass(parentTask),
+                    completionPercentage = taskViewModel.CompletionPercentage,
+                    projectedCompletionPercentage = taskViewModel.ProjectedCompletionPercentage,
+                    completedSubTaskCount = taskViewModel.CompletedSubTaskCount,
+                    inProgressSubTaskCount = taskViewModel.InProgressSubTaskCount,
+                    totalSubTaskCount = taskViewModel.TotalSubTaskCount
+                });
+            }
+
+            return JsonError("Subtask could not be reloaded after status change.");
+        }
+
+        [HttpPost]
+        public IActionResult Archive(int id)
+        {
+            int userId = UserHelper.GetUserId(User);
+            var task = _taskService.GetById(id, userId);
+            if (task == null)
+            {
+                return JsonError("Task was not found or does not belong to you.");
+            }
+
+            if (task.Status != Status.Completed)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Only completed tasks can be archived.",
+                    notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Info)
+                });
+            }
+
+            if (!_taskService.ArchiveTask(id, userId))
+            {
+                return JsonError("Task could not be archived.");
+            }
+
+            return Json(new
+            {
+                success = true,
+                taskId = id,
+                message = $"Task \"{task.Title}\" archived.",
+                notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Success)
+            });
+        }
+
+        [HttpPost]
+        public IActionResult MoveSubTaskStatus(int id, Status targetStatus)
+        {
+            int userId = UserHelper.GetUserId(User);
+            var subTask = _subTaskService.GetById(id);
+
+            if (subTask == null || subTask.UserId != userId)
+            {
+                return JsonError("Subtask was not found or does not belong to you.");
+            }
+
+            bool updated = _subTaskService.SetStatus(id, userId, targetStatus);
+            if (!updated)
+            {
+                return Json(new
+                {
+                    success = false,
+                    taskId = subTask.TaskId,
+                    message = "First complete the subtask this one depends on.",
+                    notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Info)
+                });
+            }
+
+            var refreshedSubTask = _subTaskService.GetById(id);
+            TaskItem? parentTask = refreshedSubTask == null
+                ? null
+                : _taskService.SyncStatusWithSubTasks(refreshedSubTask.TaskId, userId);
+
+            if (refreshedSubTask != null && parentTask != null)
+            {
+                var taskViewModel = BuildTaskItemViewModel(parentTask);
+
+                return Json(new
+                {
+                    success = true,
+                    taskId = refreshedSubTask.TaskId,
+                    subTaskId = refreshedSubTask.Id,
+                    message = $"Subtask \"{refreshedSubTask.Title}\" moved to {StatusHelper.GetDisplayName(refreshedSubTask.Status)}.",
+                    notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Success),
                     taskStatusValue = (int)parentTask.Status,
                     taskStatusDisplayName = StatusHelper.GetDisplayName(parentTask.Status),
                     taskStatusCssClass = StatusHelper.GetCssClass(parentTask.Status),

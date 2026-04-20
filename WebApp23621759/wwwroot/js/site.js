@@ -46,10 +46,10 @@ function showToast(message, cssClass) {
 
 //Нормализира текст от contenteditable елемент
 function normalizeEditableValue(element) {
-    // \u00A0 - non-breaking space (NBSP)
-    // „Невидим“ специален интервал, който не позволява пренасяне на ред и трябва да се нормализира, 
-    // защото се държи различно от нормален space.
-    // "Hello World" !== "Hello\u00A0World"
+    //\u00A0 е non-breaking space (NBSP)
+    //Това е невидим специален интервал, който не позволява пренасяне на ред
+    //Нормализира се, защото се държи различно от нормален space
+    //"Hello World" !== "Hello\u00A0World"
     return element?.textContent?.replace(/\u00A0/g, " ").trim() ?? "";
 }
 

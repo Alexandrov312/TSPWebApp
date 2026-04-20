@@ -13,5 +13,6 @@ namespace WebApp23621759.Models.Entities
         public Status Status{ get; set; }
         public Priority Priority{ get; set; }
         public int UserId { get; set; }
+        public bool IsArchived { get; set; }
     }
 }

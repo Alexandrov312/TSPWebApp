@@ -11,6 +11,9 @@
         if (dependencyTrigger) {
             event.preventDefault();
             event.stopPropagation();
+            if (isDependencyTriggerLocked(dependencyTrigger)) {
+                return;
+            }
             const currentEntry = dependencyTrigger.closest(".subtask-entry");
             if (currentEntry) {
                 openDependencyEditor(currentEntry);
@@ -283,6 +286,11 @@ async function saveSubTaskChanges(subtaskEntry, payload) {
 
 //Отваря select-а за редакция на dependency
 function openDependencyEditor(subtaskEntry) {
+    const dependencyTrigger = subtaskEntry.querySelector(".inline-dependency-trigger");
+    if (isDependencyTriggerLocked(dependencyTrigger)) {
+        return;
+    }
+
     if (subtaskEntry.dataset.taskId) {
         refreshDependencyOptions(subtaskEntry.dataset.taskId);
     }
@@ -333,4 +341,9 @@ function getDescriptionValue(subtaskEntry) {
 function getDependencyValue(subtaskEntry) {
     const hiddenDependency = subtaskEntry.querySelector('input[name="BlockedBySubTaskId"]');
     return hiddenDependency?.value ?? "";
+}
+
+//Проверява дали dependency редакцията е заключена за завършена подзадача
+function isDependencyTriggerLocked(dependencyTrigger) {
+    return dependencyTrigger?.disabled || dependencyTrigger?.classList.contains("dependency-locked");
 }

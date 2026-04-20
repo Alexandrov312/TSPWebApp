@@ -1,5 +1,6 @@
 ﻿const popupViewportMargin = 12;
 const popupOffset = 10;
+let popupSequence = 0;
 
 document.addEventListener("DOMContentLoaded", function () {
     document.addEventListener("click", function (event) {
@@ -9,19 +10,22 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        const descriptionToggle = event.target.closest("[data-task-description-toggle]");
+        if (descriptionToggle) {
+            event.preventDefault();
+            const wrapper = descriptionToggle.closest(".task-details-description");
+            const isOpen = wrapper?.classList.toggle("description-open");
+            descriptionToggle.setAttribute("aria-expanded", String(!!isOpen));
+            return;
+        }
+
         if (event.target.closest(".show-done-popup")) {
             event.preventDefault();
             hideAllTaskPopups();
 
             const wrapper = event.target.closest(".done-wrapper");
             const popup = wrapper.querySelector(".done-popup");
-            wrapper.classList.add("popup-open");
-
-            //Прави popup-а измерим, преди да стане видим на правилното място
-            popup.style.visibility = "hidden";
-            popup.classList.add("show");
-            positionTaskPopup(wrapper, popup);
-            popup.style.visibility = "visible";
+            openTaskPopup(wrapper, popup);
             return;
         }
 
@@ -31,26 +35,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const wrapper = event.target.closest(".delete-wrapper");
             const popup = wrapper.querySelector(".delete-popup");
+            openTaskPopup(wrapper, popup);
+            return;
+        }
 
-            wrapper.classList.add("popup-open");
-            popup.style.visibility = "hidden";
-            popup.classList.add("show");
-            positionTaskPopup(wrapper, popup);
-            popup.style.visibility = "visible";
+        const popupSubmitButton = event.target.closest(".delete-popup button[type='submit'], .done-popup button[type='submit']");
+        if (popupSubmitButton) {
+            event.preventDefault();
+            const wrapper = getWrapperFromPopupEvent(event.target, ".delete-wrapper") ?? getWrapperFromPopupEvent(event.target, ".done-wrapper");
+            const form = wrapper?.querySelector("form");
+            if (form instanceof HTMLFormElement) {
+                form.requestSubmit();
+            }
             return;
         }
 
         if (event.target.closest(".cancel-done-btn")) {
-            closeTaskPopup(event.target.closest(".done-wrapper"));
+            closeTaskPopup(getWrapperFromPopupEvent(event.target, ".done-wrapper"));
             return;
         }
 
         if (event.target.closest(".cancel-btn")) {
-            closeTaskPopup(event.target.closest(".delete-wrapper"));
+            closeTaskPopup(getWrapperFromPopupEvent(event.target, ".delete-wrapper"));
             return;
         }
 
-        if (!event.target.closest(".delete-wrapper") && !event.target.closest(".done-wrapper")) {
+        if (!event.target.closest(".delete-wrapper") && !event.target.closest(".done-wrapper") && !event.target.closest(".delete-popup") && !event.target.closest(".done-popup")) {
             hideAllTaskPopups();
         }
 
@@ -117,6 +127,11 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        if (form.matches(".task-archive-form")) {
+            removeTaskRow(result.taskId);
+            return;
+        }
+
         if (form.matches(".task-done-form")) {
             applyTaskDoneResult(result);
             return;
@@ -125,6 +140,46 @@ document.addEventListener("DOMContentLoaded", function () {
         if (form.matches(".task-update-form")) {
             applyTaskUpdateResult(result);
         }
+    });
+
+    document.addEventListener("focusin", function (event) {
+        const editableDescription = event.target.closest("[data-task-description-editable]");
+        if (editableDescription) {
+            editableDescription.dataset.originalValue = normalizeEditableValue(editableDescription);
+        }
+    });
+
+    document.addEventListener("keydown", function (event) {
+        const editableDescription = event.target.closest("[data-task-description-editable]");
+        if (!editableDescription) {
+            return;
+        }
+
+        if (event.key === "Enter") {
+            event.preventDefault();
+            editableDescription.blur();
+        }
+
+        if (event.key === "Escape") {
+            event.preventDefault();
+            editableDescription.textContent = editableDescription.dataset.originalValue ?? editableDescription.textContent ?? "";
+            editableDescription.blur();
+        }
+    });
+
+    document.addEventListener("focusout", async function (event) {
+        const editableDescription = event.target.closest("[data-task-description-editable]");
+        if (!editableDescription) {
+            return;
+        }
+
+        const originalValue = editableDescription.dataset.originalValue ?? "";
+        const currentValue = normalizeEditableValue(editableDescription) || "Task description";
+        if (currentValue === originalValue) {
+            return;
+        }
+
+        await saveTaskDetailsDescription(editableDescription, currentValue);
     });
 });
 
@@ -138,7 +193,7 @@ window.addEventListener("scroll", function () {
 
 //Проверява дали кликът е върху интерактивен елемент в главната задача
 function isTaskInteractiveElement(element) {
-    return !!element.closest("button, a, form, input, select, textarea, label, .popup-actions, .row-actions, .subtask-actions, .subtask-edit-form, .inline-editable, .inline-dependency-trigger");
+    return !!element.closest("button, a, form, input, select, textarea, label, .popup-actions, .row-actions, .subtask-actions, .subtask-edit-form, .inline-editable, .inline-dependency-trigger, [data-task-description-editable]");
 }
 
 //Връща стойностите в edit mode към първоначалните им данни
@@ -164,6 +219,7 @@ function hideAllTaskPopups() {
             popup.style.top = "-9999px";
             popup.style.left = "-9999px";
             popup.style.visibility = "";
+            restorePopupParent(popup);
         });
 
     document.querySelectorAll(".delete-wrapper, .done-wrapper")
@@ -172,13 +228,14 @@ function hideAllTaskPopups() {
 
 //Затваря конкретен popup wrapper и изчиства състоянието му
 function closeTaskPopup(wrapper) {
-    const popup = wrapper?.querySelector(".done-popup, .delete-popup");
+    const popup = getPopupForWrapper(wrapper);
 
     if (popup) {
         popup.classList.remove("show");
         popup.style.top = "-9999px";
         popup.style.left = "-9999px";
         popup.style.visibility = "";
+        restorePopupParent(popup);
     }
 
     wrapper?.classList.remove("popup-open");
@@ -188,11 +245,82 @@ function closeTaskPopup(wrapper) {
 function repositionVisibleTaskPopups() {
     document.querySelectorAll(".done-wrapper.popup-open, .delete-wrapper.popup-open")
         .forEach(wrapper => {
-            const popup = wrapper.querySelector(".done-popup.show, .delete-popup.show");
+            const popup = getPopupForWrapper(wrapper);
             if (popup) {
                 positionTaskPopup(wrapper, popup);
             }
         });
+}
+
+//Отваря popup-а в body, за да не бъде ограничен от таблици, overflow или stacking context-и
+function openTaskPopup(wrapper, popup) {
+    if (!wrapper || !popup) {
+        return;
+    }
+
+    wrapper.classList.add("popup-open");
+    preparePopupPortal(wrapper, popup);
+
+    popup.style.visibility = "hidden";
+    popup.classList.add("show");
+    positionTaskPopup(wrapper, popup);
+    popup.style.visibility = "visible";
+}
+
+//Свързва popup-а с wrapper-а и с формата, дори когато popup-ът е преместен извън нея
+function preparePopupPortal(wrapper, popup) {
+    const popupId = wrapper.dataset.popupPortalId || `task-popup-${++popupSequence}`;
+    wrapper.dataset.popupPortalId = popupId;
+    popup.dataset.popupPortalId = popupId;
+
+    if (!popup.originalParent) {
+        popup.originalParent = popup.parentElement;
+    }
+
+    const form = wrapper.querySelector("form");
+    if (form) {
+        form.id ||= `${popupId}-form`;
+        popup.querySelectorAll('button[type="submit"]').forEach(button => {
+            button.setAttribute("form", form.id);
+        });
+    }
+
+    document.body.appendChild(popup);
+}
+
+//Връща popup-а обратно в първоначалния му wrapper, когато се затвори
+function restorePopupParent(popup) {
+    if (popup?.originalParent && popup.parentElement !== popup.originalParent) {
+        popup.originalParent.appendChild(popup);
+    }
+}
+
+//Намира popup-а дори когато временно е преместен в body
+function getPopupForWrapper(wrapper) {
+    if (!wrapper) {
+        return null;
+    }
+
+    const popupId = wrapper.dataset.popupPortalId;
+    if (popupId) {
+        return document.querySelector(`.done-popup[data-popup-portal-id="${popupId}"], .delete-popup[data-popup-portal-id="${popupId}"]`);
+    }
+
+    return wrapper.querySelector(".done-popup, .delete-popup");
+}
+
+//Намира wrapper-а при клик в popup, който вече може да е извън формата
+function getWrapperFromPopupEvent(element, fallbackSelector) {
+    const directWrapper = element.closest(fallbackSelector);
+    if (directWrapper) {
+        return directWrapper;
+    }
+
+    const popup = element.closest(".done-popup, .delete-popup");
+    const popupId = popup?.dataset.popupPortalId;
+    return popupId
+        ? document.querySelector(`.done-wrapper[data-popup-portal-id="${popupId}"], .delete-wrapper[data-popup-portal-id="${popupId}"]`)
+        : null;
 }
 
 //Поставя popup-а до бутона и го пази във viewport-а
@@ -222,6 +350,40 @@ function removeTaskRow(taskId) {
 
     summaryRow?.remove();
     detailsRow?.remove();
+}
+
+//Запазва inline редакцията на описанието от details панела на главната задача
+async function saveTaskDetailsDescription(editableDescription, description) {
+    const taskId = editableDescription.dataset.taskId;
+    const summaryRow = document.querySelector(`.task-summary-row[data-task-row-id="${taskId}"]`);
+    const form = summaryRow?.querySelector(".task-update-form");
+    if (!(form instanceof HTMLFormElement)) {
+        return;
+    }
+
+    const descriptionInput = summaryRow.querySelector('input[name="Description"]');
+    if (descriptionInput) {
+        descriptionInput.value = description;
+    }
+
+    const response = await fetch(form.action, {
+        method: "POST",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        body: new FormData(form)
+    });
+
+    if (!response.ok) {
+        showToast("Task request failed.", "toast-error");
+        return;
+    }
+
+    const result = await response.json();
+    showToast(result.message, result.notificationCssClass);
+    if (result.success) {
+        applyTaskUpdateResult(result);
+    }
 }
 
 //Обновява интерфейса след успешно маркиране на главна задача като готова
@@ -294,6 +456,12 @@ function applyTaskUpdateResult(result) {
         descriptionInput.defaultValue = result.description;
     }
 
+    const detailsDescription = document.querySelector(`[data-task-description-editable][data-task-id="${result.taskId}"]`);
+    if (detailsDescription) {
+        detailsDescription.textContent = result.description || "Task description";
+        detailsDescription.dataset.originalValue = detailsDescription.textContent;
+    }
+
     if (dueDateInput) {
         dueDateInput.value = result.dueDateValue;
         dueDateInput.defaultValue = result.dueDateValue;
@@ -359,6 +527,10 @@ function applyTaskUpdateState(taskId, result) {
             result.projectedCompletionPercentage,
             result.completedSubTaskCount,
             result.totalSubTaskCount);
+    }
+
+    if (typeof syncArchiveButton === "function") {
+        syncArchiveButton(taskId, result.statusValue);
     }
 }
 

@@ -1,8 +1,8 @@
-﻿using Npgsql;
+using Npgsql;
 using WebApp23621759.Database;
 using WebApp23621759.Enums;
-using WebApp23621759.Models.Entities;
 using WebApp23621759.Helpers;
+using WebApp23621759.Models.Entities;
 using WebApp23621759.Models.ViewModel.SubTasks;
 
 namespace WebApp23621759.Services
@@ -10,10 +10,12 @@ namespace WebApp23621759.Services
     public class SubTaskService
     {
         private readonly DatabaseService _databaseService;
+        private readonly KanbanColumnService _kanbanColumnService;
 
-        public SubTaskService(DatabaseService databaseService)
+        public SubTaskService(DatabaseService databaseService, KanbanColumnService kanbanColumnService)
         {
             _databaseService = databaseService;
+            _kanbanColumnService = kanbanColumnService;
         }
 
         //Валидира целия списък с нови подзадачи преди да се запише каквото и да е в базата
@@ -66,7 +68,7 @@ namespace WebApp23621759.Services
             {
                 createdSubTasks.Add(CreateSubTask(
                     subTask.Title,
-                    subTask.Description,
+                    subTask.Description ?? "No description",
                     null,
                     taskId,
                     userId));
@@ -89,40 +91,30 @@ namespace WebApp23621759.Services
             return createdSubTasks;
         }
 
-        public SubTaskItem CreateSubTask(string title, string description, int ?blockedBySubTaskId, int taskId, int userId)
+        public SubTaskItem CreateSubTask(string title, string description, int? blockedBySubTaskId, int taskId, int userId)
         {
+            var pendingColumn = _kanbanColumnService.GetDefaultColumnForStatus(taskId, userId, Status.Pending);
+
             using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
             command.CommandText = @"
                 INSERT INTO ""SubTasks""
-                    (""Title"", ""Description"", ""Status"", ""CompletedAt"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId"")
+                    (""Title"", ""Description"", ""Status"", ""CompletedAt"", ""KanbanColumnId"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId"")
                 VALUES
-                    (@title, @description, @status, NULL, @blockedBySubTaskId, @taskId, @userId)
+                    (@title, @description, @status, NULL, @kanbanColumnId, @blockedBySubTaskId, @taskId, @userId)
                 RETURNING
-                    ""Id"", ""Title"", ""Description"", ""Status"", ""CompletedAt"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId"";";
+                    ""Id"", ""Title"", ""Description"", ""Status"", ""CompletedAt"", ""KanbanColumnId"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId"";";
 
             command.Parameters.AddWithValue("title", title);
             command.Parameters.AddWithValue("description", description ?? string.Empty);
             command.Parameters.AddWithValue("status", (int)Status.Pending);
+            command.Parameters.AddWithValue("kanbanColumnId", pendingColumn?.Id ?? (object)DBNull.Value);
             command.Parameters.AddWithValue("taskId", taskId);
             command.Parameters.AddWithValue("userId", userId);
-
-            if (blockedBySubTaskId > 0)
-            {
-                command.Parameters.AddWithValue("blockedBySubTaskId", blockedBySubTaskId);
-            }
-            else
-            {
-                command.Parameters.AddWithValue("blockedBySubTaskId", DBNull.Value);
-            }
+            command.Parameters.AddWithValue("blockedBySubTaskId", blockedBySubTaskId > 0 ? blockedBySubTaskId.Value : (object)DBNull.Value);
 
             using var reader = command.ExecuteReader();
-            if (!reader.Read())
-            {
-                return null;
-            }
-
-            return MapSubTask(reader);
+            return reader.Read() ? MapSubTask(reader) : null;
         }
 
         public List<SubTaskItem> GetAllSubTasks(int taskId)
@@ -132,8 +124,7 @@ namespace WebApp23621759.Services
             using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
             command.CommandText = @"
-                SELECT
-                    ""Id"", ""Title"", ""Description"", ""Status"", ""CompletedAt"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId""
+                SELECT ""Id"", ""Title"", ""Description"", ""Status"", ""CompletedAt"", ""KanbanColumnId"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId""
                 FROM ""SubTasks""
                 WHERE ""TaskId"" = @taskId
                 ORDER BY ""Id"";";
@@ -192,6 +183,12 @@ namespace WebApp23621759.Services
                 return false;
             }
 
+            if (currentSubTask.Status == Status.Completed &&
+                IsDependencyChanged(currentSubTask.BlockedBySubTaskId, model.BlockedBySubTaskId))
+            {
+                return false;
+            }
+
             int? blockedBySubTaskId = ResolveBlockedBySubTaskId(
                 model.Id,
                 currentSubTask.TaskId,
@@ -218,15 +215,7 @@ namespace WebApp23621759.Services
             command.Parameters.AddWithValue("title", model.Title);
             command.Parameters.AddWithValue("description", model.Description ?? string.Empty);
             command.Parameters.AddWithValue("userId", userId);
-
-            if (blockedBySubTaskId.HasValue)
-            {
-                command.Parameters.AddWithValue("blockedBySubTaskId", blockedBySubTaskId.Value);
-            }
-            else
-            {
-                command.Parameters.AddWithValue("blockedBySubTaskId", DBNull.Value);
-            }
+            command.Parameters.AddWithValue("blockedBySubTaskId", blockedBySubTaskId.HasValue ? blockedBySubTaskId.Value : (object)DBNull.Value);
 
             return command.ExecuteNonQuery() > 0;
         }
@@ -236,8 +225,7 @@ namespace WebApp23621759.Services
             using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
             command.CommandText = @"
-                SELECT
-                    ""Id"", ""Title"", ""Description"", ""Status"", ""CompletedAt"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId""
+                SELECT ""Id"", ""Title"", ""Description"", ""Status"", ""CompletedAt"", ""KanbanColumnId"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId""
                 FROM ""SubTasks""
                 WHERE ""Id"" = @subTaskId
                 LIMIT 1;";
@@ -245,93 +233,59 @@ namespace WebApp23621759.Services
             command.Parameters.AddWithValue("subTaskId", subTaskId);
 
             using var reader = command.ExecuteReader();
-            if (!reader.Read())
-            {
-                return null;
-            }
-
-            return MapSubTask(reader);
+            return reader.Read() ? MapSubTask(reader) : null;
         }
 
         public bool ChangeStatus(int subTaskId, int userId)
         {
-            using var connection = _databaseService.GetOpenConnection();
-
-            SubTaskItem task;
-            using (var getCommand = connection.CreateCommand())
-            {
-                getCommand.CommandText = @"
-                    SELECT
-                        ""Id"", ""Title"", ""Description"", ""Status"", ""CompletedAt"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId""
-                    FROM ""SubTasks""
-                    WHERE ""Id"" = @subTaskId
-                      AND ""UserId"" = @userId
-                    LIMIT 1;";
-
-                getCommand.Parameters.AddWithValue("subTaskId", subTaskId);
-                getCommand.Parameters.AddWithValue("userId", userId);
-
-                using var reader = getCommand.ExecuteReader();
-                if (!reader.Read())
-                {
-                    return false;
-                }
-
-                task = MapSubTask(reader);
-            }
-
-            var nextStatus = StatusHelper.GetNextStatus(task.Status);
-            var allSubTasks = GetAllSubTasks(task.TaskId, userId);
-
-            if (nextStatus == Status.InProgress && task.BlockedBySubTaskId.HasValue)
-            {
-                var blocker = allSubTasks.FirstOrDefault(subTask => subTask.Id == task.BlockedBySubTaskId.Value);
-                if (blocker == null || blocker.Status != Status.Completed)
-                {
-                    return false;
-                }
-            }
-
-            using var updateCommand = connection.CreateCommand();
-            updateCommand.CommandText = @"
-                UPDATE ""SubTasks""
-                SET
-                    ""Status"" = @status,
-                    ""CompletedAt"" = @completedAt
-                WHERE ""Id"" = @subTaskId
-                  AND ""UserId"" = @userId;";
-
-            updateCommand.Parameters.AddWithValue("status", (int)nextStatus);
-            updateCommand.Parameters.AddWithValue("subTaskId", subTaskId);
-            updateCommand.Parameters.AddWithValue("userId", userId);
-
-            if (nextStatus == Status.Completed)
-            {
-                updateCommand.Parameters.AddWithValue("completedAt", DateTime.UtcNow);
-            }
-            else
-            {
-                updateCommand.Parameters.AddWithValue("completedAt", DBNull.Value);
-            }
-
-            bool updated = updateCommand.ExecuteNonQuery() > 0;
-            if (!updated)
+            var task = GetById(subTaskId);
+            if (task == null || task.UserId != userId)
             {
                 return false;
             }
 
-            if (nextStatus == Status.Pending)
+            var nextStatus = StatusHelper.GetNextStatus(task.Status);
+            return SetStatus(subTaskId, userId, nextStatus);
+        }
+
+        public bool SetStatus(int subTaskId, int userId, Status targetStatus)
+        {
+            if (targetStatus == Status.Overdue)
             {
-                ResetDependentSubTasks(connection, task.Id, userId, allSubTasks);
+                return false;
             }
 
-            return true;
+            var task = GetById(subTaskId);
+            if (task == null || task.UserId != userId)
+            {
+                return false;
+            }
+
+            var targetColumn = _kanbanColumnService.GetDefaultColumnForStatus(task.TaskId, userId, targetStatus);
+            if (targetColumn == null)
+            {
+                return false;
+            }
+
+            return SetStatusAndColumn(subTaskId, userId, targetStatus, targetColumn.Id);
+        }
+
+        public bool SetColumn(int subTaskId, int userId, KanbanColumnItem targetColumn)
+        {
+            var targetStatus = targetColumn.StatusValue;
+            return SetStatusAndColumn(subTaskId, userId, targetStatus, targetColumn.Id);
         }
 
         public bool UpdateDependency(int subTaskId, int? blockedBySubTaskId, int userId)
         {
             var subTask = GetById(subTaskId);
             if (subTask == null || subTask.UserId != userId)
+            {
+                return false;
+            }
+
+            if (subTask.Status == Status.Completed &&
+                IsDependencyChanged(subTask.BlockedBySubTaskId, blockedBySubTaskId))
             {
                 return false;
             }
@@ -356,38 +310,86 @@ namespace WebApp23621759.Services
 
             command.Parameters.AddWithValue("subTaskId", subTaskId);
             command.Parameters.AddWithValue("userId", userId);
-
-            if (resolvedDependencyId.HasValue)
-            {
-                command.Parameters.AddWithValue("blockedBySubTaskId", resolvedDependencyId.Value);
-            }
-            else
-            {
-                command.Parameters.AddWithValue("blockedBySubTaskId", DBNull.Value);
-            }
+            command.Parameters.AddWithValue("blockedBySubTaskId", resolvedDependencyId.HasValue ? resolvedDependencyId.Value : (object)DBNull.Value);
 
             return command.ExecuteNonQuery() > 0;
         }
 
         public int SetAllCompletedForTask(int taskId, int userId)
         {
+            var completedColumn = _kanbanColumnService.GetDefaultColumnForStatus(taskId, userId, Status.Completed);
+
             using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
             command.CommandText = @"
                 UPDATE ""SubTasks""
                 SET
                     ""Status"" = @status,
-                    ""CompletedAt"" = NOW()
+                    ""CompletedAt"" = NOW(),
+                    ""KanbanColumnId"" = @kanbanColumnId
                 WHERE ""TaskId"" = @taskId
                   AND ""UserId"" = @userId
                   AND ""Status"" <> @completedStatus;";
 
             command.Parameters.AddWithValue("status", (int)Status.Completed);
             command.Parameters.AddWithValue("completedStatus", (int)Status.Completed);
+            command.Parameters.AddWithValue("kanbanColumnId", completedColumn?.Id ?? (object)DBNull.Value);
             command.Parameters.AddWithValue("taskId", taskId);
             command.Parameters.AddWithValue("userId", userId);
 
             return command.ExecuteNonQuery();
+        }
+
+        private bool SetStatusAndColumn(int subTaskId, int userId, Status targetStatus, int targetColumnId)
+        {
+            var task = GetById(subTaskId);
+            if (task == null || task.UserId != userId)
+            {
+                return false;
+            }
+
+            var allSubTasks = GetAllSubTasks(task.TaskId, userId);
+
+            //При move към активна или завършена колона dependency-то трябва вече да е завършено
+            if ((targetStatus == Status.InProgress || targetStatus == Status.Completed) && task.BlockedBySubTaskId.HasValue)
+            {
+                var blocker = allSubTasks.FirstOrDefault(subTask => subTask.Id == task.BlockedBySubTaskId.Value);
+                if (blocker == null || blocker.Status != Status.Completed)
+                {
+                    return false;
+                }
+            }
+
+            using var connection = _databaseService.GetOpenConnection();
+            using var updateCommand = connection.CreateCommand();
+            updateCommand.CommandText = @"
+                UPDATE ""SubTasks""
+                SET
+                    ""Status"" = @status,
+                    ""CompletedAt"" = @completedAt,
+                    ""KanbanColumnId"" = @kanbanColumnId
+                WHERE ""Id"" = @subTaskId
+                  AND ""UserId"" = @userId;";
+
+            updateCommand.Parameters.AddWithValue("status", (int)targetStatus);
+            updateCommand.Parameters.AddWithValue("completedAt", targetStatus == Status.Completed ? DateTime.UtcNow : (object)DBNull.Value);
+            updateCommand.Parameters.AddWithValue("kanbanColumnId", targetColumnId);
+            updateCommand.Parameters.AddWithValue("subTaskId", subTaskId);
+            updateCommand.Parameters.AddWithValue("userId", userId);
+
+            bool updated = updateCommand.ExecuteNonQuery() > 0;
+            if (!updated)
+            {
+                return false;
+            }
+
+            if (targetStatus != Status.Completed)
+            {
+                var pendingColumn = _kanbanColumnService.GetDefaultColumnForStatus(task.TaskId, userId, Status.Pending);
+                ResetDependentSubTasks(connection, task.Id, userId, allSubTasks, pendingColumn?.Id);
+            }
+
+            return true;
         }
 
         private static SubTaskItem MapSubTask(NpgsqlDataReader reader)
@@ -399,9 +401,10 @@ namespace WebApp23621759.Services
                 Description = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
                 Status = (Status)reader.GetInt32(3),
                 CompletedAt = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
-                BlockedBySubTaskId = reader.IsDBNull(5) ? null : reader.GetInt32(5),
-                TaskId = reader.GetInt32(6),
-                UserId = reader.GetInt32(7)
+                KanbanColumnId = reader.IsDBNull(5) ? null : reader.GetInt32(5),
+                BlockedBySubTaskId = reader.IsDBNull(6) ? null : reader.GetInt32(6),
+                TaskId = reader.GetInt32(7),
+                UserId = reader.GetInt32(8)
             };
         }
 
@@ -419,7 +422,6 @@ namespace WebApp23621759.Services
                 return null;
             }
 
-            //Проверка дали съществува самата зависимост
             var subTasks = GetAllSubTasks(taskId, userId);
             var dependency = subTasks.FirstOrDefault(subTask => subTask.Id == blockedBySubTaskId.Value);
             if (dependency == null)
@@ -427,7 +429,7 @@ namespace WebApp23621759.Services
                 return null;
             }
 
-            //Проверка дали създава безкраен циъкл
+            //Проверка дали създава безкраен цикъл
             if (CreatesCycle(subTaskId, blockedBySubTaskId.Value, subTasks))
             {
                 return null;
@@ -466,6 +468,15 @@ namespace WebApp23621759.Services
         }
 
         //Проверява дали нова зависимост между подзадачи в create екрана създава цикъл по индексите им
+        private static bool IsDependencyChanged(int? currentDependencyId, int? requestedDependencyId)
+        {
+            int? normalizedRequestedId = requestedDependencyId.HasValue && requestedDependencyId.Value > 0
+                ? requestedDependencyId.Value
+                : null;
+
+            return currentDependencyId != normalizedRequestedId;
+        }
+
         private static bool CreatesNewSubTaskCycle(int currentSubTaskIndex, int candidateDependencyIndex, List<CreateSubTaskInputModel> subTasks)
         {
             var visited = new HashSet<int>();
@@ -489,7 +500,7 @@ namespace WebApp23621759.Services
             return false;
         }
 
-        private static void ResetDependentSubTasks(NpgsqlConnection connection, int rootSubTaskId, int userId, List<SubTaskItem> allSubTasks)
+        private static void ResetDependentSubTasks(NpgsqlConnection connection, int rootSubTaskId, int userId, List<SubTaskItem> allSubTasks, int? pendingColumnId)
         {
             var dependentsByParentId = allSubTasks
                 .Where(subTask => subTask.BlockedBySubTaskId.HasValue)
@@ -531,12 +542,13 @@ namespace WebApp23621759.Services
                 UPDATE ""SubTasks""
                 SET
                     ""Status"" = @status,
-                    ""CompletedAt"" = @completedAt
+                    ""CompletedAt"" = NULL,
+                    ""KanbanColumnId"" = @kanbanColumnId
                 WHERE ""Id"" = ANY(@subTaskIds)
                   AND ""UserId"" = @userId;";
 
             resetCommand.Parameters.AddWithValue("status", (int)Status.Pending);
-            resetCommand.Parameters.AddWithValue("completedAt", DBNull.Value);
+            resetCommand.Parameters.AddWithValue("kanbanColumnId", pendingColumnId.HasValue ? pendingColumnId.Value : (object)DBNull.Value);
             resetCommand.Parameters.AddWithValue("subTaskIds", descendantIds.ToArray());
             resetCommand.Parameters.AddWithValue("userId", userId);
             resetCommand.ExecuteNonQuery();

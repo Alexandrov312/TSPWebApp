@@ -17,6 +17,16 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        const descriptionToggle = event.target.closest(".calendar-description-toggle");
+        if (descriptionToggle) {
+            event.preventDefault();
+            event.stopPropagation();
+            const taskCard = descriptionToggle.closest(".day-task-card");
+            const isOpen = taskCard?.classList.toggle("calendar-description-open");
+            descriptionToggle.setAttribute("aria-expanded", String(!!isOpen));
+            return;
+        }
+
         const taskCard = event.target.closest(".day-task-card");
         if (taskCard && !isCalendarInteractiveElement(event.target)) {
             toggleCalendarTaskDetails(taskCard);
@@ -142,6 +152,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (form.matches(".calendar-task-delete-form")) {
+            event.preventDefault();
+            submitCalendarTaskAction(form);
+            return;
+        }
+
+        if (form.matches(".calendar-task-archive-form")) {
             event.preventDefault();
             submitCalendarTaskAction(form);
             return;
@@ -306,7 +322,7 @@ function closeCalendarPriorityEditor(taskCard, selectedValue) {
 
 //Проверява дали кликът е върху интерактивен елемент в картата на главна задача
 function isCalendarInteractiveElement(element) {
-    return !!element.closest("button, a, form, input, select, textarea, label, .popup-actions, .subtask-actions, .subtask-edit-form, .inline-editable, .inline-dependency-trigger, .calendar-subtasks-panel-wrap, .calendar-inline-editable, .calendar-priority-trigger");
+    return !!element.closest("button, a, form, input, select, textarea, label, .popup-actions, .subtask-actions, .subtask-edit-form, .inline-editable, .inline-dependency-trigger, .calendar-subtasks-panel-wrap, .calendar-inline-editable, .calendar-priority-trigger, .calendar-description-toggle");
 }
 
 //Разгъва или свива панела с подзадачите на избраната главна задача

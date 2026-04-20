@@ -4,9 +4,9 @@
 }
 
 .create-task-layout {
-    width: min(1400px, 100%);
+    width: min(1700px, 100%);
     display: grid;
-    grid-template-columns: minmax(420px, 1fr) minmax(420px, 1fr);
+    grid-template-columns: minmax(420px, 0.9fr) minmax(560px, 1.1fr);
     gap: 28px;
     align-items: start;
 }

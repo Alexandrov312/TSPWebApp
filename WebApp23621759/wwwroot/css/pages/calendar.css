@@ -1,14 +1,16 @@
 .page.calendar-page {
     align-items: flex-start;
     justify-content: flex-start;
-    padding: 20px 0px 20px 0px;
+    width: calc(100vw - 24px);
+    margin-left: calc((100% - (100vw - 24px)) / 2);
+    padding: 20px 12px;
     overflow-x: hidden;
 }
 
 .calendar-layout {
-    width: calc(100vw - 10px);
+    width: 100%;
     display: grid;
-    grid-template-columns: 720px minmax(0, 1fr);
+    grid-template-columns: 600px minmax(0, 1fr);
     gap: 12px;
     align-items: start;
     margin-left: 0;
@@ -29,7 +31,7 @@
 
 .day-tasks-panel {
     position: relative;
-    padding: 28px 28px 92px;
+    padding: 24px 24px 92px;
     height: 805px;
     display: flex;
     flex-direction: column;
@@ -63,6 +65,7 @@
     flex: 1;
     overflow-y: auto;
     padding-right: 6px;
+    width: 100%;
 }
 
 .day-tasks-list::-webkit-scrollbar {
@@ -194,10 +197,12 @@
 
 .day-task-card {
     position: relative;
+    width: 100%;
+    box-sizing: border-box;
     border: 1px solid #d7e3dc;
     border-radius: 18px;
-    padding: 18px;
-    margin-bottom: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
     background: #fafdfb;
     transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     cursor: pointer;
@@ -244,7 +249,7 @@
 }
 
 .day-task-title {
-    font-size: 22px;
+    font-size: 19px;
     font-weight: 700;
     color: #2d3a33;
     margin-bottom: 8px;
@@ -254,7 +259,10 @@
 }
 
 .day-task-description {
-    margin-bottom: 14px;
+    margin-bottom: 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #f4f8f5;
     color: #44574c;
     line-height: 1.5;
     cursor: text;
@@ -271,7 +279,7 @@
 }
 
 .calendar-task-progress-block {
-    margin-bottom: 14px;
+    margin-bottom: 10px;
 }
 
 .calendar-task-footer {
@@ -284,30 +292,34 @@
 .calendar-task-status-text {
     display: inline-flex;
     align-items: center;
-    padding: 8px 12px;
-    border-radius: 12px;
-    font-size: 14px;
+    justify-content: center;
+    min-height: 32px;
+    min-width: 106px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 13px;
     font-weight: 700;
+    line-height: 1;
 }
 
 .calendar-task-status-text.status-pending {
-    background: #eef2f7;
-    color: #51606f;
+    background: #dfe7f2;
+    color: #32465f;
 }
 
 .calendar-task-status-text.status-in-progress {
-    background: #e2f0ff;
-    color: #1f5f9d;
+    background: #cfe7ff;
+    color: #0f568c;
 }
 
 .calendar-task-status-text.status-completed {
-    background: #e3f4e5;
-    color: #2e7d32;
+    background: #cfe9d6;
+    color: #155f29;
 }
 
 .calendar-task-status-text.status-overdue {
-    background: #fde8e5;
-    color: #c0392b;
+    background: #ffd6d1;
+    color: #8f2018;
 }
 
 .calendar-task-actions {
@@ -344,7 +356,7 @@
 
 .calendar-subtasks-panel-wrap {
     display: none;
-    padding-top: 16px;
+    padding-top: 10px;
     overflow: visible;
 }
 
@@ -352,10 +364,55 @@
     display: block;
 }
 
+.calendar-task-description-details {
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    border: 1px solid #dce9e1;
+    border-radius: 14px;
+    background: white;
+}
+
+.calendar-description-toggle {
+    border: none;
+    background: transparent;
+    color: #557164;
+    padding: 0;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.calendar-description-toggle::before {
+    content: "›";
+    display: inline-block;
+    margin-right: 6px;
+    transition: transform 0.2s ease;
+}
+
+.day-task-card.calendar-description-open .calendar-description-toggle::before {
+    transform: rotate(90deg);
+}
+
+.calendar-task-description-panel {
+    display: none;
+    margin-top: 10px;
+}
+
+.day-task-card.calendar-description-open .calendar-task-description-panel {
+    display: block;
+}
+
 .day-task-card .task-subtasks-panel {
-    padding: 16px 0 0;
+    padding: 12px 0 0;
+    width: 100%;
     border-top: 1px solid #dfe7e2;
     background: transparent;
+}
+
+.day-task-card .subtask-list {
+    width: 100%;
 }
 
 .day-task-card .subtask-entry {
@@ -366,6 +423,9 @@
     position: absolute;
     right: 28px;
     bottom: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 58px;
     height: 58px;
     border: none;
@@ -384,8 +444,8 @@
 
 @media (max-width: 1500px) {
     .calendar-layout {
-        width: calc(100vw - 10px);
-        grid-template-columns: 700px minmax(0, 1fr);
+        width: 100%;
+        grid-template-columns: 560px minmax(0, 1fr);
     }
 }
 
@@ -393,6 +453,12 @@
     .calendar-layout {
         width: 100%;
         grid-template-columns: 1fr;
+    }
+
+    .page.calendar-page {
+        width: 100%;
+        margin-left: 0;
+        padding: 20px 0;
     }
 
     .day-tasks-panel {

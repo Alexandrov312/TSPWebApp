@@ -1,35 +1,40 @@
 ﻿.subtasks-container {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 10px;
     margin-bottom: 18px;
 }
 
 .subtask-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(180px, 0.8fr);
+    column-gap: 10px;
+    align-items: start;
     background: #fafdfb;
     border: 1px solid #d9e3dc;
-    border-radius: 16px;
-    padding: 18px;
+    border-radius: 12px;
+    padding: 8px 12px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
 }
 
 .subtask-item-header {
+    grid-column: 1 / -1;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 14px;
+    margin-bottom: 4px;
 }
 
 .subtask-item-title {
     margin: 0;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     color: #2d3a33;
 }
 
 .remove-subtask-btn {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     border: none;
     border-radius: 10px;
     background: #fde8e8;
@@ -65,7 +70,7 @@
 
 .form-textarea {
     width: 100%;
-    min-height: 110px;
+    min-height: 78px;
     resize: vertical;
     padding: 12px 14px;
     border: 1px solid #b8c7be;
@@ -80,3 +85,74 @@
         border-color: #6fa98a;
         box-shadow: 0 0 0 3px rgba(111, 169, 138, 0.15);
     }
+
+.subtask-item .form-textarea {
+    min-height: 48px;
+    padding: 7px 10px;
+    font-size: 14px;
+}
+
+.subtask-item .form-group {
+    margin-bottom: 2px;
+}
+
+.subtask-item .form-group label {
+    margin-bottom: 2px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.subtask-item input,
+.subtask-item select {
+    min-height: 40px;
+    padding: 7px 10px;
+    font-size: 14px;
+}
+
+.subtask-description-toggle {
+    border: none;
+    background: transparent;
+    color: #557164;
+    padding: 0;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.subtask-description-toggle::before {
+    content: "›";
+    display: inline-block;
+    margin-right: 6px;
+    transition: transform 0.2s ease;
+}
+
+.subtask-description-block.description-open .subtask-description-toggle::before {
+    transform: rotate(90deg);
+}
+
+.subtask-description-block {
+    grid-column: 1 / -1;
+    margin-top: -4px;
+}
+
+.subtask-description-create-panel {
+    display: none;
+    margin-top: 4px;
+}
+
+.subtask-description-block.description-open .subtask-description-create-panel {
+    display: block;
+}
+
+.subtask-item .field-error {
+    min-height: 0;
+    line-height: 1.15;
+}
+
+.subtask-item .field-error span {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+}

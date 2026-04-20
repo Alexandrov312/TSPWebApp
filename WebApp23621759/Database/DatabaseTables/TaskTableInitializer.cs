@@ -20,11 +20,18 @@ namespace WebApp23621759.Database.DatabaseTables
 						""CompletedAt"" TIMESTAMP,
 						""Status"" INTEGER NOT NULL,
 						""Priority"" INTEGER NOT NULL,
+						""IsArchived"" BOOLEAN NOT NULL DEFAULT FALSE,
 						""UserId"" INTEGER NOT NULL,
                         CONSTRAINT fk_tasks_users FOREIGN KEY (""UserId"") REFERENCES ""Users""(""Id"")
 					);";
                 createTableCommand.ExecuteNonQuery();
             }
+
+            using var archiveColumnCommand = connection.CreateCommand();
+            archiveColumnCommand.CommandText = @"
+                ALTER TABLE ""Tasks""
+                ADD COLUMN IF NOT EXISTS ""IsArchived"" BOOLEAN NOT NULL DEFAULT FALSE;";
+            archiveColumnCommand.ExecuteNonQuery();
         }
     }
 }

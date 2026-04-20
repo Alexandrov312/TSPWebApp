@@ -3,6 +3,11 @@
     position: relative;
 }
 
+.done-wrapper.popup-open,
+.delete-wrapper.popup-open {
+    z-index: 10040;
+}
+
 .done-popup,
 .delete-popup {
     position: fixed;
@@ -14,9 +19,10 @@
     padding: 12px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     display: none;
-    z-index: 1001;
+    z-index: 2147483000;
     min-width: 180px;
     text-align: center;
+    pointer-events: auto;
 }
 
     .done-popup.show,

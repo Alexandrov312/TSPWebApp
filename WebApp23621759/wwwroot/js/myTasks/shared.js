@@ -89,6 +89,8 @@ function syncTaskStateAcrossViews(result) {
                 option.defaultSelected = option.value === taskStatusValue;
             });
         }
+
+        syncArchiveButton(result.taskId, taskStatusValue);
     }
 
     const taskCard = document.querySelector(`.day-task-card[data-calendar-task-id="${result.taskId}"]`);
@@ -118,6 +120,24 @@ function syncTaskStateAcrossViews(result) {
     }
 }
 
+//Активира archive бутона само когато главната задача е завършена
+function syncArchiveButton(taskId, taskStatusValue) {
+    const archiveWrapper = document.querySelector(`[data-task-archive-id="${taskId}"]`);
+    const archiveButton = archiveWrapper?.querySelector(".option-btn-archive");
+    if (!archiveWrapper || !archiveButton) {
+        return;
+    }
+
+    const isCompleted = String(taskStatusValue) === "2";
+    archiveWrapper.classList.toggle("archive-enabled", isCompleted);
+    archiveWrapper.classList.toggle("archive-disabled", !isCompleted);
+    archiveButton.disabled = !isCompleted;
+    archiveButton.classList.toggle("show-popup", isCompleted);
+    archiveButton.title = isCompleted
+        ? "Archive task"
+        : "Complete the task before archiving";
+}
+
 //Добавя правилния status-* клас към select-а на главната задача
 function applyStatusSelectClass(selectElement, statusCssClass) {
     if (!selectElement) {
@@ -134,4 +154,5 @@ window.postForm = postForm;
 window.updateTaskProgress = updateTaskProgress;
 window.syncTaskStateAcrossViews = syncTaskStateAcrossViews;
 window.applyStatusSelectClass = applyStatusSelectClass;
+window.syncArchiveButton = syncArchiveButton;
 window.normalizeEditableValue = normalizeEditableValue;

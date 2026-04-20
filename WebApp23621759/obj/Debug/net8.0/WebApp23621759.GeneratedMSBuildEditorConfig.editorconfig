@@ -18,6 +18,10 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = C:\Projects\VS Projects\6tiSemestar\WebApp23621759\WebApp23621759
 build_property._RazorSourceGeneratorDebug = 
 
+[C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/Archive/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXJjaGl2ZVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/Calendar/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FsZW5kYXJcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -44,6 +48,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/MyTasks/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTXlUYXNrc1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/MyTasks/_TaskKanbanPanel.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTXlUYXNrc1xfVGFza0thbmJhblBhbmVsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/MyTasks/_TaskSubTasksPanel.cshtml]

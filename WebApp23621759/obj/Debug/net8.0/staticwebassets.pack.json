@@ -77,6 +77,10 @@
       "PackagePath": "staticwebassets\\favicon.ico"
     },
     {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\archive.js",
+      "PackagePath": "staticwebassets\\js\\archive.js"
+    },
+    {
       "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\calendar.js",
       "PackagePath": "staticwebassets\\js\\calendar.js"
     },
@@ -87,6 +91,10 @@
     {
       "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\my-tasks.js",
       "PackagePath": "staticwebassets\\js\\my-tasks.js"
+    },
+    {
+      "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\myTasks\\kanban-mode.js",
+      "PackagePath": "staticwebassets\\js\\myTasks\\kanban-mode.js"
     },
     {
       "Id": "C:\\Projects\\VS Projects\\6tiSemestar\\WebApp23621759\\WebApp23621759\\wwwroot\\js\\myTasks\\shared.js",

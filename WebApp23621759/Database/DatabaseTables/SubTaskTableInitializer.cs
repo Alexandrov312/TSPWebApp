@@ -17,6 +17,7 @@ namespace WebApp23621759.Database.DatabaseTables
                             ""Description"" TEXT,
                             ""Status"" INT NOT NULL,
                             ""CompletedAt"" TIMESTAMP NULL,
+                            ""KanbanColumnId"" INT NULL,
                             ""TaskId"" INT NOT NULL,
                             ""UserId"" INT NOT NULL,
                             ""BlockedBySubTaskId"" INT NULL,
@@ -30,6 +31,11 @@ namespace WebApp23621759.Database.DatabaseTables
                                 FOREIGN KEY (""UserId"")
                                 REFERENCES ""Users""(""Id"")
                                 ON DELETE CASCADE,
+
+                            CONSTRAINT ""FK_SubTasks_KanbanColumns""
+                                FOREIGN KEY (""KanbanColumnId"")
+                                REFERENCES ""KanbanColumns""(""Id"")
+                                ON DELETE SET NULL,
                     
                             CONSTRAINT ""FK_SubTasks_BlockedBy""
                                 FOREIGN KEY (""BlockedBySubTaskId"")
@@ -45,6 +51,30 @@ namespace WebApp23621759.Database.DatabaseTables
                 ALTER TABLE ""SubTasks""
                 DROP COLUMN IF EXISTS ""CreatedAt"";";
             dropCreatedAtColumnCommand.ExecuteNonQuery();
+
+            using var addKanbanColumnIdCommand = connection.CreateCommand();
+            addKanbanColumnIdCommand.CommandText = @"
+                ALTER TABLE ""SubTasks""
+                ADD COLUMN IF NOT EXISTS ""KanbanColumnId"" INT NULL;";
+            addKanbanColumnIdCommand.ExecuteNonQuery();
+
+            using var addKanbanColumnForeignKeyCommand = connection.CreateCommand();
+            addKanbanColumnForeignKeyCommand.CommandText = @"
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1
+                        FROM pg_constraint
+                        WHERE conname = 'FK_SubTasks_KanbanColumns'
+                    ) THEN
+                        ALTER TABLE ""SubTasks""
+                        ADD CONSTRAINT ""FK_SubTasks_KanbanColumns""
+                        FOREIGN KEY (""KanbanColumnId"")
+                        REFERENCES ""KanbanColumns""(""Id"")
+                        ON DELETE SET NULL;
+                    END IF;
+                END $$;";
+            addKanbanColumnForeignKeyCommand.ExecuteNonQuery();
         }
     }
 }

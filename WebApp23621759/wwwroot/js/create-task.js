@@ -170,6 +170,14 @@
     });
 
     container.addEventListener("click", function (event) {
+        const descriptionToggle = event.target.closest(".subtask-description-toggle");
+        if (descriptionToggle) {
+            const block = descriptionToggle.closest(".subtask-description-block");
+            const isOpen = block?.classList.toggle("description-open");
+            descriptionToggle.setAttribute("aria-expanded", String(!!isOpen));
+            return;
+        }
+
         const removeButton = event.target.closest(".remove-subtask-btn");
         if (!removeButton) {
             return;

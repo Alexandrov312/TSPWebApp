@@ -22,11 +22,11 @@ namespace WebApp23621759.Services
             using var command = connection.CreateCommand();
             command.CommandText = @"
                 INSERT INTO ""Tasks"" (""Title"", ""Description"", ""DueDate"", ""CreatedAt"", 
-                            ""CompletedAt"", ""Status"", ""Priority"", ""UserId"")
+                            ""CompletedAt"", ""Status"", ""Priority"", ""IsArchived"", ""UserId"")
                 VALUES (@title, @description, @dueDate, @createdAt, @completedAt, @status, 
-                            @priority, @userId)
+                            @priority, @isArchived, @userId)
                 RETURNING ""Id"", ""Title"", ""Description"", ""DueDate"", 
-                            ""CreatedAt"", ""CompletedAt"", ""Status"", ""Priority"", ""UserId"";";
+                            ""CreatedAt"", ""CompletedAt"", ""Status"", ""Priority"", ""IsArchived"", ""UserId"";";
 
             command.Parameters.AddWithValue("@title", title);
             command.Parameters.AddWithValue("@description", description);
@@ -35,6 +35,7 @@ namespace WebApp23621759.Services
             command.Parameters.AddWithValue("@completedAt", DBNull.Value);
             command.Parameters.AddWithValue("@status", (int)Status.Pending);
             command.Parameters.AddWithValue("@priority", (int)priority);
+            command.Parameters.AddWithValue("@isArchived", false);
             command.Parameters.AddWithValue("@userId", userId);
 
             using var reader = command.ExecuteReader();
@@ -63,9 +64,9 @@ namespace WebApp23621759.Services
             };
 
             command.CommandText = $@"
-                SELECT ""Id"", ""Title"", ""Description"", ""DueDate"", ""CreatedAt"", ""CompletedAt"", ""Status"", ""Priority"", ""UserId""
+                SELECT ""Id"", ""Title"", ""Description"", ""DueDate"", ""CreatedAt"", ""CompletedAt"", ""Status"", ""Priority"", ""IsArchived"", ""UserId""
                 FROM ""Tasks""
-                WHERE ""UserId"" = @userId
+                WHERE ""UserId"" = @userId AND ""IsArchived"" = FALSE
                 ORDER BY {sortColumn} {direction};";
 
             command.Parameters.AddWithValue("@userId", userId);
@@ -90,6 +91,63 @@ namespace WebApp23621759.Services
 
             int rowsAffected = command.ExecuteNonQuery();
             return rowsAffected > 0;
+        }
+
+        public List<TaskItem> GetArchivedTasksByUserId(int userId)
+        {
+            var tasks = new List<TaskItem>();
+
+            using var connection = _databaseService.GetOpenConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = @"
+                SELECT ""Id"", ""Title"", ""Description"", ""DueDate"", ""CreatedAt"", ""CompletedAt"", ""Status"", ""Priority"", ""IsArchived"", ""UserId""
+                FROM ""Tasks""
+                WHERE ""UserId"" = @userId AND ""IsArchived"" = TRUE
+                ORDER BY ""CompletedAt"" DESC NULLS LAST, ""DueDate"" DESC;";
+
+            command.Parameters.AddWithValue("@userId", userId);
+
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                tasks.Add(MapTask(reader));
+            }
+
+            return tasks;
+        }
+
+        public bool ArchiveTask(int taskId, int userId)
+        {
+            using var connection = _databaseService.GetOpenConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = @"
+                UPDATE ""Tasks""
+                SET ""IsArchived"" = TRUE
+                WHERE ""Id"" = @id
+                  AND ""UserId"" = @userId
+                  AND ""Status"" = @completedStatus
+                  AND ""IsArchived"" = FALSE;";
+
+            command.Parameters.AddWithValue("id", taskId);
+            command.Parameters.AddWithValue("userId", userId);
+            command.Parameters.AddWithValue("completedStatus", (int)Status.Completed);
+
+            return command.ExecuteNonQuery() > 0;
+        }
+
+        public bool RestoreTask(int taskId, int userId)
+        {
+            using var connection = _databaseService.GetOpenConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = @"
+                UPDATE ""Tasks""
+                SET ""IsArchived"" = FALSE
+                WHERE ""Id"" = @id AND ""UserId"" = @userId AND ""IsArchived"" = TRUE;";
+
+            command.Parameters.AddWithValue("id", taskId);
+            command.Parameters.AddWithValue("userId", userId);
+
+            return command.ExecuteNonQuery() > 0;
         }
 
         public bool UpdateTask(EditTaskViewModel model, int userId)
@@ -152,7 +210,7 @@ namespace WebApp23621759.Services
 
             command.CommandText = @"
                 SELECT ""Id"", ""Title"", ""Description"", ""DueDate"",
-                       ""CreatedAt"", ""CompletedAt"", ""Status"", ""Priority"", ""UserId""
+                       ""CreatedAt"", ""CompletedAt"", ""Status"", ""Priority"", ""IsArchived"", ""UserId""
                 FROM ""Tasks""
                 WHERE ""Id"" = @id AND ""UserId"" = @userId
                 LIMIT 1;";
@@ -178,9 +236,10 @@ namespace WebApp23621759.Services
             using var command = connection.CreateCommand();
 
             command.CommandText = @"
-                SELECT ""Id"", ""Title"", ""Description"", ""DueDate"", ""CreatedAt"", ""CompletedAt"", ""Status"", ""Priority"", ""UserId""
+                SELECT ""Id"", ""Title"", ""Description"", ""DueDate"", ""CreatedAt"", ""CompletedAt"", ""Status"", ""Priority"", ""IsArchived"", ""UserId""
                 FROM ""Tasks""
                 WHERE ""UserId"" = @userId
+                  AND ""IsArchived"" = FALSE
                   AND ""DueDate"" >= @startOfMonth
                   AND ""DueDate"" < @startOfNextMonth
                 ORDER BY ""DueDate"" ASC;";
@@ -314,7 +373,8 @@ namespace WebApp23621759.Services
                 CompletedAt = reader.IsDBNull(5) ? null : reader.GetDateTime(5),
                 Status = (Status)reader.GetInt32(6),
                 Priority = (Priority)reader.GetInt32(7),
-                UserId = reader.GetInt32(8)
+                IsArchived = reader.GetBoolean(8),
+                UserId = reader.GetInt32(9)
             };
         }
     }

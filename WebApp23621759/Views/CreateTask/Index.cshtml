@@ -93,23 +93,25 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Description</label>
-                                    <textarea name="SubTasks[@i].Description"
-                                              form="create-task-form"
-                                              class="form-textarea"
-                                              placeholder="Enter subtask description">@Model.SubTasks[i].Description</textarea>
-                                    <div class="field-error">
-                                        <span asp-validation-for="SubTasks[@i].Description"></span>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
                                     <label>Depends on</label>
                                     <select name="SubTasks[@i].BlockedByIndex"
                                             form="create-task-form"
                                             class="subtask-dependency-select">
                                         <option value="">No dependency</option>
                                     </select>
+                                </div>
+
+                                <div class="form-group subtask-description-block">
+                                    <button type="button" class="subtask-description-toggle" aria-expanded="false">Description</button>
+                                    <div class="subtask-description-create-panel">
+                                        <textarea name="SubTasks[@i].Description"
+                                                  form="create-task-form"
+                                                  class="form-textarea"
+                                                  placeholder="Enter subtask description">@Model.SubTasks[i].Description</textarea>
+                                        <div class="field-error">
+                                            <span asp-validation-for="SubTasks[@i].Description"></span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         }
@@ -143,21 +145,23 @@
         </div>
 
         <div class="form-group">
-            <label>Description</label>
-            <textarea data-name="Description"
-                      form="create-task-form"
-                      class="form-textarea"
-                      placeholder="Enter subtask description"></textarea>
-            <div class="field-error"></div>
-        </div>
-
-        <div class="form-group">
             <label>Depends on</label>
             <select data-name="BlockedByIndex"
                     form="create-task-form"
                     class="subtask-dependency-select">
                 <option value="">No dependency</option>
             </select>
+        </div>
+
+        <div class="form-group subtask-description-block">
+            <button type="button" class="subtask-description-toggle" aria-expanded="false">Description</button>
+            <div class="subtask-description-create-panel">
+                <textarea data-name="Description"
+                          form="create-task-form"
+                          class="form-textarea"
+                          placeholder="Enter subtask description"></textarea>
+                <div class="field-error"></div>
+            </div>
         </div>
     </div>
 </template>

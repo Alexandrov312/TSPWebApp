@@ -220,6 +220,43 @@ namespace WebApp23621759.Controllers
         }
 
         [HttpPost]
+        public IActionResult Archive(int id, int year, int month, DateTime selectedDate)
+        {
+            int userId = UserHelper.GetUserId(User);
+            var task = _taskService.GetById(id, userId);
+            if (task == null)
+            {
+                return JsonError("Task was not found or does not belong to you.");
+            }
+
+            if (task.Status != Status.Completed)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Only completed tasks can be archived.",
+                    notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Info)
+                });
+            }
+
+            if (!_taskService.ArchiveTask(id, userId))
+            {
+                return JsonError("Task could not be archived.");
+            }
+
+            return Json(new
+            {
+                success = true,
+                taskId = id,
+                message = $"Task \"{task.Title}\" archived.",
+                notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Success),
+                year,
+                month,
+                selectedDate = selectedDate.ToString("yyyy-MM-dd")
+            });
+        }
+
+        [HttpPost]
         public IActionResult CreateTask(int year, int month, DateTime selectedDate)
         {
             int userId = UserHelper.GetUserId(User);

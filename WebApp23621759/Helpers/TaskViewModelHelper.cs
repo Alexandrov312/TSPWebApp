@@ -39,6 +39,7 @@ namespace WebApp23621759.Helpers
                     Description = subTask.Description,
                     Status = subTask.Status,
                     CompletedAt = subTask.CompletedAt,
+                    KanbanColumnId = subTask.KanbanColumnId,
                     BlockedBySubTaskId = subTask.BlockedBySubTaskId,
                     BlockedByTitle = subTasks.FirstOrDefault(candidate => candidate.Id == subTask.BlockedBySubTaskId)?.Title,
                     DependencyOptions = SubTaskHelper.BuildDependencyOptions(subTask, subTasks)

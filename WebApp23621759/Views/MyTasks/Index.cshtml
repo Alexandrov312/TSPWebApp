@@ -5,6 +5,9 @@
 @{
     string currentSortBy = ViewBag.CurrentSortBy;
     string currentDirection = ViewBag.CurrentDirection;
+    int? initialKanbanTaskId = ViewBag.InitialKanbanTaskId;
+    string initialKanbanSource = ViewBag.KanbanSource ?? "mytasks";
+    string initialKanbanReturnUrl = ViewBag.KanbanReturnUrl ?? string.Empty;
 
     string GetNextDirection(string column)
     {
@@ -25,37 +28,55 @@
 
         return currentDirection == "ASC" ? " ↑" : " ↓";
     }
+
+    var initialKanbanTask = initialKanbanTaskId.HasValue
+        ? Model.FirstOrDefault(task => task.Task.Id == initialKanbanTaskId.Value)
+        : null;
 }
 
 <div class="page tasks-page">
     <div class="panel-card tasks-card">
+        <div class="mytasks-kanban-view @(initialKanbanTask == null ? "is-hidden" : "")">
+            @if (initialKanbanTask != null)
+            {
+                <partial name="_TaskKanbanPanel" model="initialKanbanTask" />
+            }
+        </div>
+
+        <div class="mytasks-list-view @(initialKanbanTask == null ? "" : "is-hidden")">
         <div class="tasks-card-header">
             <h2 class="title tasks-title">My Tasks</h2>
 
-            <div class="table-actions">
-                <a asp-action="Index"
-                   asp-route-sortBy="dueDate"
-                   asp-route-direction="@GetNextDirection("dueDate")">
-                    Due Date @GetArrow("dueDate")
-                </a>
+            <div class="table-toolbar">
+                <div class="table-actions">
+                    <a asp-action="Index"
+                       asp-route-sortBy="dueDate"
+                       asp-route-direction="@GetNextDirection("dueDate")">
+                        Due Date @GetArrow("dueDate")
+                    </a>
 
-                <a asp-action="Index"
-                   asp-route-sortBy="priority"
-                   asp-route-direction="@GetNextDirection("priority")">
-                    Priority @GetArrow("priority")
-                </a>
+                    <a asp-action="Index"
+                       asp-route-sortBy="priority"
+                       asp-route-direction="@GetNextDirection("priority")">
+                        Priority @GetArrow("priority")
+                    </a>
 
-                <a asp-action="Index"
-                   asp-route-sortBy="status"
-                   asp-route-direction="@GetNextDirection("status")">
-                    Status @GetArrow("status")
-                </a>
+                    <a asp-action="Index"
+                       asp-route-sortBy="status"
+                       asp-route-direction="@GetNextDirection("status")">
+                        Status @GetArrow("status")
+                    </a>
 
-                <a asp-action="Index"
-                   asp-route-sortBy="createdAt"
-                   asp-route-direction="@GetNextDirection("createdAt")">
-                    Created Date @GetArrow("createdAt")
-                </a>
+                    <a asp-action="Index"
+                       asp-route-sortBy="createdAt"
+                       asp-route-direction="@GetNextDirection("createdAt")">
+                        Created Date @GetArrow("createdAt")
+                    </a>
+                </div>
+
+                <form asp-action="Create" method="post" class="task-create-form">
+                    <button type="submit" class="create-task-inline-btn">+ New task</button>
+                </form>
             </div>
         </div>
 
@@ -64,7 +85,6 @@
                 <thead>
                     <tr>
                         <th>Title</th>
-                        <th>Description</th>
                         <th>Due Date</th>
                         <th>Status</th>
                         <th>Priority</th>
@@ -88,13 +108,8 @@
                                        type="text"
                                        name="Title"
                                        value="@task.Title" />
-                            </td>
-
-                            <td data-task-field="description">
-                                <span class="view-mode task-cell-display">@task.Description</span>
                                 <input form="edit-form-@task.Id"
-                                       class="edit-mode form-input"
-                                       type="text"
+                                       type="hidden"
                                        name="Description"
                                        value="@task.Description" />
                             </td>
@@ -109,7 +124,7 @@
                             </td>
 
                             <td data-task-field="status">
-                                <span class="view-mode static-view-mode task-cell-display">@StatusHelper.GetDisplayName(task.Status)</span>
+                                <span class="view-mode static-view-mode task-cell-display task-status-badge">@StatusHelper.GetDisplayName(task.Status)</span>
                             </td>
 
                             <td data-task-field="priority">
@@ -188,6 +203,36 @@
                                         ✏️
                                     </button>
 
+                                    <button type="button"
+                                            class="option-btn option-btn-kanban open-kanban-btn"
+                                            title="Open Kanban"
+                                            data-kanban-task-id="@task.Id"
+                                            data-kanban-source="mytasks">
+                                        🧩
+                                    </button>
+
+                                    <div class="archive-wrapper delete-wrapper @(task.Status == Status.Completed ? "archive-enabled" : "archive-disabled")"
+                                         data-task-archive-id="@task.Id">
+                                        <form asp-action="Archive" method="post" class="table-form task-archive-form task-ajax-form" data-task-id="@task.Id">
+                                            <input type="hidden" name="id" value="@task.Id" />
+
+                                            <button type="button"
+                                                    class="option-btn option-btn-archive @(task.Status == Status.Completed ? "show-popup" : "")"
+                                                    title="@(task.Status == Status.Completed ? "Archive task" : "Complete the task before archiving")"
+                                                    @(task.Status == Status.Completed ? "" : "disabled")>
+                                                📦
+                                            </button>
+
+                                            <div class="delete-popup">
+                                                <span>Archive task?</span>
+                                                <div class="popup-actions">
+                                                    <button type="submit" class="popup-btn popup-btn-confirm">Yes</button>
+                                                    <button type="button" class="popup-btn popup-btn-cancel cancel-btn">No</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
                                     <div class="delete-wrapper">
                                         <form asp-action="Delete" method="post" class="table-form task-delete-form task-ajax-form" data-task-id="@task.Id">
                                             <input type="hidden" name="id" value="@task.Id" />
@@ -227,13 +272,29 @@
                         </tr>
 
                         <tr class="subtasks-row" data-task-details-id="@task.Id">
-                            <td colspan="9">
+                            <td colspan="8">
+                                <div class="task-details-description">
+                                    <button type="button"
+                                            class="task-description-toggle"
+                                            data-task-description-toggle
+                                            aria-expanded="false">
+                                        Description
+                                    </button>
+                                    <div class="task-description-panel">
+                                        <p class="task-description-inline"
+                                           data-task-id="@task.Id"
+                                           data-task-description-editable
+                                           contenteditable="true"
+                                           spellcheck="false">@(string.IsNullOrWhiteSpace(task.Description) ? "Task description" : task.Description)</p>
+                                    </div>
+                                </div>
                                 <partial name="_TaskSubTasksPanel" model="taskItem" />
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
+        </div>
         </div>
     </div>
 </div>
@@ -243,5 +304,14 @@
     <script src="~/js/myTasks/subtask-panel.js" asp-append-version="true"></script>
     <script src="~/js/myTasks/task-actions.js" asp-append-version="true"></script>
     <script src="~/js/myTasks/subtask-actions.js" asp-append-version="true"></script>
+    <script src="~/js/myTasks/kanban-mode.js" asp-append-version="true"></script>
+    @if (initialKanbanTaskId.HasValue)
+    {
+        <script>
+            window.initialKanbanTaskId = "@initialKanbanTaskId.Value";
+            window.initialKanbanSource = "@initialKanbanSource";
+            window.initialKanbanReturnUrl = "@initialKanbanReturnUrl";
+        </script>
+    }
 }
 

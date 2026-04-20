@@ -60,14 +60,6 @@
                         @task.Title
                     </div>
 
-                    @* Inline editable описание *@
-                    <div class="day-task-description calendar-inline-editable"
-                         data-calendar-field="description"
-                         contenteditable="true"
-                         spellcheck="false">
-                        @(string.IsNullOrWhiteSpace(task.Description) ? "Task description" : task.Description)
-                    </div>
-
                     @* Прогрес бар на задачата (на база подзадачи) *@
                     <div class="calendar-task-progress-block">
                         <div class="task-progress" data-task-progress-id="@task.Id">
@@ -88,6 +80,15 @@
                         </div>
 
                         <div class="calendar-task-actions">
+                            <a asp-controller="MyTasks"
+                               asp-action="Index"
+                               asp-route-kanbanTaskId="@task.Id"
+                               asp-route-source="calendar"
+                               asp-route-returnUrl="@Url.Action("Index", "Calendar", new { year = Model.Year, month = Model.Month, selectedDate = Model.SelectedDate.ToString("yyyy-MM-dd") })"
+                               class="option-btn option-btn-kanban"
+                               title="Open Kanban">
+                                🧩
+                            </a>
 
                             @* Маркиране като завършена *@
                             <div class="done-wrapper">
@@ -130,11 +131,52 @@
                                     </div>
                                 </form>
                             </div>
+
+                            <div class="archive-wrapper delete-wrapper @(task.Status == Status.Completed ? "archive-enabled" : "archive-disabled")">
+                                <form asp-action="Archive" method="post" class="calendar-task-archive-form calendar-task-ajax-form">
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <input type="hidden" name="year" value="@Model.Year" />
+                                    <input type="hidden" name="month" value="@Model.Month" />
+                                    <input type="hidden" name="selectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+
+                                    <button type="button"
+                                            class="option-btn option-btn-archive @(task.Status == Status.Completed ? "show-popup" : "")"
+                                            title="@(task.Status == Status.Completed ? "Archive task" : "Complete the task before archiving")"
+                                            @(task.Status == Status.Completed ? "" : "disabled")>
+                                        📦
+                                    </button>
+
+                                    <div class="delete-popup">
+                                        <span>Archive task?</span>
+                                        <div class="popup-actions">
+                                            <button type="submit" class="popup-btn popup-btn-confirm">Yes</button>
+                                            <button type="button" class="popup-btn popup-btn-cancel cancel-btn">No</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
 
-                    @* Панел с подзадачи (reuse от MyTasks) *@
+                    @* Детайли и панел с подзадачи (reuse от MyTasks) *@
                     <div class="calendar-subtasks-panel-wrap">
+                        <div class="calendar-task-description-details">
+                            <button type="button"
+                                    class="calendar-description-toggle"
+                                    aria-expanded="false">
+                                Description
+                            </button>
+
+                            <div class="calendar-task-description-panel">
+                                <div class="day-task-description calendar-inline-editable"
+                                     data-calendar-field="description"
+                                     contenteditable="true"
+                                     spellcheck="false">
+                                    @(string.IsNullOrWhiteSpace(task.Description) ? "Task description" : task.Description)
+                                </div>
+                            </div>
+                        </div>
+
                         <partial name="~/Views/MyTasks/_TaskSubTasksPanel.cshtml" model="taskItem" />
                     </div>
 

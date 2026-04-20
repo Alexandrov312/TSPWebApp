@@ -11,6 +11,7 @@ namespace WebApp23621759.Models.Entities
 
         public Status Status { get; set; }
         public DateTime? CompletedAt { get; set; }
+        public int? KanbanColumnId { get; set; }
         public int? BlockedBySubTaskId { get; set; }
 
         public int TaskId { get; set; }

@@ -10,7 +10,7 @@ namespace WebApp23621759.Models.ViewModel.SubTasks
         public string Title { get; set; }
 
         [StringLength(2500)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
         public int? BlockedByIndex { get; set; }
     }
 }

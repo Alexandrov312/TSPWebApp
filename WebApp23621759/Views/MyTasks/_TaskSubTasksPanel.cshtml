@@ -23,9 +23,21 @@
     @if (Model.SubTasks.Any())
     {
         <div class="subtask-list">
-            @foreach (var subTask in Model.SubTasks)
+            @for (int subTaskIndex = 0; subTaskIndex < Model.SubTasks.Count; subTaskIndex++)
             {
-                <div class="subtask-entry @StatusHelper.GetCssClass(subTask.Status) @(subTask.BlockedBySubTaskId.HasValue ? "has-dependency" : "")"
+                var subTask = Model.SubTasks[subTaskIndex];
+                bool isDependencyLocked = subTask.Status == WebApp23621759.Enums.Status.Completed;
+                bool hasDependency = subTask.BlockedBySubTaskId.HasValue;
+                var siblingDependencyIndexes = hasDependency
+                    ? Enumerable.Range(0, Model.SubTasks.Count)
+                        .Where(index => Model.SubTasks[index].BlockedBySubTaskId == subTask.BlockedBySubTaskId)
+                        .ToList()
+                    : new List<int>();
+                bool hasSharedDependencyBranch = siblingDependencyIndexes.Count > 1;
+                bool isFirstSharedDependency = hasSharedDependencyBranch && subTaskIndex == siblingDependencyIndexes.First();
+                bool isLastSharedDependency = hasSharedDependencyBranch && subTaskIndex == siblingDependencyIndexes.Last();
+
+                <div class="subtask-entry @StatusHelper.GetCssClass(subTask.Status) @(hasDependency ? "has-dependency" : "") @(hasDependency && !hasSharedDependencyBranch ? "single-dependency" : "") @(hasSharedDependencyBranch ? "shared-dependency" : "") @(isFirstSharedDependency ? "shared-branch-start" : "") @(isLastSharedDependency ? "shared-branch-end" : "")"
                      style="--subtask-depth:@subTask.Depth"
                      data-subtask-id="@subTask.Id"
                      data-task-id="@subTask.TaskId">
@@ -56,11 +68,13 @@
                                 @* Dependency selector – позволява избор само на валидни зависимости *@
                                 <span class="subtask-dependency-slot">
                                     <button type="button"
-                                            class="subtask-dependency-badge inline-dependency-trigger @(string.IsNullOrWhiteSpace(subTask.BlockedByTitle) ? "is-empty" : "")">
+                                            class="subtask-dependency-badge inline-dependency-trigger @(string.IsNullOrWhiteSpace(subTask.BlockedByTitle) ? "is-empty" : "") @(isDependencyLocked ? "dependency-locked" : "")"
+                                            disabled="@isDependencyLocked"
+                                            title="@(isDependencyLocked ? "Completed subtasks have locked dependencies" : "Change dependency")">
                                         @(string.IsNullOrWhiteSpace(subTask.BlockedByTitle) ? "Add dependency" : $"Depends on: {subTask.BlockedByTitle}")
                                     </button>
 
-                                    <select class="form-input subtask-inline-dependency-select">
+                                    <select class="form-input subtask-inline-dependency-select" disabled="@isDependencyLocked">
                                         <option value="">No dependency</option>
                                         @foreach (var dependencyOption in subTask.DependencyOptions)
                                         {

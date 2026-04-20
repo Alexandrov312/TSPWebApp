@@ -1,0 +1,170 @@
+@using WebApp23621759.Enums
+@using WebApp23621759.Helpers
+@model WebApp23621759.Models.ViewModel.Tasks.MyTaskItemViewModel
+
+@{
+    var statuses = new[] { Status.Pending, Status.InProgress, Status.Completed };
+    string kanbanSource = ViewBag.KanbanSource ?? "mytasks";
+    string kanbanReturnUrl = ViewBag.KanbanReturnUrl ?? string.Empty;
+}
+
+<div class="mytasks-kanban-board"
+     data-kanban-task-id="@Model.Task.Id"
+     data-kanban-panel-endpoint="@Url.Action("KanbanPanel", "MyTasks", new { taskId = Model.Task.Id })"
+     data-kanban-move-endpoint="@Url.Action("MoveSubTaskStatus", "MyTasks")"
+     data-kanban-source="@kanbanSource"
+     data-kanban-return-url="@kanbanReturnUrl">
+    <div class="mytasks-kanban-header">
+        <div>
+            <span class="mytasks-kanban-eyebrow">Kanban view</span>
+            <h2 class="kanban-task-title-editable"
+                data-kanban-task-field="title"
+                contenteditable="true"
+                spellcheck="false">@Model.Task.Title</h2>
+
+            <button type="button"
+                    class="kanban-description-toggle"
+                    data-kanban-description-toggle
+                    aria-expanded="false">
+                Description
+            </button>
+
+            <div class="kanban-task-description-panel">
+                <p class="kanban-task-description-editable"
+                   data-kanban-task-field="description"
+                   contenteditable="true"
+                   spellcheck="false">@(string.IsNullOrWhiteSpace(Model.Task.Description) ? "Task description" : Model.Task.Description)</p>
+            </div>
+        </div>
+
+        <button type="button" class="kanban-back-btn">← Back</button>
+    </div>
+
+    <form asp-action="Update" method="post" class="kanban-task-update-form">
+        <input type="hidden" name="Id" value="@Model.Task.Id" />
+        <input type="hidden" name="Title" value="@Model.Task.Title" />
+        <input type="hidden" name="Description" value="@Model.Task.Description" />
+        <input type="hidden" name="DueDate" value="@Model.Task.DueDate.ToString("yyyy-MM-ddTHH:mm")" />
+        <input type="hidden" name="Priority" value="@((int)Model.Task.Priority)" />
+        <input type="hidden" name="Status" value="@((int)Model.Task.Status)" />
+    </form>
+
+    <div class="mytasks-kanban-toolbar">
+        <div class="task-progress" data-task-progress-id="@Model.Task.Id">
+            <div class="task-progress-bar">
+                <div class="task-progress-fill task-progress-fill-projected" style="width: @Model.ProjectedCompletionPercentage%;"></div>
+                <div class="task-progress-fill task-progress-fill-completed" style="width: @Model.CompletionPercentage%;"></div>
+            </div>
+            <div class="task-progress-text">
+                @Model.CompletionPercentage% (@Model.CompletedSubTaskCount/@Model.TotalSubTaskCount)
+            </div>
+        </div>
+
+        <form asp-action="AddSubTask" method="post" class="kanban-subtask-add-form">
+            <input type="hidden" name="taskId" value="@Model.Task.Id" />
+            <button type="submit" class="subtask-action-btn subtask-add-btn">+ Add subtask</button>
+        </form>
+    </div>
+
+    <div class="mytasks-kanban-columns">
+        @foreach (var status in statuses)
+        {
+            var columnSubTasks = Model.SubTasks
+                .Where(subTask => subTask.Status == status)
+                .ToList();
+
+            <section class="mytasks-kanban-column @StatusHelper.GetCssClass(status)"
+                     data-kanban-status="@((int)status)">
+                <div class="mytasks-kanban-column-header">
+                    <h3>@StatusHelper.GetDisplayName(status)</h3>
+                    <span>@columnSubTasks.Count</span>
+                </div>
+
+                <div class="mytasks-kanban-dropzone">
+                    @foreach (var subTask in columnSubTasks)
+                    {
+                        var blocker = subTask.BlockedBySubTaskId.HasValue
+                            ? Model.SubTasks.FirstOrDefault(candidate => candidate.Id == subTask.BlockedBySubTaskId.Value)
+                            : null;
+                        bool isBlocked = blocker != null && blocker.Status != Status.Completed;
+                        bool isDependencyLocked = subTask.Status == Status.Completed;
+
+                        <article class="mytasks-kanban-card @StatusHelper.GetCssClass(subTask.Status) @(isBlocked ? "is-blocked" : "")"
+                                 draggable="true"
+                                 data-subtask-id="@subTask.Id"
+                                 data-task-id="@subTask.TaskId"
+                                 data-current-status="@((int)subTask.Status)"
+                                 data-is-blocked="@(isBlocked ? "true" : "false")">
+                            <div class="mytasks-kanban-card-main">
+                                <strong class="kanban-inline-title"
+                                        data-inline-field="title"
+                                        contenteditable="true"
+                                        spellcheck="false">@subTask.Title</strong>
+
+                                <span class="kanban-card-dependency-slot">
+                                    <button type="button"
+                                            class="kanban-dependency-badge kanban-dependency-trigger @(blocker == null ? "no-dependency" : isBlocked ? "blocked" : "ready") @(isDependencyLocked ? "dependency-locked" : "")"
+                                            disabled="@isDependencyLocked"
+                                            title="@(isDependencyLocked ? "Completed subtasks have locked dependencies" : "Change dependency")">
+                                        @(blocker == null ? "No dependency" : isBlocked ? $"Blocked by: {blocker.Title}" : $"Depends on: {blocker.Title}")
+                                    </button>
+
+                                    <select class="form-input kanban-dependency-select" disabled="@isDependencyLocked">
+                                        <option value="">No dependency</option>
+                                        @foreach (var dependencyOption in subTask.DependencyOptions)
+                                        {
+                                            if (dependencyOption.Id == subTask.BlockedBySubTaskId)
+                                            {
+                                                <option value="@dependencyOption.Id" selected>@dependencyOption.Title</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@dependencyOption.Id">@dependencyOption.Title</option>
+                                            }
+                                        }
+                                    </select>
+                                </span>
+                            </div>
+
+                            <div class="mytasks-kanban-card-actions">
+                                <div class="delete-wrapper subtask-delete-wrapper">
+                                    <form asp-action="DeleteSubTask" method="post" class="kanban-subtask-delete-form">
+                                        <input type="hidden" name="id" value="@subTask.Id" />
+                                        <button type="button" class="subtask-action-btn subtask-delete-btn show-popup" title="Delete subtask">🗑️</button>
+
+                                        <div class="delete-popup subtask-delete-popup">
+                                            <span>Delete subtask?</span>
+                                            <div class="popup-actions">
+                                                <button type="submit" class="popup-btn popup-btn-danger">Yes</button>
+                                                <button type="button" class="popup-btn popup-btn-cancel cancel-btn">No</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="kanban-card-detail-popover">
+                                <div class="kanban-card-detail-header">
+                                    <span>Description</span>
+                                    <button type="button" class="kanban-card-detail-close" title="Close">×</button>
+                                </div>
+
+                                <div class="kanban-card-description-editable"
+                                     data-inline-field="description"
+                                     contenteditable="true"
+                                     spellcheck="false">@(string.IsNullOrWhiteSpace(subTask.Description) ? "No description" : subTask.Description)</div>
+                            </div>
+
+                            <form asp-action="UpdateSubTask" method="post" class="subtask-edit-form">
+                                <input type="hidden" name="Id" value="@subTask.Id" />
+                                <input type="hidden" name="Title" value="@subTask.Title" />
+                                <input type="hidden" name="Description" value="@subTask.Description" />
+                                <input type="hidden" name="BlockedBySubTaskId" value="@(subTask.BlockedBySubTaskId?.ToString() ?? string.Empty)" />
+                            </form>
+                        </article>
+                    }
+                </div>
+            </section>
+        }
+    </div>
+</div>
