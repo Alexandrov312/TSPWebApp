@@ -146,8 +146,10 @@
 
         if (items.length >= maxSubtasks) {
             addButton.classList.add("limit-reached");
+            counterWrapper.classList.add("limit-reached");
         } else {
             addButton.classList.remove("limit-reached");
+            counterWrapper.classList.remove("limit-reached");
         }
 
         refreshDependencyOptions();

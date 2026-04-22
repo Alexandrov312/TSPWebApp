@@ -75,3 +75,8 @@
     .popup-btn-cancel:hover {
         background: #e0e0e0;
     }
+
+.restore-popup .popup-btn-cancel:hover {
+    background: #dfe7e3;
+    color: #173b2a;
+}

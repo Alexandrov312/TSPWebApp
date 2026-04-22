@@ -35,23 +35,27 @@ async function reloadTaskSubTasksPanel(taskId, expandedSubTaskId) {
         return;
     }
 
-    const currentPanel = document.querySelector(`.task-subtasks-panel[data-task-panel-id="${taskId}"]`);
-    if (!currentPanel) {
+    const currentPanels = Array.from(document.querySelectorAll(`.task-subtasks-panel[data-task-panel-id="${taskId}"]`));
+    if (!currentPanels.length) {
         return;
     }
 
-    const endpoint = currentPanel.dataset.subtasksEndpoint;
+    const endpoint = currentPanels[0].dataset.subtasksEndpoint;
     if (!endpoint) {
         return;
     }
 
-    const expandedIds = Array.isArray(expandedSubTaskId)
-        ? expandedSubTaskId.map(String)
-        : expandedSubTaskId
-            ? [String(expandedSubTaskId)]
-            : Array.from(currentPanel.querySelectorAll(".subtask-entry.expanded"))
-                .map(entry => entry.dataset.subtaskId)
-                .filter(Boolean);
+    const expandedIdsByPanel = new Map(currentPanels.map(panel => {
+        const expandedIds = Array.isArray(expandedSubTaskId)
+            ? expandedSubTaskId.map(String)
+            : expandedSubTaskId
+                ? [String(expandedSubTaskId)]
+                : Array.from(panel.querySelectorAll(".subtask-entry.expanded"))
+                    .map(entry => entry.dataset.subtaskId)
+                    .filter(Boolean);
+
+        return [panel, expandedIds];
+    }));
 
     const response = await fetch(endpoint, {
         headers: {
@@ -63,21 +67,25 @@ async function reloadTaskSubTasksPanel(taskId, expandedSubTaskId) {
         return;
     }
 
-    currentPanel.outerHTML = await response.text();
+    const panelHtml = await response.text();
 
-    const refreshedPanel = document.querySelector(`.task-subtasks-panel[data-task-panel-id="${taskId}"]`);
-    if (!refreshedPanel) {
-        return;
-    }
+    currentPanels.forEach(panel => {
+        panel.outerHTML = panelHtml;
+    });
 
     //След всеки refresh преизчислява валидните dependency опции
     refreshDependencyOptions(taskId);
 
-    expandedIds.forEach(subTaskId => {
-        const refreshedEntry = refreshedPanel.querySelector(`.subtask-entry[data-subtask-id="${subTaskId}"]`);
-        if (refreshedEntry) {
-            setSubTaskExpanded(refreshedEntry, true);
-        }
+    const refreshedPanels = Array.from(document.querySelectorAll(`.task-subtasks-panel[data-task-panel-id="${taskId}"]`));
+    refreshedPanels.forEach((refreshedPanel, index) => {
+        const previousPanel = currentPanels[index];
+        const expandedIds = expandedIdsByPanel.get(previousPanel) ?? [];
+        expandedIds.forEach(subTaskId => {
+            const refreshedEntry = refreshedPanel.querySelector(`.subtask-entry[data-subtask-id="${subTaskId}"]`);
+            if (refreshedEntry) {
+                setSubTaskExpanded(refreshedEntry, true);
+            }
+        });
     });
 }
 

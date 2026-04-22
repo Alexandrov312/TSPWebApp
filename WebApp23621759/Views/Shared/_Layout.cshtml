@@ -4,6 +4,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - WebApp23621759</title>
+    <script>
+        try {
+            document.documentElement.dataset.mytasksView = localStorage.getItem("mytasks:viewMode") || "table";
+            document.documentElement.dataset.archiveView = localStorage.getItem("archive:viewMode") || "table";
+            document.documentElement.dataset.theme = localStorage.getItem("site:theme") || "light";
+        } catch {
+            document.documentElement.dataset.mytasksView = "table";
+            document.documentElement.dataset.archiveView = "table";
+            document.documentElement.dataset.theme = "light";
+        }
+    </script>
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
@@ -70,6 +81,16 @@
                     </ul>
 
                     <ul class="navbar-nav ms-auto">
+                        <li class="nav-item d-flex align-items-center me-2">
+                            <button type="button"
+                                    class="theme-toggle-btn"
+                                    data-theme-toggle
+                                    aria-label="Toggle dark mode">
+                                <span class="theme-toggle-icon" data-theme-icon>🌙</span>
+                                <span class="theme-toggle-text" data-theme-text>Dark</span>
+                            </button>
+                        </li>
+
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item d-flex align-items-center me-2">

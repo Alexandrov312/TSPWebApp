@@ -4,9 +4,9 @@
 }
 
 .create-task-layout {
-    width: min(1700px, 100%);
+    width: min(1950px, calc(100vw - 32px));
     display: grid;
-    grid-template-columns: minmax(420px, 0.9fr) minmax(560px, 1.1fr);
+    grid-template-columns: minmax(520px, 640px) minmax(760px, 1fr);
     gap: 28px;
     align-items: start;
 }
@@ -103,7 +103,13 @@
     cursor: not-allowed;
 }
 
-.limit-reached-blink {
+.subtasks-counter.limit-reached,
+.subtasks-counter.limit-reached {
     color: #c62828;
     transform: scale(1.06);
+}
+
+.subtasks-counter.limit-reached-blink {
+    color: #c62828;
+    transform: scale(1.18);
 }

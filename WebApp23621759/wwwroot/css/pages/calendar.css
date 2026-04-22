@@ -248,6 +248,39 @@
     font-weight: 700;
 }
 
+.calendar-due-date-slot {
+    position: relative;
+}
+
+.calendar-due-date-trigger {
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    padding: 0;
+    cursor: pointer;
+}
+
+.calendar-due-date-trigger:hover {
+    color: #216b45;
+}
+
+.calendar-due-date-input {
+    display: none;
+    width: 190px;
+    min-height: 34px;
+    padding: 5px 8px;
+    font-size: 13px;
+}
+
+.day-task-card.due-date-editing .calendar-due-date-trigger {
+    display: none;
+}
+
+.day-task-card.due-date-editing .calendar-due-date-input {
+    display: block;
+}
+
 .day-task-title {
     font-size: 19px;
     font-weight: 700;
@@ -423,7 +456,7 @@
     position: absolute;
     right: 28px;
     bottom: 28px;
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     width: 58px;
@@ -432,10 +465,29 @@
     border-radius: 999px;
     background: linear-gradient(135deg, #2f7d53, #21563a);
     color: white;
-    font-size: 32px;
-    line-height: 1;
+    font-size: 0;
+    font-weight: 600;
+    line-height: 0;
+    padding: 0;
+    text-align: center;
     box-shadow: 0 14px 28px rgba(33, 86, 58, 0.28);
     cursor: pointer;
+}
+
+.calendar-fab-plus {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    height: auto;
+    font-family: Arial, sans-serif;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 0.8;
+    transform: translate(-50%, -50%);
 }
 
 .calendar-fab:hover {

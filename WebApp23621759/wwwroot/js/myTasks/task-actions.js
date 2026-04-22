@@ -10,6 +10,20 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        const gridEditTrigger = event.target.closest(".task-grid-inline-trigger");
+        if (gridEditTrigger) {
+            event.preventDefault();
+            event.stopPropagation();
+            openTaskGridInlineEdit(gridEditTrigger);
+            return;
+        }
+
+        const taskGridCard = event.target.closest(".task-grid-card");
+        if (taskGridCard && !isTaskInteractiveElement(event.target)) {
+            toggleTaskGridDetails(taskGridCard.dataset.taskGridId);
+            return;
+        }
+
         const descriptionToggle = event.target.closest("[data-task-description-toggle]");
         if (descriptionToggle) {
             event.preventDefault();
@@ -65,31 +79,31 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (event.target.closest(".edit-btn")) {
-            const currentRow = event.target.closest(".task-row");
-            if (!currentRow) {
+            const currentTaskElement = event.target.closest(".task-row, .task-grid-card");
+            if (!currentTaskElement) {
                 return;
             }
 
             //Позволява само един главен ред да е в edit mode по едно и също време
-            document.querySelectorAll(".task-row.editing").forEach(row => {
-                if (row !== currentRow) {
-                    row.classList.remove("editing");
-                    resetTaskRowInputs(row);
+            document.querySelectorAll(".task-row.editing, .task-grid-card.editing").forEach(element => {
+                if (element !== currentTaskElement) {
+                    element.classList.remove("editing", "editing-title", "editing-dueDate", "editing-priority");
+                    resetTaskRowInputs(element);
                 }
             });
 
-            currentRow.classList.add("editing");
+            currentTaskElement.classList.add("editing");
             return;
         }
 
         if (event.target.closest(".cancel-edit-btn")) {
-            const row = event.target.closest(".task-row");
-            if (!row) {
+            const taskElement = event.target.closest(".task-row, .task-grid-card");
+            if (!taskElement) {
                 return;
             }
 
-            row.classList.remove("editing");
-            resetTaskRowInputs(row);
+            taskElement.classList.remove("editing", "editing-title", "editing-dueDate", "editing-priority");
+            resetTaskRowInputs(taskElement);
         }
     });
 
@@ -101,44 +115,53 @@ document.addEventListener("DOMContentLoaded", function () {
 
         event.preventDefault();
 
-        const response = await fetch(form.action, {
-            method: "POST",
-            headers: {
-                "X-Requested-With": "XMLHttpRequest"
-            },
-            body: new FormData(form)
-        });
-
-        if (!response.ok) {
-            showToast("Task request failed.", "toast-error");
+        if (form.dataset.isSubmitting === "true") {
             return;
         }
 
-        const result = await response.json();
-        hideAllTaskPopups();
-        showToast(result.message, result.notificationCssClass);
+        form.dataset.isSubmitting = "true";
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: new FormData(form)
+            });
 
-        if (!result.success) {
-            return;
-        }
+            if (!response.ok) {
+                showToast("Task request failed.", "toast-error");
+                return;
+            }
 
-        if (form.matches(".task-delete-form")) {
-            removeTaskRow(result.taskId);
-            return;
-        }
+            const result = await response.json();
+            hideAllTaskPopups();
+            showToast(result.message, result.notificationCssClass);
 
-        if (form.matches(".task-archive-form")) {
-            removeTaskRow(result.taskId);
-            return;
-        }
+            if (!result.success) {
+                return;
+            }
 
-        if (form.matches(".task-done-form")) {
-            applyTaskDoneResult(result);
-            return;
-        }
+            if (form.matches(".task-delete-form")) {
+                removeTaskRow(result.taskId);
+                return;
+            }
 
-        if (form.matches(".task-update-form")) {
-            applyTaskUpdateResult(result);
+            if (form.matches(".task-archive-form")) {
+                removeTaskRow(result.taskId);
+                return;
+            }
+
+            if (form.matches(".task-done-form, .task-pending-form")) {
+                applyTaskStatusActionResult(result);
+                return;
+            }
+
+            if (form.matches(".task-update-form")) {
+                applyTaskUpdateResult(result);
+            }
+        } finally {
+            delete form.dataset.isSubmitting;
         }
     });
 
@@ -150,6 +173,21 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.addEventListener("keydown", function (event) {
+        const gridInput = event.target.closest(".task-grid-card.editing input.edit-mode, .task-grid-card.editing select.edit-mode");
+        if (gridInput) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                saveTaskGridInlineEdit(gridInput);
+            }
+
+            if (event.key === "Escape") {
+                event.preventDefault();
+                const card = gridInput.closest(".task-grid-card");
+                resetTaskRowInputs(card);
+                card?.classList.remove("editing", "editing-title", "editing-dueDate", "editing-priority");
+            }
+        }
+
         const editableDescription = event.target.closest("[data-task-description-editable]");
         if (!editableDescription) {
             return;
@@ -168,6 +206,25 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.addEventListener("focusout", async function (event) {
+        const gridInput = event.target.closest(".task-grid-card.editing input.edit-mode");
+        if (gridInput) {
+            saveTaskGridInlineEdit(gridInput);
+            return;
+        }
+
+        const gridSelect = event.target.closest(".task-grid-card.editing select.edit-mode");
+        if (gridSelect) {
+            window.setTimeout(() => {
+                const card = gridSelect.closest(".task-grid-card");
+                const isChanged = Array.from(gridSelect.options).some(option => option.selected !== option.defaultSelected);
+                if (card?.classList.contains("editing") && !isChanged) {
+                    resetTaskRowInputs(card);
+                    card.classList.remove("editing", "editing-title", "editing-dueDate", "editing-priority");
+                }
+            }, 0);
+            return;
+        }
+
         const editableDescription = event.target.closest("[data-task-description-editable]");
         if (!editableDescription) {
             return;
@@ -181,6 +238,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
         await saveTaskDetailsDescription(editableDescription, currentValue);
     });
+
+    document.addEventListener("change", function (event) {
+        const gridInput = event.target.closest(".task-grid-card.editing input.edit-mode, .task-grid-card.editing select.edit-mode");
+        if (gridInput) {
+            saveTaskGridInlineEdit(gridInput);
+        }
+    });
 });
 
 window.addEventListener("resize", function () {
@@ -193,7 +257,7 @@ window.addEventListener("scroll", function () {
 
 //Проверява дали кликът е върху интерактивен елемент в главната задача
 function isTaskInteractiveElement(element) {
-    return !!element.closest("button, a, form, input, select, textarea, label, .popup-actions, .row-actions, .subtask-actions, .subtask-edit-form, .inline-editable, .inline-dependency-trigger, [data-task-description-editable]");
+    return !!element.closest("button, a, form, input, select, textarea, label, .popup-actions, .subtask-actions, .subtask-edit-form, .inline-editable, .inline-dependency-trigger, [data-task-description-editable], .task-grid-details");
 }
 
 //Връща стойностите в edit mode към първоначалните им данни
@@ -209,6 +273,27 @@ function resetTaskRowInputs(row) {
             option.selected = option.defaultSelected;
         });
     });
+}
+
+//Запазва автоматично конкретната inline редакция в grid card-а
+function saveTaskGridInlineEdit(input) {
+    const card = input.closest(".task-grid-card");
+    const form = card?.querySelector(".task-update-form");
+    if (!(form instanceof HTMLFormElement)) {
+        return;
+    }
+
+    const isSelectChanged = input instanceof HTMLSelectElement
+        && Array.from(input.options).some(option => option.selected !== option.defaultSelected);
+    const isInputChanged = input instanceof HTMLInputElement
+        && input.value !== input.defaultValue;
+
+    if (!isSelectChanged && !isInputChanged) {
+        card.classList.remove("editing", "editing-title", "editing-dueDate", "editing-priority");
+        return;
+    }
+
+    form.requestSubmit();
 }
 
 //Затваря всички активни popup-и за задачите
@@ -345,11 +430,87 @@ function positionTaskPopup(wrapper, popup) {
 
 //Премахва редовете на главната задача и детайлния ѝ ред от таблицата
 function removeTaskRow(taskId) {
-    const summaryRow = document.querySelector(`.task-summary-row[data-task-row-id="${taskId}"]`);
-    const detailsRow = document.querySelector(`.subtasks-row[data-task-details-id="${taskId}"]`);
+    document.querySelectorAll(`.task-summary-row[data-task-row-id="${taskId}"], .subtasks-row[data-task-details-id="${taskId}"], .task-grid-card[data-task-grid-id="${taskId}"], .task-grid-details[data-task-grid-details-id="${taskId}"]`)
+        .forEach(element => element.remove());
+}
 
-    summaryRow?.remove();
-    detailsRow?.remove();
+//Отваря/затваря детайлите на task card в grid режима
+function toggleTaskGridDetails(taskId) {
+    const card = document.querySelector(`.task-grid-card[data-task-grid-id="${taskId}"]`);
+    const details = document.querySelector(`.task-grid-details[data-task-grid-details-id="${taskId}"]`);
+    if (!card || !details) {
+        return;
+    }
+
+    const shouldOpen = !details.classList.contains("open");
+    document.querySelectorAll(".task-grid-card.expanded").forEach(openCard => {
+        if (openCard !== card) {
+            openCard.classList.remove("expanded");
+        }
+    });
+
+    document.querySelectorAll(".task-grid-details.open").forEach(openDetails => {
+        if (openDetails !== details) {
+            openDetails.classList.remove("open");
+        }
+    });
+
+    if (shouldOpen) {
+        moveGridDetailsAfterCurrentRow(card, details, ".task-grid-card");
+    }
+
+    card.classList.toggle("expanded", shouldOpen);
+    details.classList.toggle("open", shouldOpen);
+}
+
+//Премества details панела след последната карта от същия визуален ред
+function moveGridDetailsAfterCurrentRow(card, details, cardSelector) {
+    const grid = card.parentElement;
+    if (!grid) {
+        return;
+    }
+
+    const rowTop = card.offsetTop;
+    const rowCards = Array.from(grid.querySelectorAll(cardSelector))
+        .filter(candidate => candidate.offsetTop === rowTop);
+    const lastCardInRow = rowCards[rowCards.length - 1] ?? card;
+    lastCardInRow.insertAdjacentElement("afterend", details);
+}
+
+//Отваря edit mode от самия текст в grid card-а и фокусира правилното поле
+function openTaskGridInlineEdit(trigger) {
+    const card = trigger.closest(".task-grid-card");
+    if (!card) {
+        return;
+    }
+
+    document.querySelectorAll(".task-grid-card.editing").forEach(openCard => {
+        if (openCard !== card) {
+            openCard.classList.remove("editing", "editing-title", "editing-dueDate", "editing-priority");
+            resetTaskRowInputs(openCard);
+        }
+    });
+
+    const target = trigger.dataset.gridEditTarget;
+    const selectorByTarget = {
+        title: 'input[name="Title"]',
+        dueDate: 'input[name="DueDate"]',
+        priority: 'select[name="Priority"]'
+    };
+
+    card.classList.remove("editing-title", "editing-dueDate", "editing-priority");
+    card.classList.add("editing", `editing-${target}`);
+
+    const editable = card.querySelector(selectorByTarget[target]);
+    if (editable) {
+        editable.focus();
+        if (editable.select) {
+            editable.select();
+        }
+        if (target === "dueDate" && typeof editable.showPicker === "function") {
+            editable.showPicker();
+        }
+    }
 }
 
 //Запазва inline редакцията на описанието от details панела на главната задача
@@ -386,8 +547,8 @@ async function saveTaskDetailsDescription(editableDescription, description) {
     }
 }
 
-//Обновява интерфейса след успешно маркиране на главна задача като готова
-function applyTaskDoneResult(result) {
+//Обновява интерфейса след успешно маркиране на главна задача като готова или неготова
+function applyTaskStatusActionResult(result) {
     applyTaskUpdateState(result.taskId, {
         statusDisplayName: result.statusDisplayName,
         statusValue: result.statusValue,
@@ -402,6 +563,10 @@ function applyTaskDoneResult(result) {
 
     if (typeof window.reloadTaskSubTasksPanel === "function") {
         window.reloadTaskSubTasksPanel(result.taskId);
+    }
+
+    if (document.querySelector(`.mytasks-kanban-board[data-kanban-task-id="${result.taskId}"]`) && typeof reloadMyTasksKanbanBoard === "function") {
+        reloadMyTasksKanbanBoard(result.taskId);
     }
 }
 
@@ -456,11 +621,11 @@ function applyTaskUpdateResult(result) {
         descriptionInput.defaultValue = result.description;
     }
 
-    const detailsDescription = document.querySelector(`[data-task-description-editable][data-task-id="${result.taskId}"]`);
-    if (detailsDescription) {
+    const detailsDescriptions = document.querySelectorAll(`[data-task-description-editable][data-task-id="${result.taskId}"]`);
+    detailsDescriptions.forEach(detailsDescription => {
         detailsDescription.textContent = result.description || "Task description";
         detailsDescription.dataset.originalValue = detailsDescription.textContent;
-    }
+    });
 
     if (dueDateInput) {
         dueDateInput.value = result.dueDateValue;
@@ -479,6 +644,60 @@ function applyTaskUpdateResult(result) {
         Array.from(prioritySelect.options).forEach(option => {
             option.defaultSelected = option.value === String(result.priorityValue);
         });
+    }
+
+    const gridCard = document.querySelector(`.task-grid-card[data-task-grid-id="${result.taskId}"]`);
+    if (gridCard) {
+        const gridTitle = gridCard.querySelector(".task-grid-title-area h3.view-mode, .task-grid-card-header h3.view-mode");
+        const gridPriorityBadge = gridCard.querySelector(".priority-badge");
+        const gridDueText = gridCard.querySelector("[data-grid-due-text]");
+        const gridCompletedText = gridCard.querySelector("[data-grid-completed-text]");
+        const gridTitleInput = gridCard.querySelector('input[name="Title"]');
+        const gridDescriptionInput = gridCard.querySelector('input[name="Description"]');
+        const gridDueDateInput = gridCard.querySelector('input[name="DueDate"]');
+        const gridPrioritySelect = gridCard.querySelector('select[name="Priority"]');
+        if (gridTitle) {
+            gridTitle.textContent = result.title;
+        }
+
+        if (gridPriorityBadge) {
+            gridPriorityBadge.textContent = result.priorityDisplayName;
+            gridPriorityBadge.className = `priority-badge view-mode task-grid-inline-trigger ${result.priorityCssClass}`;
+        }
+
+        if (gridDueText) {
+            gridDueText.textContent = `Due ${result.dueDateText}`;
+        }
+
+        if (gridCompletedText) {
+            gridCompletedText.textContent = result.completedAtText === "Not finished"
+                ? "Not finished"
+                : `Completed: ${result.completedAtText}`;
+        }
+
+        if (gridTitleInput) {
+            gridTitleInput.value = result.title;
+            gridTitleInput.defaultValue = result.title;
+        }
+
+        if (gridDescriptionInput) {
+            gridDescriptionInput.value = result.description;
+            gridDescriptionInput.defaultValue = result.description;
+        }
+
+        if (gridDueDateInput) {
+            gridDueDateInput.value = result.dueDateValue;
+            gridDueDateInput.defaultValue = result.dueDateValue;
+        }
+
+        if (gridPrioritySelect) {
+            gridPrioritySelect.value = String(result.priorityValue);
+            Array.from(gridPrioritySelect.options).forEach(option => {
+                option.defaultSelected = option.value === String(result.priorityValue);
+            });
+        }
+
+        gridCard.classList.remove("editing", "editing-title", "editing-dueDate", "editing-priority");
     }
 
     summaryRow.classList.remove("editing");

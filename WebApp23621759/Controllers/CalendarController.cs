@@ -257,6 +257,36 @@ namespace WebApp23621759.Controllers
         }
 
         [HttpPost]
+        public IActionResult MarkAsPending(int id, int year, int month, DateTime selectedDate)
+        {
+            int userId = UserHelper.GetUserId(User);
+            var task = _taskService.GetById(id, userId);
+            if (task == null)
+            {
+                return JsonError("Task was not found or does not belong to you.");
+            }
+
+            _subTaskService.SetAllPendingForTask(id, userId);
+
+            bool updated = _taskService.SetPending(id, userId);
+            if (!updated)
+            {
+                return JsonError("Task could not be marked as pending.");
+            }
+
+            return Json(new
+            {
+                success = true,
+                taskId = id,
+                message = $"Task \"{task.Title}\" marked as pending.",
+                notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Success),
+                year,
+                month,
+                selectedDate = selectedDate.ToString("yyyy-MM-dd")
+            });
+        }
+
+        [HttpPost]
         public IActionResult CreateTask(int year, int month, DateTime selectedDate)
         {
             int userId = UserHelper.GetUserId(User);

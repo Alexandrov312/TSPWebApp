@@ -3,30 +3,64 @@
 @model List<WebApp23621759.Models.ViewModel.Tasks.MyTaskItemViewModel>
 
 @{
-    string currentSortBy = ViewBag.CurrentSortBy;
-    string currentDirection = ViewBag.CurrentDirection;
+    string currentSort = ViewBag.CurrentSort ?? "dueDate:ASC";
     int? initialKanbanTaskId = ViewBag.InitialKanbanTaskId;
     string initialKanbanSource = ViewBag.KanbanSource ?? "mytasks";
     string initialKanbanReturnUrl = ViewBag.KanbanReturnUrl ?? string.Empty;
 
-    string GetNextDirection(string column)
+    List<(string Column, string Direction)> GetSortRules()
     {
-        if (currentSortBy == column)
+        return currentSort
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(rule => rule.Split(':', StringSplitOptions.TrimEntries))
+            .Where(parts => parts.Length > 0)
+            .Select(parts => (
+                Column: parts[0],
+                Direction: parts.ElementAtOrDefault(1)?.Equals("DESC", StringComparison.OrdinalIgnoreCase) == true ? "DESC" : "ASC"))
+            .Where(rule => new[] { "dueDate", "priority", "status", "createdAt" }.Contains(rule.Column))
+            .GroupBy(rule => rule.Column)
+            .Select(group => group.First())
+            .ToList();
+    }
+
+    string GetNextSort(string column)
+    {
+        var rules = GetSortRules();
+        int index = rules.FindIndex(rule => rule.Column == column);
+
+        if (index < 0)
         {
-            return currentDirection == "ASC" ? "DESC" : "ASC";
+            rules.Add((column, "ASC"));
+        }
+        else if (rules[index].Direction == "ASC")
+        {
+            rules[index] = (column, "DESC");
+        }
+        else
+        {
+            rules.RemoveAt(index);
         }
 
-        return "ASC";
+        return rules.Count == 0
+            ? "none"
+            : string.Join(",", rules.Select(rule => $"{rule.Column}:{rule.Direction}"));
     }
 
     string GetArrow(string column)
     {
-        if (currentSortBy != column)
+        var rule = GetSortRules().FirstOrDefault(rule => rule.Column == column);
+        if (string.IsNullOrEmpty(rule.Column))
         {
             return "";
         }
 
-        return currentDirection == "ASC" ? " ↑" : " ↓";
+        return rule.Direction == "ASC" ? " ↑" : " ↓";
+    }
+
+    string GetSortPriority(string column)
+    {
+        int index = GetSortRules().FindIndex(rule => rule.Column == column);
+        return index < 0 ? "" : (index + 1).ToString();
     }
 
     var initialKanbanTask = initialKanbanTaskId.HasValue
@@ -45,32 +79,55 @@
 
         <div class="mytasks-list-view @(initialKanbanTask == null ? "" : "is-hidden")">
         <div class="tasks-card-header">
-            <h2 class="title tasks-title">My Tasks</h2>
+            <div class="tasks-title-row">
+                <h2 class="title tasks-title">My Tasks</h2>
+
+                <div class="view-toggle" data-view-toggle="mytasks">
+                    <button type="button" class="view-toggle-btn active" data-view-mode-button="table">Table</button>
+                    <button type="button" class="view-toggle-btn" data-view-mode-button="grid">Grid</button>
+                </div>
+            </div>
 
             <div class="table-toolbar">
                 <div class="table-actions">
                     <a asp-action="Index"
-                       asp-route-sortBy="dueDate"
-                       asp-route-direction="@GetNextDirection("dueDate")">
+                       asp-route-sort="@GetNextSort("dueDate")"
+                       class="sort-action @(string.IsNullOrEmpty(GetSortPriority("dueDate")) ? "" : "active")">
                         Due Date @GetArrow("dueDate")
+                        @if (!string.IsNullOrEmpty(GetSortPriority("dueDate")))
+                        {
+                            <span class="sort-priority">@GetSortPriority("dueDate")</span>
+                        }
                     </a>
 
                     <a asp-action="Index"
-                       asp-route-sortBy="priority"
-                       asp-route-direction="@GetNextDirection("priority")">
+                       asp-route-sort="@GetNextSort("priority")"
+                       class="sort-action @(string.IsNullOrEmpty(GetSortPriority("priority")) ? "" : "active")">
                         Priority @GetArrow("priority")
+                        @if (!string.IsNullOrEmpty(GetSortPriority("priority")))
+                        {
+                            <span class="sort-priority">@GetSortPriority("priority")</span>
+                        }
                     </a>
 
                     <a asp-action="Index"
-                       asp-route-sortBy="status"
-                       asp-route-direction="@GetNextDirection("status")">
+                       asp-route-sort="@GetNextSort("status")"
+                       class="sort-action @(string.IsNullOrEmpty(GetSortPriority("status")) ? "" : "active")">
                         Status @GetArrow("status")
+                        @if (!string.IsNullOrEmpty(GetSortPriority("status")))
+                        {
+                            <span class="sort-priority">@GetSortPriority("status")</span>
+                        }
                     </a>
 
                     <a asp-action="Index"
-                       asp-route-sortBy="createdAt"
-                       asp-route-direction="@GetNextDirection("createdAt")">
+                       asp-route-sort="@GetNextSort("createdAt")"
+                       class="sort-action @(string.IsNullOrEmpty(GetSortPriority("createdAt")) ? "" : "active")">
                         Created Date @GetArrow("createdAt")
+                        @if (!string.IsNullOrEmpty(GetSortPriority("createdAt")))
+                        {
+                            <span class="sort-priority">@GetSortPriority("createdAt")</span>
+                        }
                     </a>
                 </div>
 
@@ -80,7 +137,7 @@
             </div>
         </div>
 
-        <div class="table-wrapper">
+        <div class="table-wrapper task-view-mode" data-view-mode-panel="table">
             <table class="task-table">
                 <thead>
                     <tr>
@@ -177,26 +234,6 @@
                                 </form>
 
                                 <div class="view-mode row-actions">
-                                    <div class="done-wrapper">
-                                        <form asp-action="MarkAsDone" method="post" class="table-form task-done-form task-ajax-form" data-task-id="@task.Id">
-                                            <input type="hidden" name="id" value="@task.Id" />
-
-                                            <button type="button"
-                                                    class="option-btn option-btn-success show-done-popup"
-                                                    title="Mark as done">
-                                                ✅
-                                            </button>
-
-                                            <div class="done-popup">
-                                                <span>Mark task as done?</span>
-                                                <div class="popup-actions">
-                                                    <button type="submit" class="popup-btn popup-btn-confirm">Yes</button>
-                                                    <button type="button" class="popup-btn popup-btn-cancel cancel-done-btn">No</button>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
-
                                     <button type="button"
                                             class="option-btn option-btn-warning edit-btn"
                                             title="Edit task">
@@ -233,6 +270,46 @@
                                         </form>
                                     </div>
 
+                                        <div class="done-wrapper">
+                                            <form asp-action="MarkAsDone" method="post" class="table-form task-done-form task-ajax-form" data-task-id="@task.Id">
+                                                <input type="hidden" name="id" value="@task.Id" />
+
+                                                <button type="button"
+                                                        class="option-btn option-btn-success show-done-popup"
+                                                        title="Mark as done">
+                                                    ✓
+                                                </button>
+
+                                                <div class="done-popup">
+                                                    <span>Mark task as done?</span>
+                                                    <div class="popup-actions">
+                                                        <button type="submit" class="popup-btn popup-btn-confirm">Yes</button>
+                                                        <button type="button" class="popup-btn popup-btn-cancel cancel-done-btn">No</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <div class="done-wrapper pending-wrapper">
+                                            <form asp-action="MarkAsPending" method="post" class="table-form task-pending-form task-ajax-form" data-task-id="@task.Id">
+                                                <input type="hidden" name="id" value="@task.Id" />
+
+                                                <button type="button"
+                                                        class="option-btn option-btn-neutral show-done-popup"
+                                                        title="Mark as pending">
+                                                    ⟳
+                                                </button>
+
+                                                <div class="done-popup pending-popup">
+                                                    <span>Mark task as pending?</span>
+                                                    <div class="popup-actions">
+                                                        <button type="submit" class="popup-btn popup-btn-confirm">Yes</button>
+                                                        <button type="button" class="popup-btn popup-btn-cancel cancel-done-btn">No</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+
                                     <div class="delete-wrapper">
                                         <form asp-action="Delete" method="post" class="table-form task-delete-form task-ajax-form" data-task-id="@task.Id">
                                             <input type="hidden" name="id" value="@task.Id" />
@@ -240,7 +317,7 @@
                                             <button type="button"
                                                     class="option-btn option-btn-danger show-popup"
                                                     title="Delete task">
-                                                🗑️
+                                                🗑
                                             </button>
 
                                             <div class="delete-popup">
@@ -294,6 +371,166 @@
                     }
                 </tbody>
             </table>
+        </div>
+
+        <div class="tasks-grid task-view-mode is-hidden" data-view-mode-panel="grid">
+            @foreach (var taskItem in Model)
+            {
+                var task = taskItem.Task;
+
+                <article class="task-grid-card @StatusHelper.GetCssClass(task.Status) @TaskDateHelper.GetRowDateClass(task)"
+                         data-task-grid-id="@task.Id">
+                    <div class="task-grid-card-topline">
+                        <span class="task-grid-eyebrow view-mode task-grid-inline-trigger" data-grid-due-text data-grid-edit-target="dueDate">Due @task.DueDate.ToString("dd.MM.yyyy HH:mm")</span>
+                        <div class="task-grid-due-edit edit-mode">
+                            <input form="grid-edit-form-@task.Id"
+                                   class="edit-mode form-input"
+                                   type="datetime-local"
+                                   name="DueDate"
+                                   value="@task.DueDate.ToString("yyyy-MM-ddTHH:mm")" />
+                        </div>
+                        <span class="task-status-badge">@StatusHelper.GetDisplayName(task.Status)</span>
+                    </div>
+
+                    <div class="task-grid-title-area">
+                        <h3 class="view-mode task-grid-inline-trigger" data-grid-edit-target="title">@task.Title</h3>
+                        <input form="grid-edit-form-@task.Id"
+                               class="edit-mode form-input"
+                               type="text"
+                               name="Title"
+                               value="@task.Title" />
+                        <input form="grid-edit-form-@task.Id"
+                               type="hidden"
+                               name="Description"
+                               value="@task.Description" />
+                    </div>
+
+                    <div class="task-grid-meta">
+                        <span class="priority-badge view-mode task-grid-inline-trigger @PriorityHelper.GetCssClass(task.Priority)" data-grid-edit-target="priority">@task.Priority</span>
+                        <select form="grid-edit-form-@task.Id" class="edit-mode form-input task-grid-priority-select" name="Priority">
+                            @foreach (Priority priority in Enum.GetValues(typeof(Priority)))
+                            {
+                                if (priority == task.Priority)
+                                {
+                                    <option value="@((int)priority)" selected>@priority</option>
+                                }
+                                else
+                                {
+                                    <option value="@((int)priority)">@priority</option>
+                                }
+                            }
+                        </select>
+                        <span>Created: @task.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+                        <span data-grid-completed-text>@(task.CompletedAt == null ? "Not finished" : $"Completed: {task.CompletedAt?.ToString("dd.MM.yyyy HH:mm")}")</span>
+                    </div>
+
+                    <div class="task-progress" data-task-progress-id="@task.Id">
+                        <div class="task-progress-bar">
+                            <div class="task-progress-fill task-progress-fill-projected" style="width: @taskItem.ProjectedCompletionPercentage%;"></div>
+                            <div class="task-progress-fill task-progress-fill-completed" style="width: @taskItem.CompletionPercentage%;"></div>
+                        </div>
+                        <div class="task-progress-text">
+                            @taskItem.CompletionPercentage% (@taskItem.CompletedSubTaskCount/@taskItem.TotalSubTaskCount)
+                        </div>
+                    </div>
+
+                    <div class="task-grid-actions row-actions">
+                        <form id="grid-edit-form-@task.Id" asp-action="Update" method="post" class="task-update-form task-ajax-form" data-task-id="@task.Id">
+                            <input type="hidden" name="Id" value="@task.Id" />
+                        </form>
+
+                        <button type="button"
+                                class="option-btn option-btn-kanban open-kanban-btn"
+                                title="Open Kanban"
+                                data-kanban-task-id="@task.Id"
+                                data-kanban-source="mytasks">
+                            🧩
+                        </button>
+
+                        <div class="archive-wrapper delete-wrapper @(task.Status == Status.Completed ? "archive-enabled" : "archive-disabled")"
+                             data-task-archive-id="@task.Id">
+                            <form asp-action="Archive" method="post" class="table-form task-archive-form task-ajax-form" data-task-id="@task.Id">
+                                <input type="hidden" name="id" value="@task.Id" />
+                                <button type="button"
+                                        class="option-btn option-btn-archive @(task.Status == Status.Completed ? "show-popup" : "")"
+                                        title="@(task.Status == Status.Completed ? "Archive task" : "Complete the task before archiving")"
+                                        @(task.Status == Status.Completed ? "" : "disabled")>
+                                    📦
+                                </button>
+                                <div class="delete-popup">
+                                    <span>Archive task?</span>
+                                    <div class="popup-actions">
+                                        <button type="submit" class="popup-btn popup-btn-confirm">Yes</button>
+                                        <button type="button" class="popup-btn popup-btn-cancel cancel-btn">No</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                            <div class="done-wrapper">
+                                <form asp-action="MarkAsDone" method="post" class="table-form task-done-form task-ajax-form" data-task-id="@task.Id">
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <button type="button" class="option-btn option-btn-success show-done-popup" title="Mark as done">✓</button>
+                                    <div class="done-popup">
+                                        <span>Mark task as done?</span>
+                                        <div class="popup-actions">
+                                            <button type="submit" class="popup-btn popup-btn-confirm">Yes</button>
+                                            <button type="button" class="popup-btn popup-btn-cancel cancel-done-btn">No</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                        <div class="done-wrapper pending-wrapper">
+                            <form asp-action="MarkAsPending" method="post" class="table-form task-pending-form task-ajax-form" data-task-id="@task.Id">
+                                <input type="hidden" name="id" value="@task.Id" />
+                                <button type="button" class="option-btn option-btn-neutral show-done-popup" title="Mark as pending">⟳</button>
+                                <div class="done-popup pending-popup">
+                                    <span>Mark task as pending?</span>
+                                    <div class="popup-actions">
+                                        <button type="submit" class="popup-btn popup-btn-confirm">Yes</button>
+                                        <button type="button" class="popup-btn popup-btn-cancel cancel-done-btn">No</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="delete-wrapper">
+                            <form asp-action="Delete" method="post" class="table-form task-delete-form task-ajax-form" data-task-id="@task.Id">
+                                <input type="hidden" name="id" value="@task.Id" />
+                                <button type="button" class="option-btn option-btn-danger show-popup" title="Delete task">🗑️</button>
+                                <div class="delete-popup">
+                                    <span>Delete task?</span>
+                                    <div class="popup-actions">
+                                        <button type="submit" class="popup-btn popup-btn-danger">Yes</button>
+                                        <button type="button" class="popup-btn popup-btn-cancel cancel-btn">No</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+                </article>
+
+                <div class="task-grid-details" data-task-grid-details-id="@task.Id">
+                    <div class="task-details-description">
+                        <button type="button"
+                                class="task-description-toggle"
+                                data-task-description-toggle
+                                aria-expanded="false">
+                            Description
+                        </button>
+                        <div class="task-description-panel">
+                            <p class="task-description-inline"
+                               data-task-id="@task.Id"
+                               data-task-description-editable
+                               contenteditable="true"
+                               spellcheck="false">@(string.IsNullOrWhiteSpace(task.Description) ? "Task description" : task.Description)</p>
+                        </div>
+                    </div>
+                    <partial name="_TaskSubTasksPanel" model="taskItem" />
+                </div>
+            }
         </div>
         </div>
     </div>

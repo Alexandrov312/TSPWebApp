@@ -14,3 +14,779 @@ body {
     margin-bottom: 60px;
     background: linear-gradient(135deg, #dff5ec, #f6fbf8);
 }
+
+.theme-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 86px;
+    padding: 7px 12px;
+    border: 1px solid #cfe0d6;
+    border-radius: 999px;
+    background: #f4faf6;
+    color: #244f38;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+    background: #dff0e7;
+    border-color: #9cc4ac;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px rgba(31, 107, 67, 0.12);
+}
+
+.theme-toggle-icon {
+    font-size: 16px;
+}
+
+html[data-theme="dark"] {
+    color-scheme: dark;
+}
+
+html[data-theme="dark"] body {
+    background: radial-gradient(circle at top left, #173322 0, #0d1b14 34%, #08110d 100%);
+    color: #e6f0ea;
+}
+
+html[data-theme="dark"] .navbar,
+html[data-theme="dark"] .navbar.bg-white {
+    background: #0f1d16 !important;
+    border-color: #284237 !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .navbar-brand,
+html[data-theme="dark"] .nav-link,
+html[data-theme="dark"] .nav-link.text-dark,
+html[data-theme="dark"] .btn-link.nav-link {
+    color: #e9f5ee !important;
+}
+
+html[data-theme="dark"] .nav-link:hover,
+html[data-theme="dark"] .navbar-brand:hover {
+    color: #8fd7ad !important;
+}
+
+html[data-theme="dark"] .theme-toggle-btn {
+    background: #1c3529;
+    border-color: #3d6653;
+    color: #f3f8f5;
+    box-shadow: inset 0 0 0 1px rgba(143, 215, 173, 0.08);
+}
+
+html[data-theme="dark"] .theme-toggle-btn:hover {
+    background: #264636;
+    border-color: #67a681;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] footer,
+html[data-theme="dark"] .footer,
+html[data-theme="dark"] .border-top,
+html[data-theme="dark"] .border-bottom {
+    border-color: #284237 !important;
+}
+
+html[data-theme="dark"] .footer,
+html[data-theme="dark"] .text-muted {
+    color: #9fb4aa !important;
+}
+
+html[data-theme="dark"] a {
+    color: #8fd7ad;
+}
+
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] h5,
+html[data-theme="dark"] h6,
+html[data-theme="dark"] .tasks-title,
+html[data-theme="dark"] .calendar-title,
+html[data-theme="dark"] .subtasks-title {
+    color: #f0f7f3;
+}
+
+html[data-theme="dark"] .panel-card,
+html[data-theme="dark"] .card-auth,
+html[data-theme="dark"] .tasks-card,
+html[data-theme="dark"] .calendar-panel,
+html[data-theme="dark"] .day-tasks-panel,
+html[data-theme="dark"] .create-task-card,
+html[data-theme="dark"] .subtasks-card,
+html[data-theme="dark"] .archive-card {
+    background: linear-gradient(180deg, #15241c 0%, #101c16 100%) !important;
+    border-color: #2a4639 !important;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.34) !important;
+    color: #e6f0ea;
+}
+
+html[data-theme="dark"] .task-table,
+html[data-theme="dark"] .archive-table {
+    background: #111e17 !important;
+    color: #e6f0ea;
+}
+
+html[data-theme="dark"] .task-table thead,
+html[data-theme="dark"] .archive-table thead,
+html[data-theme="dark"] .task-table th,
+html[data-theme="dark"] .archive-table th {
+    background: #1a2d23 !important;
+    color: #eef7f2 !important;
+    border-color: #2f4d3f !important;
+}
+
+html[data-theme="dark"] .task-table td,
+html[data-theme="dark"] .archive-table td {
+    border-color: #263f33 !important;
+    color: #d9e8e0;
+}
+
+html[data-theme="dark"] .task-summary-row.status-pending,
+html[data-theme="dark"] .task-row.status-pending {
+    background-color: #17212c !important;
+}
+
+html[data-theme="dark"] .task-summary-row.status-in-progress,
+html[data-theme="dark"] .task-row.status-in-progress {
+    background-color: #10263a !important;
+}
+
+html[data-theme="dark"] .task-summary-row.status-completed,
+html[data-theme="dark"] .task-row.status-completed {
+    background-color: #12291b !important;
+}
+
+html[data-theme="dark"] .task-summary-row.status-overdue,
+html[data-theme="dark"] .task-row.status-overdue {
+    background-color: #331817 !important;
+}
+
+html[data-theme="dark"] .task-grid-card,
+html[data-theme="dark"] .archive-grid-card,
+html[data-theme="dark"] .day-task-card,
+html[data-theme="dark"] .subtask-entry,
+html[data-theme="dark"] .archive-subtask-entry,
+html[data-theme="dark"] .mytasks-kanban-card {
+    background: linear-gradient(145deg, #15251d, #101b15) !important;
+    border-color: #2f4d3f !important;
+    color: #e6f0ea;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.26);
+}
+
+html[data-theme="dark"] .task-grid-card.status-pending,
+html[data-theme="dark"] .calendar-task-pending {
+    background: linear-gradient(145deg, #16202a, #101820) !important;
+}
+
+html[data-theme="dark"] .task-grid-card.status-in-progress,
+html[data-theme="dark"] .calendar-task-in-progress {
+    background: linear-gradient(145deg, #10283c, #0f1b29) !important;
+}
+
+html[data-theme="dark"] .task-grid-card.status-completed,
+html[data-theme="dark"] .archive-grid-card,
+html[data-theme="dark"] .calendar-task-completed {
+    background: linear-gradient(145deg, #12301f, #102016) !important;
+}
+
+html[data-theme="dark"] .task-grid-card.status-overdue,
+html[data-theme="dark"] .calendar-task-overdue {
+    background: linear-gradient(145deg, #3a1817, #241110) !important;
+}
+
+html[data-theme="dark"] .task-grid-title-area h3,
+html[data-theme="dark"] .task-grid-card-header h3,
+html[data-theme="dark"] .day-task-title,
+html[data-theme="dark"] .subtask-title,
+html[data-theme="dark"] .kanban-card-title,
+html[data-theme="dark"] .kanban-task-title-editable {
+    color: #f3faf6 !important;
+}
+
+html[data-theme="dark"] .task-grid-eyebrow,
+html[data-theme="dark"] .task-grid-meta,
+html[data-theme="dark"] .task-progress-text,
+html[data-theme="dark"] .task-cell-display,
+html[data-theme="dark"] .subtasks-counter,
+html[data-theme="dark"] .day-tasks-empty,
+html[data-theme="dark"] .calendar-task-time,
+html[data-theme="dark"] .calendar-task-until,
+html[data-theme="dark"] .subtask-completed-at,
+html[data-theme="dark"] .archive-subtask-completed {
+    color: #b7c9c0 !important;
+}
+
+html[data-theme="dark"] .task-progress-bar {
+    background: repeating-linear-gradient(90deg, #24362d 0, #24362d 24%, #1c2a23 25%) !important;
+    border-color: #344f42 !important;
+}
+
+html[data-theme="dark"] .task-progress-text {
+    background: #17251d !important;
+}
+
+html[data-theme="dark"] .view-toggle,
+html[data-theme="dark"] .table-actions a,
+html[data-theme="dark"] .calendar-nav-btn,
+html[data-theme="dark"] .calendar-description-toggle,
+html[data-theme="dark"] .task-description-toggle,
+html[data-theme="dark"] .archive-description-toggle,
+html[data-theme="dark"] .kanban-description-toggle,
+html[data-theme="dark"] .subtask-description-create-toggle {
+    background: #1b3025 !important;
+    border-color: #355947 !important;
+    color: #d7e8df !important;
+}
+
+html[data-theme="dark"] .view-toggle-btn:not(.active) {
+    color: #b8cec3;
+}
+
+html[data-theme="dark"] .view-toggle::before {
+    background: #3ba76b;
+}
+
+html[data-theme="dark"] .calendar-day {
+    background: #101c16 !important;
+    color: #e6f0ea;
+    border-color: #1d3328 !important;
+}
+
+html[data-theme="dark"] .calendar-day:hover,
+html[data-theme="dark"] .calendar-day.selected,
+html[data-theme="dark"] .calendar-day.today {
+    background: #1b3327 !important;
+    border-color: #5d9977 !important;
+}
+
+html[data-theme="dark"] .calendar-weekdays div {
+    color: #c0d0c8;
+}
+
+html[data-theme="dark"] .form-input,
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select,
+html[data-theme="dark"] .subtask-inline-dependency-select,
+html[data-theme="dark"] .kanban-dependency-select {
+    background: #0f1c15 !important;
+    border-color: #365946 !important;
+    color: #eef7f2 !important;
+}
+
+html[data-theme="dark"] .form-input::placeholder,
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+    color: #82988d !important;
+}
+
+html[data-theme="dark"] .priority-badge.low-priority,
+html[data-theme="dark"] .priority-low {
+    background: #173a24 !important;
+    color: #8fe0aa !important;
+}
+
+html[data-theme="dark"] .priority-badge.medium-priority,
+html[data-theme="dark"] .priority-medium {
+    background: #3b3214 !important;
+    color: #f5d36d !important;
+}
+
+html[data-theme="dark"] .priority-badge.high-priority,
+html[data-theme="dark"] .priority-high {
+    background: #421b22 !important;
+    color: #ff9aa7 !important;
+}
+
+html[data-theme="dark"] .task-status-badge,
+html[data-theme="dark"] .archive-status-badge,
+html[data-theme="dark"] .calendar-task-status-text,
+html[data-theme="dark"] .subtask-status-btn,
+html[data-theme="dark"] .archive-subtask-status {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .task-summary-row.status-pending .task-status-badge,
+html[data-theme="dark"] .task-grid-card.status-pending .task-status-badge,
+html[data-theme="dark"] .calendar-task-status-text.status-pending,
+html[data-theme="dark"] .subtask-status-btn.status-pending,
+html[data-theme="dark"] .archive-subtask-status.status-pending {
+    background: #253244 !important;
+    color: #d5e4ff !important;
+}
+
+html[data-theme="dark"] .task-summary-row.status-in-progress .task-status-badge,
+html[data-theme="dark"] .task-grid-card.status-in-progress .task-status-badge,
+html[data-theme="dark"] .calendar-task-status-text.status-in-progress,
+html[data-theme="dark"] .subtask-status-btn.status-in-progress,
+html[data-theme="dark"] .archive-subtask-status.status-in-progress {
+    background: #143b5b !important;
+    color: #a9d7ff !important;
+}
+
+html[data-theme="dark"] .task-summary-row.status-completed .task-status-badge,
+html[data-theme="dark"] .task-grid-card.status-completed .task-status-badge,
+html[data-theme="dark"] .archive-status-badge,
+html[data-theme="dark"] .calendar-task-status-text.status-completed,
+html[data-theme="dark"] .subtask-status-btn.status-completed,
+html[data-theme="dark"] .archive-subtask-status.status-completed {
+    background: #174226 !important;
+    color: #9ce4ae !important;
+}
+
+html[data-theme="dark"] .task-summary-row.status-overdue .task-status-badge,
+html[data-theme="dark"] .task-grid-card.status-overdue .task-status-badge,
+html[data-theme="dark"] .calendar-task-status-text.status-overdue,
+html[data-theme="dark"] .subtask-status-btn.status-overdue,
+html[data-theme="dark"] .archive-subtask-status.status-overdue {
+    background: #4a1d1b !important;
+    color: #ffaca5 !important;
+}
+
+html[data-theme="dark"] .delete-popup,
+html[data-theme="dark"] .done-popup,
+html[data-theme="dark"] .subtask-delete-popup,
+html[data-theme="dark"] .kanban-card-detail-popover {
+    background: #132119 !important;
+    border-color: #365946 !important;
+    color: #eef7f2 !important;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.45) !important;
+}
+
+html[data-theme="dark"] .popup-btn-cancel,
+html[data-theme="dark"] .subtask-cancel-btn {
+    background: #25362d !important;
+    color: #e6f0ea !important;
+}
+
+html[data-theme="dark"] .task-details-description,
+html[data-theme="dark"] .task-description-inline,
+html[data-theme="dark"] .archive-details-panel,
+html[data-theme="dark"] .archive-description-readonly,
+html[data-theme="dark"] .archive-subtask-description,
+html[data-theme="dark"] .calendar-task-description-details,
+html[data-theme="dark"] .calendar-task-description-editable,
+html[data-theme="dark"] .kanban-task-description-panel,
+html[data-theme="dark"] .kanban-card-description-editable,
+html[data-theme="dark"] .no-subtasks-message {
+    background: #111e17 !important;
+    border-color: #2e4a3c !important;
+    color: #dce9e2 !important;
+}
+
+html[data-theme="dark"] .task-grid-details,
+html[data-theme="dark"] .archive-grid-details,
+html[data-theme="dark"] .subtasks-row td,
+html[data-theme="dark"] .archive-details-row td {
+    background: #0f1a14 !important;
+    border-color: #2c473a !important;
+    color: #e6f0ea;
+}
+
+html[data-theme="dark"] .subtask-dependency-badge,
+html[data-theme="dark"] .inline-dependency-trigger,
+html[data-theme="dark"] .kanban-dependency-trigger {
+    background: #1d3328 !important;
+    color: #bde6ce !important;
+}
+
+html[data-theme="dark"] .toast-notification {
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.38);
+}
+
+html[data-theme="dark"] .subtask-item {
+    background: linear-gradient(145deg, #16271e, #101c16) !important;
+    border-color: #345744 !important;
+    color: #e6f0ea;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+}
+
+html[data-theme="dark"] .subtask-item-title,
+html[data-theme="dark"] .subtask-item .form-group label {
+    color: #eef7f2 !important;
+}
+
+html[data-theme="dark"] .subtask-item .field-error span {
+    color: #ff9b9b !important;
+}
+
+html[data-theme="dark"] .subtasks-scroll-area::-webkit-scrollbar-track,
+html[data-theme="dark"] .day-tasks-list::-webkit-scrollbar-track {
+    background: #112019;
+}
+
+html[data-theme="dark"] .subtasks-scroll-area::-webkit-scrollbar-thumb,
+html[data-theme="dark"] .day-tasks-list::-webkit-scrollbar-thumb {
+    background: #345744;
+}
+
+html[data-theme="dark"] .subtasks-scroll-area::-webkit-scrollbar-thumb:hover,
+html[data-theme="dark"] .day-tasks-list::-webkit-scrollbar-thumb:hover {
+    background: #4f7e64;
+}
+
+html[data-theme="dark"] .add-subtask-btn,
+html[data-theme="dark"] .subtask-add-btn,
+html[data-theme="dark"] .create-task-inline-btn {
+    background: #1e6a42 !important;
+    border-color: #55926e !important;
+    color: #f3fbf6 !important;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
+}
+
+html[data-theme="dark"] .add-subtask-btn:hover,
+html[data-theme="dark"] .subtask-add-btn:hover,
+html[data-theme="dark"] .create-task-inline-btn:hover {
+    background: #278350 !important;
+    border-color: #74bc8d !important;
+}
+
+html[data-theme="dark"] .add-subtask-btn.limit-reached {
+    background: #223128 !important;
+    border-color: #46564d !important;
+    color: #8fa298 !important;
+    box-shadow: none;
+}
+
+html[data-theme="dark"] .subtasks-counter.limit-reached,
+html[data-theme="dark"] .subtasks-counter.limit-reached-blink {
+    color: #ff8a80 !important;
+}
+
+html[data-theme="dark"] .remove-subtask-btn,
+html[data-theme="dark"] .subtask-delete-btn {
+    background: #442022 !important;
+    color: #ffc0c0 !important;
+}
+
+html[data-theme="dark"] .remove-subtask-btn:hover,
+html[data-theme="dark"] .subtask-delete-btn:hover {
+    background: #64282c !important;
+    color: #fff1f1 !important;
+}
+
+html[data-theme="dark"] .task-subtasks-panel {
+    background: linear-gradient(180deg, #111f18 0%, #0d1812 100%) !important;
+    border-color: #2c473a !important;
+}
+
+html[data-theme="dark"] .task-subtasks-title,
+html[data-theme="dark"] .task-subtasks-count {
+    color: #dcece4 !important;
+}
+
+html[data-theme="dark"] .task-grid-card.expanded::after,
+html[data-theme="dark"] .archive-grid-card.expanded::after {
+    background: #0f1a14 !important;
+    border-color: #3f6c54 !important;
+}
+
+html[data-theme="dark"] .subtask-description-text {
+    background: #101d16 !important;
+    border-color: #314f40 !important;
+    color: #dfece5 !important;
+}
+
+html[data-theme="dark"] .subtask-toggle-btn,
+html[data-theme="dark"] .subtask-description-toggle {
+    color: #aacabd !important;
+}
+
+html[data-theme="dark"] .subtask-toggle-btn:hover,
+html[data-theme="dark"] .subtask-description-toggle:hover {
+    color: #8fd7ad !important;
+}
+
+html[data-theme="dark"] .day-number {
+    color: #d8e9e1 !important;
+}
+
+html[data-theme="dark"] .calendar-day.other-month .day-number {
+    color: #8ca096 !important;
+}
+
+html[data-theme="dark"] .calendar-day.today .day-number,
+html[data-theme="dark"] .calendar-day.selected .day-number {
+    color: #f1fff7 !important;
+}
+
+html[data-theme="dark"] .task-dot {
+    background: #f6b23b !important;
+    box-shadow: 0 0 0 4px rgba(246, 178, 59, 0.18);
+}
+
+html[data-theme="dark"] .day-task-card .task-subtasks-panel {
+    background: transparent !important;
+    border-color: #345744 !important;
+}
+
+html[data-theme="dark"] .calendar-task-description-details,
+html[data-theme="dark"] .day-task-description {
+    background: #111e17 !important;
+    border-color: #314f40 !important;
+    color: #dfece5 !important;
+}
+
+html[data-theme="dark"] .archive-description-box,
+html[data-theme="dark"] .archive-description-panel {
+    background: #111e17 !important;
+    border-color: #314f40 !important;
+    color: #dfece5 !important;
+}
+
+html[data-theme="dark"] .archive-description-box span,
+html[data-theme="dark"] .archive-description-box p {
+    color: #dfece5 !important;
+}
+
+html[data-theme="dark"] .archive-task-row {
+    background: linear-gradient(90deg, #12271a, #101c16) !important;
+}
+
+html[data-theme="dark"] .archive-task-row:hover td,
+html[data-theme="dark"] .archive-task-row.expanded td {
+    background: #16291f !important;
+}
+
+html[data-theme="dark"] .option-btn-archive {
+    background: #5d4f22 !important;
+    color: #fff4cc !important;
+}
+
+html[data-theme="dark"] .option-btn-archive:hover {
+    background: #7a672b !important;
+}
+
+html[data-theme="dark"] .archive-disabled .option-btn-archive,
+html[data-theme="dark"] .archive-disabled .option-btn-archive:hover {
+    background: #263129 !important;
+    color: #73877b !important;
+}
+
+html[data-theme="dark"] .option-btn-restore,
+html[data-theme="dark"] .option-btn-kanban {
+    background: #14566a !important;
+    color: #dff8ff !important;
+}
+
+html[data-theme="dark"] .option-btn-restore:hover,
+html[data-theme="dark"] .option-btn-kanban:hover {
+    background: #1c718a !important;
+}
+
+html[data-theme="dark"] .calendar-fab {
+    background: linear-gradient(135deg, #278350, #1c5e3a) !important;
+    color: #f6fff9 !important;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.34);
+}
+
+html[data-theme="dark"] .calendar-fab:hover {
+    background: linear-gradient(135deg, #2f9a5e, #227246) !important;
+}
+
+html[data-theme="dark"] .priority-selector input[type="radio"]:checked + .priority-option {
+    border-color: #d8fff0 !important;
+    box-shadow: 0 0 0 3px rgba(143, 215, 173, 0.42), 0 10px 22px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-theme="dark"] .priority-option:hover {
+    box-shadow: 0 0 0 2px rgba(143, 215, 173, 0.22);
+}
+
+html[data-theme="dark"] .task-row.editing td {
+    background: #342b17 !important;
+    color: #f7ead0 !important;
+}
+
+html[data-theme="dark"] .task-row.editing td:first-child {
+    border-left-color: #f2b84b !important;
+}
+
+html[data-theme="dark"] .task-grid-card.editing {
+    border-color: #f0c15f !important;
+    background: linear-gradient(145deg, #2b2517, #171c13) !important;
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.38), 0 0 0 3px rgba(240, 193, 95, 0.14) !important;
+}
+
+html[data-theme="dark"] .task-grid-title-area input[name="Title"].edit-mode,
+html[data-theme="dark"] .task-grid-card-header input[name="Title"].edit-mode {
+    color: #fff7dd !important;
+    border-bottom-color: #d9b85f !important;
+}
+
+html[data-theme="dark"] .mytasks-kanban-header {
+    border-color: #2e4a3c !important;
+}
+
+html[data-theme="dark"] .mytasks-kanban-eyebrow,
+html[data-theme="dark"] .mytasks-kanban-header p {
+    color: #a9beb4 !important;
+}
+
+html[data-theme="dark"] .kanban-back-btn {
+    background: #1b3025 !important;
+    color: #e7f4ed !important;
+    border: 1px solid #355947 !important;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
+}
+
+html[data-theme="dark"] .kanban-back-btn:hover {
+    background: #274837 !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .mytasks-kanban-column {
+    background: linear-gradient(180deg, #101d16 0%, #0b1510 100%) !important;
+    border-color: #2d4a3b !important;
+    box-shadow: inset 0 1px 0 rgba(143, 215, 173, 0.05), 0 12px 24px rgba(0, 0, 0, 0.18);
+}
+
+html[data-theme="dark"] .mytasks-kanban-column-header h3 {
+    color: #edf8f2 !important;
+}
+
+html[data-theme="dark"] .mytasks-kanban-column-header span {
+    background: #17271e !important;
+    color: #cbeadd !important;
+}
+
+html[data-theme="dark"] .mytasks-kanban-column.drop-valid {
+    border-color: #5ab77a !important;
+    box-shadow: inset 0 0 0 2px rgba(90, 183, 122, 0.28), 0 12px 24px rgba(0, 0, 0, 0.22) !important;
+}
+
+html[data-theme="dark"] .mytasks-kanban-column.drag-over {
+    background: linear-gradient(180deg, #183224 0%, #102118 100%) !important;
+}
+
+html[data-theme="dark"] .mytasks-kanban-dropzone {
+    color: #dfece5;
+}
+
+html[data-theme="dark"] .mytasks-kanban-card,
+html[data-theme="dark"] .mytasks-kanban-card-main,
+html[data-theme="dark"] .kanban-inline-title,
+html[data-theme="dark"] .kanban-card-title,
+html[data-theme="dark"] .kanban-card-detail-header,
+html[data-theme="dark"] .kanban-card-description-editable {
+    color: #eef7f2 !important;
+}
+
+html[data-theme="dark"] .kanban-inline-title:hover,
+html[data-theme="dark"] .kanban-inline-title:focus {
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .kanban-inline-title:focus {
+    background: #12241a !important;
+    box-shadow: 0 0 0 2px rgba(143, 215, 173, 0.16);
+}
+
+html[data-theme="dark"] .mytasks-kanban-card.is-blocked {
+    background: linear-gradient(145deg, #35220f, #1b1710) !important;
+    border-color: #b96f20 !important;
+    border-left-color: #f59e0b !important;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.32), inset 0 0 0 1px rgba(245, 158, 11, 0.16) !important;
+}
+
+html[data-theme="dark"] .mytasks-kanban-card.is-blocked .kanban-inline-title,
+html[data-theme="dark"] .mytasks-kanban-card.is-blocked .kanban-card-title {
+    color: #fff2d8 !important;
+}
+
+html[data-theme="dark"] .kanban-dependency-badge.no-dependency {
+    background: #17241d !important;
+    color: #aebfb6 !important;
+}
+
+html[data-theme="dark"] .kanban-dependency-badge.ready {
+    background: #173b25 !important;
+    color: #9de6b2 !important;
+}
+
+html[data-theme="dark"] .kanban-dependency-badge.blocked {
+    background: #442b13 !important;
+    color: #ffd08a !important;
+}
+
+html[data-theme="dark"] .option-btn {
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .option-btn-success {
+    background: #1f8a3d !important;
+}
+
+html[data-theme="dark"] .option-btn-success:hover {
+    background: #27a34a !important;
+}
+
+html[data-theme="dark"] .option-btn-warning {
+    background: #c37a08 !important;
+}
+
+html[data-theme="dark"] .option-btn-warning:hover {
+    background: #e1900b !important;
+}
+
+html[data-theme="dark"] .option-btn-danger {
+    background: #b91f25 !important;
+}
+
+html[data-theme="dark"] .option-btn-danger:hover {
+    background: #d4282f !important;
+}
+
+html[data-theme="dark"] .option-btn-neutral {
+    background: #263129 !important;
+    color: #988b70 !important;
+}
+
+html[data-theme="dark"] .option-btn-neutral:hover {
+    background: #344038 !important;
+}
+
+html[data-theme="dark"] .pending-wrapper .option-btn-neutral {
+    background: #233548 !important;
+    color: #d7e7ff !important;
+}
+
+html[data-theme="dark"] .pending-wrapper .option-btn-neutral:hover {
+    background: #2f4862 !important;
+}
+
+html[data-theme="dark"] .table-actions a.active {
+    background: #243f31 !important;
+    border-color: #68a87f !important;
+    color: #e8f6ef !important;
+}
+
+html[data-theme="dark"] .sort-priority {
+    background: #70c58b !important;
+    color: #07110d !important;
+}
+
+html[data-theme="dark"] .calendar-fab {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    text-align: center;
+    font-size: 0 !important;
+    font-weight: 600 !important;
+}
+
+html[data-theme="dark"] .calendar-due-date-trigger {
+    color: #d7e8df !important;
+}
+
+html[data-theme="dark"] .calendar-due-date-input {
+    background: #13231a !important;
+    border-color: #365946 !important;
+    color: #eef7f2 !important;
+}

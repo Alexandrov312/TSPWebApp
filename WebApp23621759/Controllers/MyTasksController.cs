@@ -22,18 +22,20 @@ namespace WebApp23621759.Controllers
         }
 
         //Зарежда страницата с всички задачи на текущия потребител
-        public IActionResult Index(string sortBy = "dueDate", string direction = "ASC", int? kanbanTaskId = null, string source = "mytasks", string? returnUrl = null)
+        public IActionResult Index(string sortBy = "dueDate", string direction = "ASC", string? sort = null, int? kanbanTaskId = null, string source = "mytasks", string? returnUrl = null)
         {
             int userId = UserHelper.GetUserId(User);
 
             //Взима задачите на потребителя според избраната подредба
-            var tasks = _taskService.GetAllTasksByUserId(userId, sortBy, direction);
+            string sortRules = string.IsNullOrWhiteSpace(sort) ? $"{sortBy}:{direction}" : sort;
+            var tasks = _taskService.GetAllTasksByUserId(userId, sortRules);
 
             //Подготвя view model за всяка задача, включително подзадачите ѝ
             var taskViewModels = tasks.Select(task => BuildTaskItemViewModel(task)).ToList();
 
             ViewBag.CurrentSortBy = sortBy;
             ViewBag.CurrentDirection = direction;
+            ViewBag.CurrentSort = sortRules;
             ViewBag.InitialKanbanTaskId = kanbanTaskId;
             ViewBag.KanbanSource = source;
             ViewBag.KanbanReturnUrl = returnUrl;
@@ -221,6 +223,52 @@ namespace WebApp23621759.Controllers
             }
 
             return JsonError("Task could not be reloaded after completion.");
+        }
+
+        [HttpPost]
+        public IActionResult MarkAsPending(int id)
+        {
+            int userId = UserHelper.GetUserId(User);
+            var task = _taskService.GetById(id, userId);
+
+            if (task == null)
+            {
+                return JsonError("Task was not found or does not belong to you.");
+            }
+
+            _subTaskService.SetAllPendingForTask(id, userId);
+
+            bool updated = _taskService.SetPending(id, userId);
+            if (!updated)
+            {
+                return JsonError("Task was not found or does not belong to you.");
+            }
+
+            var refreshedTask = _taskService.GetById(id, userId);
+            if (refreshedTask != null)
+            {
+                var taskViewModel = BuildTaskItemViewModel(refreshedTask);
+
+                return Json(new
+                {
+                    success = true,
+                    taskId = refreshedTask.Id,
+                    message = $"Task \"{task.Title}\" marked as pending.",
+                    notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Success),
+                    statusDisplayName = StatusHelper.GetDisplayName(refreshedTask.Status),
+                    statusValue = (int)refreshedTask.Status,
+                    statusCssClass = StatusHelper.GetCssClass(refreshedTask.Status),
+                    completedAtText = refreshedTask.CompletedAt?.ToString("dd.MM.yyyy HH:mm") ?? "Not finished",
+                    rowDateCssClass = TaskDateHelper.GetRowDateClass(refreshedTask),
+                    completionPercentage = taskViewModel.CompletionPercentage,
+                    projectedCompletionPercentage = taskViewModel.ProjectedCompletionPercentage,
+                    completedSubTaskCount = taskViewModel.CompletedSubTaskCount,
+                    inProgressSubTaskCount = taskViewModel.InProgressSubTaskCount,
+                    totalSubTaskCount = taskViewModel.TotalSubTaskCount
+                });
+            }
+
+            return JsonError("Task could not be reloaded after status change.");
         }
 
         [HttpPost]

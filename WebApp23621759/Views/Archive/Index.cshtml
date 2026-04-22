@@ -8,6 +8,11 @@
                 <span class="archive-eyebrow">Completed work</span>
                 <h2 class="title tasks-title">Archive</h2>
             </div>
+
+            <div class="view-toggle" data-view-toggle="archive">
+                <button type="button" class="view-toggle-btn active" data-view-mode-button="table">Table</button>
+                <button type="button" class="view-toggle-btn" data-view-mode-button="grid">Grid</button>
+            </div>
         </div>
 
         @if (!Model.Any())
@@ -18,7 +23,7 @@
         }
         else
         {
-            <div class="table-wrapper">
+            <div class="table-wrapper archive-view-mode" data-view-mode-panel="table">
                 <table class="task-table archive-table">
                     <thead>
                         <tr>
@@ -60,22 +65,23 @@
                                 </td>
                                 <td class="options-cell">
                                     <div class="row-actions">
-                                        <button type="button"
-                                                class="option-btn option-btn-kanban archive-details-toggle"
-                                                title="Show details"
-                                                data-archive-details-toggle="@task.Id">
-                                            👁
-                                        </button>
-
-                                        <form asp-action="Restore" method="post" class="archive-action-form">
+                                        <div class="done-wrapper restore-wrapper">
+                                            <form asp-action="Restore" method="post" class="archive-action-form">
                                             <input type="hidden" name="id" value="@task.Id" />
-                                            <button type="submit" class="option-btn option-btn-restore" title="Restore task">↩</button>
-                                        </form>
+                                            <div class="done-popup restore-popup">
+                                                <span>Restore task?</span>
+                                                <div class="popup-actions">
+                                                    <button type="submit" class="popup-btn popup-btn-confirm" data-restore-confirm="true">Yes</button>
+                                                    <button type="button" class="popup-btn popup-btn-cancel cancel-done-btn">No</button>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="option-btn option-btn-restore" title="Restore task">↺</button>
+                                            </form>
+                                        </div>
 
                                         <div class="delete-wrapper">
                                             <form asp-action="Delete" method="post" class="archive-action-form">
                                                 <input type="hidden" name="id" value="@task.Id" />
-
                                                 <button type="button" class="option-btn option-btn-danger show-popup" title="Delete forever">🗑️</button>
 
                                                 <div class="delete-popup">
@@ -92,78 +98,80 @@
                             </tr>
                             <tr class="archive-details-row" data-archive-details-id="@task.Id">
                                 <td colspan="7">
-                                    <div class="archive-details-panel">
-                                        <div class="archive-description-box">
-                                            <button type="button"
-                                                    class="archive-description-toggle"
-                                                    aria-expanded="false"
-                                                    data-archive-description-toggle>
-                                                Description
-                                            </button>
-                                            <div class="archive-description-panel">
-                                                <p>@(string.IsNullOrWhiteSpace(task.Description) ? "No description" : task.Description)</p>
-                                            </div>
-                                        </div>
-
-                                        <div class="archive-subtasks-readonly">
-                                            <div class="task-subtasks-panel-header">
-                                                <h3 class="task-subtasks-title">Subtasks</h3>
-                                                <span class="task-subtasks-count">@taskItem.TotalSubTaskCount total</span>
-                                            </div>
-
-                                            @if (!taskItem.SubTasks.Any())
-                                            {
-                                                <div class="no-subtasks-message">This archived task has no subtasks.</div>
-                                            }
-                                            else
-                                            {
-                                                <div class="subtask-list archive-subtask-list">
-                                                    @for (int subTaskIndex = 0; subTaskIndex < taskItem.SubTasks.Count; subTaskIndex++)
-                                                    {
-                                                        var subTask = taskItem.SubTasks[subTaskIndex];
-                                                        bool hasDependency = subTask.BlockedBySubTaskId.HasValue;
-                                                        var siblingDependencyIndexes = hasDependency
-                                                            ? Enumerable.Range(0, taskItem.SubTasks.Count)
-                                                                .Where(index => taskItem.SubTasks[index].BlockedBySubTaskId == subTask.BlockedBySubTaskId)
-                                                                .ToList()
-                                                            : new List<int>();
-                                                        bool hasSharedDependencyBranch = siblingDependencyIndexes.Count > 1;
-                                                        bool isFirstSharedDependency = hasSharedDependencyBranch && subTaskIndex == siblingDependencyIndexes.First();
-                                                        bool isLastSharedDependency = hasSharedDependencyBranch && subTaskIndex == siblingDependencyIndexes.Last();
-
-                                                        <article class="subtask-entry archive-subtask-entry @(hasDependency ? "has-dependency" : "") @(hasDependency && !hasSharedDependencyBranch ? "single-dependency" : "") @(hasSharedDependencyBranch ? "shared-dependency" : "") @(isFirstSharedDependency ? "shared-branch-start" : "") @(isLastSharedDependency ? "shared-branch-end" : "")"
-                                                                 style="--subtask-depth:@subTask.Depth">
-                                                            <div class="subtask-summary">
-                                                                <div class="subtask-summary-content">
-                                                                    <div class="subtask-title-row">
-                                                                        <span class="subtask-status-btn archive-subtask-status @StatusHelper.GetCssClass(subTask.Status)">
-                                                                            @StatusHelper.GetDisplayName(subTask.Status)
-                                                                        </span>
-                                                                        <strong class="subtask-title">@subTask.Title</strong>
-                                                                    </div>
-                                                                    <div class="subtask-meta">
-                                                                        <span>Completed: @(subTask.CompletedAt?.ToString("dd.MM.yyyy HH:mm") ?? "Not finished")</span>
-                                                                        @if (!string.IsNullOrWhiteSpace(subTask.BlockedByTitle))
-                                                                        {
-                                                                            <span class="subtask-dependency-badge">Depends on: @subTask.BlockedByTitle</span>
-                                                                        }
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="archive-subtask-description">
-                                                                @(string.IsNullOrWhiteSpace(subTask.Description) ? "No description" : subTask.Description)
-                                                            </div>
-                                                        </article>
-                                                    }
-                                                </div>
-                                            }
-                                        </div>
-                                    </div>
+                                    <partial name="_ArchiveTaskDetails" model="taskItem" />
                                 </td>
                             </tr>
                         }
                     </tbody>
                 </table>
+            </div>
+
+            <div class="archive-grid archive-view-mode is-hidden" data-view-mode-panel="grid">
+                @foreach (var taskItem in Model)
+                {
+                    var task = taskItem.Task;
+
+                    <article class="archive-grid-card" data-archive-card-id="@task.Id">
+                        <div class="task-grid-card-header">
+                            <div>
+                                <span class="task-grid-eyebrow">Completed @task.CompletedAt?.ToString("dd.MM.yyyy HH:mm")</span>
+                                <h3>@task.Title</h3>
+                            </div>
+
+                            <span class="archive-status-badge status-completed">Completed</span>
+                        </div>
+
+                        <div class="task-grid-meta">
+                            <span>Due: @task.DueDate.ToString("dd.MM.yyyy HH:mm")</span>
+                            <span class="priority-badge @PriorityHelper.GetCssClass(task.Priority)">@task.Priority</span>
+                        </div>
+
+                        <div class="task-progress" data-task-progress-id="@task.Id">
+                            <div class="task-progress-bar">
+                                <div class="task-progress-fill task-progress-fill-projected" style="width: @taskItem.ProjectedCompletionPercentage%;"></div>
+                                <div class="task-progress-fill task-progress-fill-completed" style="width: @taskItem.CompletionPercentage%;"></div>
+                            </div>
+                            <div class="task-progress-text">
+                                @taskItem.CompletionPercentage% (@taskItem.CompletedSubTaskCount/@taskItem.TotalSubTaskCount)
+                            </div>
+                        </div>
+
+                        <div class="task-grid-actions row-actions">
+                            <div class="done-wrapper restore-wrapper">
+                                <form asp-action="Restore" method="post" class="archive-action-form">
+                                <input type="hidden" name="id" value="@task.Id" />
+                                <div class="done-popup restore-popup">
+                                    <span>Restore task?</span>
+                                    <div class="popup-actions">
+                                        <button type="submit" class="popup-btn popup-btn-confirm" data-restore-confirm="true">Yes</button>
+                                        <button type="button" class="popup-btn popup-btn-cancel cancel-done-btn">No</button>
+                                    </div>
+                                </div>
+                                <button type="submit" class="option-btn option-btn-restore" title="Restore task">↺</button>
+                                </form>
+                            </div>
+
+                            <div class="delete-wrapper">
+                                <form asp-action="Delete" method="post" class="archive-action-form">
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <button type="button" class="option-btn option-btn-danger show-popup" title="Delete forever">🗑️</button>
+                                    <div class="delete-popup">
+                                        <span>Delete forever?</span>
+                                        <div class="popup-actions">
+                                            <button type="submit" class="popup-btn popup-btn-danger">Yes</button>
+                                            <button type="button" class="popup-btn popup-btn-cancel cancel-btn">No</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                    </article>
+
+                    <div class="archive-grid-details" data-archive-card-details-id="@task.Id">
+                        <partial name="_ArchiveTaskDetails" model="taskItem" />
+                    </div>
+                }
             </div>
         }
     </div>

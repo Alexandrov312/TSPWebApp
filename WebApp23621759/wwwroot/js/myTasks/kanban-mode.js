@@ -310,7 +310,7 @@ async function createMyTasksTask(form) {
 
     showToast(result.message, result.notificationCssClass);
     if (result.success) {
-        await refreshMyTasksListView();
+        await refreshMyTasksListView(result.taskId);
     }
 }
 
@@ -422,8 +422,14 @@ async function handleMyTasksKanbanMutation(result) {
 }
 
 //Презарежда стандартната таблица през AJAX без full page reload
-async function refreshMyTasksListView() {
-    const response = await fetch("/MyTasks", {
+async function refreshMyTasksListView(scrollToTaskId) {
+    const query = new URLSearchParams(window.location.search);
+    query.delete("kanbanTaskId");
+    query.delete("source");
+    query.delete("returnUrl");
+    const endpoint = query.toString() ? `/MyTasks?${query.toString()}` : "/MyTasks";
+
+    const response = await fetch(endpoint, {
         headers: {
             "X-Requested-With": "XMLHttpRequest"
         }
@@ -439,7 +445,35 @@ async function refreshMyTasksListView() {
     const currentList = document.querySelector(".mytasks-list-view");
     if (refreshedList && currentList) {
         currentList.innerHTML = refreshedList.innerHTML;
+        if (typeof applyPersistedViewModes === "function") {
+            applyPersistedViewModes();
+        }
+
+        if (scrollToTaskId) {
+            scrollToCreatedTask(scrollToTaskId);
+        }
     }
+}
+
+//Скролва до новосъздадената задача след AJAX refresh на MyTasks
+function scrollToCreatedTask(taskId) {
+    window.requestAnimationFrame(() => {
+        const isGridView = document.documentElement.dataset.mytasksView === "grid";
+        const primarySelector = isGridView
+            ? `.task-grid-card[data-task-grid-id="${taskId}"]`
+            : `.task-summary-row[data-task-row-id="${taskId}"]`;
+        const fallbackSelector = isGridView
+            ? `.task-summary-row[data-task-row-id="${taskId}"]`
+            : `.task-grid-card[data-task-grid-id="${taskId}"]`;
+        const target = document.querySelector(primarySelector) ?? document.querySelector(fallbackSelector);
+        if (!target) {
+            return;
+        }
+
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+        target.classList.add("created-task-highlight");
+        window.setTimeout(() => target.classList.remove("created-task-highlight"), 1400);
+    });
 }
 
 //Маркира само позволените drop зони според dependency ограниченията

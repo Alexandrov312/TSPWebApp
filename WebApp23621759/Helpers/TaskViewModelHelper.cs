@@ -14,10 +14,10 @@ namespace WebApp23621759.Helpers
             int completedSubTasks = subTasks.Count(subTask => subTask.Status == Status.Completed);
             int inProgressSubTasks = subTasks.Count(subTask => subTask.Status == Status.InProgress);
             int completionPercentage = totalSubTasks == 0
-                ? 0
+                ? task.Status == Status.Completed ? 100 : 0
                 : (int)Math.Round((double)completedSubTasks * 100 / totalSubTasks);
             int projectedCompletionPercentage = totalSubTasks == 0
-                ? 0
+                ? completionPercentage
                 : (int)Math.Round((double)(completedSubTasks + inProgressSubTasks) * 100 / totalSubTasks);
             Dictionary<int, int> depthBySubTaskId = SubTaskHelper.BuildSubTaskDepthMap(subTasks);
             List<SubTaskItem> orderedSubTasks = SubTaskHelper.OrderSubTasks(subTasks);

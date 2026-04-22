@@ -1,0 +1,74 @@
+@using WebApp23621759.Helpers
+@model WebApp23621759.Models.ViewModel.Tasks.MyTaskItemViewModel
+
+@{
+    var task = Model.Task;
+}
+
+<div class="archive-details-panel">
+    <div class="archive-description-box">
+        <button type="button"
+                class="archive-description-toggle"
+                aria-expanded="false"
+                data-archive-description-toggle>
+            Description
+        </button>
+        <div class="archive-description-panel">
+            <p>@(string.IsNullOrWhiteSpace(task.Description) ? "No description" : task.Description)</p>
+        </div>
+    </div>
+
+    <div class="archive-subtasks-readonly">
+        <div class="task-subtasks-panel-header">
+            <h3 class="task-subtasks-title">Subtasks</h3>
+            <span class="task-subtasks-count">@Model.TotalSubTaskCount total</span>
+        </div>
+
+        @if (!Model.SubTasks.Any())
+        {
+            <div class="no-subtasks-message">This archived task has no subtasks.</div>
+        }
+        else
+        {
+            <div class="subtask-list archive-subtask-list">
+                @for (int subTaskIndex = 0; subTaskIndex < Model.SubTasks.Count; subTaskIndex++)
+                {
+                    var subTask = Model.SubTasks[subTaskIndex];
+                    bool hasDependency = subTask.BlockedBySubTaskId.HasValue;
+                    var siblingDependencyIndexes = hasDependency
+                        ? Enumerable.Range(0, Model.SubTasks.Count)
+                            .Where(index => Model.SubTasks[index].BlockedBySubTaskId == subTask.BlockedBySubTaskId)
+                            .ToList()
+                        : new List<int>();
+                    bool hasSharedDependencyBranch = siblingDependencyIndexes.Count > 1;
+                    bool isFirstSharedDependency = hasSharedDependencyBranch && subTaskIndex == siblingDependencyIndexes.First();
+                    bool isLastSharedDependency = hasSharedDependencyBranch && subTaskIndex == siblingDependencyIndexes.Last();
+
+                    <article class="subtask-entry archive-subtask-entry @(hasDependency ? "has-dependency" : "") @(hasDependency && !hasSharedDependencyBranch ? "single-dependency" : "") @(hasSharedDependencyBranch ? "shared-dependency" : "") @(isFirstSharedDependency ? "shared-branch-start" : "") @(isLastSharedDependency ? "shared-branch-end" : "")"
+                             style="--subtask-depth:@subTask.Depth">
+                        <div class="subtask-summary">
+                            <div class="subtask-summary-content">
+                                <div class="subtask-title-row">
+                                    <span class="subtask-status-btn archive-subtask-status @StatusHelper.GetCssClass(subTask.Status)">
+                                        @StatusHelper.GetDisplayName(subTask.Status)
+                                    </span>
+                                    <strong class="subtask-title">@subTask.Title</strong>
+                                </div>
+                                <div class="subtask-meta">
+                                    <span>Completed: @(subTask.CompletedAt?.ToString("dd.MM.yyyy HH:mm") ?? "Not finished")</span>
+                                    @if (!string.IsNullOrWhiteSpace(subTask.BlockedByTitle))
+                                    {
+                                        <span class="subtask-dependency-badge">Depends on: @subTask.BlockedByTitle</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="archive-subtask-description">
+                            @(string.IsNullOrWhiteSpace(subTask.Description) ? "No description" : subTask.Description)
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </div>
+</div>

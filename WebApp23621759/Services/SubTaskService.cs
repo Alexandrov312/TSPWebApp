@@ -340,6 +340,31 @@ namespace WebApp23621759.Services
             return command.ExecuteNonQuery();
         }
 
+        public int SetAllPendingForTask(int taskId, int userId)
+        {
+            var pendingColumn = _kanbanColumnService.GetDefaultColumnForStatus(taskId, userId, Status.Pending);
+
+            using var connection = _databaseService.GetOpenConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = @"
+                UPDATE ""SubTasks""
+                SET
+                    ""Status"" = @status,
+                    ""CompletedAt"" = NULL,
+                    ""KanbanColumnId"" = @kanbanColumnId
+                WHERE ""TaskId"" = @taskId
+                  AND ""UserId"" = @userId
+                  AND ""Status"" <> @pendingStatus;";
+
+            command.Parameters.AddWithValue("status", (int)Status.Pending);
+            command.Parameters.AddWithValue("pendingStatus", (int)Status.Pending);
+            command.Parameters.AddWithValue("kanbanColumnId", pendingColumn?.Id ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("taskId", taskId);
+            command.Parameters.AddWithValue("userId", userId);
+
+            return command.ExecuteNonQuery();
+        }
+
         private bool SetStatusAndColumn(int subTaskId, int userId, Status targetStatus, int targetColumnId)
         {
             var task = GetById(subTaskId);

@@ -50,24 +50,27 @@ namespace WebApp23621759.Services
 
         public List<TaskItem> GetAllTasksByUserId(int userId, string sortBy, string direction)
         {
+            string normalizedDirection = string.Equals(direction, "DESC", StringComparison.OrdinalIgnoreCase)
+                ? "DESC"
+                : "ASC";
+
+            return GetAllTasksByUserId(userId, $"{sortBy}:{normalizedDirection}");
+        }
+
+        public List<TaskItem> GetAllTasksByUserId(int userId, string sortRules)
+        {
             var tasks = new List<TaskItem>();
 
             using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
 
-            string sortColumn = sortBy switch
-            {
-                "priority" => "\"Priority\"",
-                "status" => "\"Status\"",
-                "createdAt" => "\"CreatedAt\"",
-                _ => "\"DueDate\""
-            };
+            string orderByClause = BuildOrderByClause(sortRules);
 
             command.CommandText = $@"
                 SELECT ""Id"", ""Title"", ""Description"", ""DueDate"", ""CreatedAt"", ""CompletedAt"", ""Status"", ""Priority"", ""IsArchived"", ""UserId""
                 FROM ""Tasks""
                 WHERE ""UserId"" = @userId AND ""IsArchived"" = FALSE
-                ORDER BY {sortColumn} {direction};";
+                ORDER BY {orderByClause};";
 
             command.Parameters.AddWithValue("@userId", userId);
 
@@ -78,6 +81,38 @@ namespace WebApp23621759.Services
             }
 
             return tasks;
+        }
+
+        private static string BuildOrderByClause(string sortRules)
+        {
+            var allowedColumns = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["dueDate"] = "\"DueDate\"",
+                ["priority"] = "\"Priority\"",
+                ["status"] = "\"Status\"",
+                ["createdAt"] = "\"CreatedAt\""
+            };
+
+            var orderParts = new List<string>();
+            var usedColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string rawRule in (sortRules ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                string[] pieces = rawRule.Split(':', StringSplitOptions.TrimEntries);
+                string key = pieces.ElementAtOrDefault(0) ?? string.Empty;
+                if (!allowedColumns.TryGetValue(key, out string? column) || !usedColumns.Add(key))
+                {
+                    continue;
+                }
+
+                string direction = pieces.ElementAtOrDefault(1)?.Equals("DESC", StringComparison.OrdinalIgnoreCase) == true
+                    ? "DESC"
+                    : "ASC";
+
+                orderParts.Add($"{column} {direction}");
+            }
+
+            orderParts.Add("\"Id\" ASC");
+            return string.Join(", ", orderParts);
         }
 
         public bool DeleteTask(int taskId)
@@ -283,6 +318,26 @@ namespace WebApp23621759.Services
             command.Parameters.AddWithValue("status", (int)newStatus);
             command.Parameters.AddWithValue("completedStatus", (int)Status.Completed);
             command.Parameters.AddWithValue("overdueStatus", (int)Status.Overdue);
+
+            int affectedRows = command.ExecuteNonQuery();
+            return affectedRows > 0;
+        }
+
+        public bool SetPending(int taskId, int userId)
+        {
+            using var connection = _databaseService.GetOpenConnection();
+            using var command = connection.CreateCommand();
+
+            command.CommandText = @"
+                UPDATE ""Tasks""
+                SET 
+                    ""Status"" = @status,
+                    ""CompletedAt"" = NULL
+                WHERE ""Id"" = @id AND ""UserId"" = @userId;";
+
+            command.Parameters.AddWithValue("id", taskId);
+            command.Parameters.AddWithValue("userId", userId);
+            command.Parameters.AddWithValue("status", (int)Status.Pending);
 
             int affectedRows = command.ExecuteNonQuery();
             return affectedRows > 0;

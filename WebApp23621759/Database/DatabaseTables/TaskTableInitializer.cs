@@ -26,12 +26,6 @@ namespace WebApp23621759.Database.DatabaseTables
 					);";
                 createTableCommand.ExecuteNonQuery();
             }
-
-            using var archiveColumnCommand = connection.CreateCommand();
-            archiveColumnCommand.CommandText = @"
-                ALTER TABLE ""Tasks""
-                ADD COLUMN IF NOT EXISTS ""IsArchived"" BOOLEAN NOT NULL DEFAULT FALSE;";
-            archiveColumnCommand.ExecuteNonQuery();
         }
     }
 }

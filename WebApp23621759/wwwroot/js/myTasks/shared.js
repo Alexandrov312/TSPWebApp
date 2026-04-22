@@ -22,28 +22,30 @@ async function postForm(form, body) {
 
 //Обновява визуално прогреса на главната задача
 function updateTaskProgress(taskId, completionPercentage, projectedCompletionPercentage, completedSubTaskCount, totalSubTaskCount) {
-    const progressContainer = document.querySelector(`.task-progress[data-task-progress-id="${taskId}"]`);
-    if (!progressContainer) {
+    const progressContainers = document.querySelectorAll(`.task-progress[data-task-progress-id="${taskId}"]`);
+    if (!progressContainers.length) {
         return;
     }
 
-    const completedFill = progressContainer.querySelector(".task-progress-fill-completed");
-    const projectedFill = progressContainer.querySelector(".task-progress-fill-projected");
-    const progressText = progressContainer.querySelector(".task-progress-text");
+    progressContainers.forEach(progressContainer => {
+        const completedFill = progressContainer.querySelector(".task-progress-fill-completed");
+        const projectedFill = progressContainer.querySelector(".task-progress-fill-projected");
+        const progressText = progressContainer.querySelector(".task-progress-text");
 
-    if (completedFill) {
-        completedFill.style.width = `${completionPercentage}%`;
-    }
+        if (completedFill) {
+            completedFill.style.width = `${completionPercentage}%`;
+        }
 
-    if (projectedFill) {
-        //Синята част никога не трябва да остава по-къса от зелената
-        const projectedWidth = Math.max(projectedCompletionPercentage ?? completionPercentage, completionPercentage);
-        projectedFill.style.width = `${projectedWidth}%`;
-    }
+        if (projectedFill) {
+            //Синята част никога не трябва да остава по-къса от зелената
+            const projectedWidth = Math.max(projectedCompletionPercentage ?? completionPercentage, completionPercentage);
+            projectedFill.style.width = `${projectedWidth}%`;
+        }
 
-    if (progressText) {
-        progressText.textContent = `${completionPercentage}% (${completedSubTaskCount}/${totalSubTaskCount})`;
-    }
+        if (progressText) {
+            progressText.textContent = `${completionPercentage}% (${completedSubTaskCount}/${totalSubTaskCount})`;
+        }
+    });
 }
 
 //Прилага новия статус на главната задача едновременно в MyTasks и Calendar, ако съответният елемент е на екрана
@@ -93,6 +95,34 @@ function syncTaskStateAcrossViews(result) {
         syncArchiveButton(result.taskId, taskStatusValue);
     }
 
+    const gridCard = document.querySelector(`.task-grid-card[data-task-grid-id="${result.taskId}"]`);
+    if (gridCard) {
+        const rowDateClasses = ["task-row-due-today", "task-row-overdue", "task-row-completed-past", "task-row-upcoming"];
+        const statusClasses = ["status-pending", "status-in-progress", "status-completed", "status-overdue"];
+        const statusBadge = gridCard.querySelector(".task-status-badge");
+        const completedText = gridCard.querySelector("[data-grid-completed-text]");
+
+        gridCard.classList.remove(...rowDateClasses, ...statusClasses);
+        if (taskRowDateCssClass) {
+            gridCard.classList.add(taskRowDateCssClass);
+        }
+        if (taskStatusCssClass) {
+            gridCard.classList.add(taskStatusCssClass);
+        }
+
+        if (statusBadge) {
+            statusBadge.textContent = taskStatusDisplayName;
+        }
+
+        if (completedText && taskCompletedAtText) {
+            completedText.textContent = taskCompletedAtText === "Not finished"
+                ? "Not finished"
+                : `Completed: ${taskCompletedAtText}`;
+        }
+
+        syncArchiveButton(result.taskId, taskStatusValue);
+    }
+
     const taskCard = document.querySelector(`.day-task-card[data-calendar-task-id="${result.taskId}"]`);
     if (taskCard) {
         taskCard.classList.remove("calendar-task-pending", "calendar-task-in-progress", "calendar-task-completed", "calendar-task-overdue");
@@ -122,20 +152,24 @@ function syncTaskStateAcrossViews(result) {
 
 //Активира archive бутона само когато главната задача е завършена
 function syncArchiveButton(taskId, taskStatusValue) {
-    const archiveWrapper = document.querySelector(`[data-task-archive-id="${taskId}"]`);
-    const archiveButton = archiveWrapper?.querySelector(".option-btn-archive");
-    if (!archiveWrapper || !archiveButton) {
+    const archiveWrappers = document.querySelectorAll(`[data-task-archive-id="${taskId}"]`);
+    if (!archiveWrappers.length) {
         return;
     }
 
     const isCompleted = String(taskStatusValue) === "2";
-    archiveWrapper.classList.toggle("archive-enabled", isCompleted);
-    archiveWrapper.classList.toggle("archive-disabled", !isCompleted);
-    archiveButton.disabled = !isCompleted;
-    archiveButton.classList.toggle("show-popup", isCompleted);
-    archiveButton.title = isCompleted
-        ? "Archive task"
-        : "Complete the task before archiving";
+    archiveWrappers.forEach(archiveWrapper => {
+        const archiveButton = archiveWrapper.querySelector(".option-btn-archive");
+        archiveWrapper.classList.toggle("archive-enabled", isCompleted);
+        archiveWrapper.classList.toggle("archive-disabled", !isCompleted);
+        if (archiveButton) {
+            archiveButton.disabled = !isCompleted;
+            archiveButton.classList.toggle("show-popup", isCompleted);
+            archiveButton.title = isCompleted
+                ? "Archive task"
+                : "Complete the task before archiving";
+        }
+    });
 }
 
 //Добавя правилния status-* клас към select-а на главната задача

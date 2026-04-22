@@ -27,6 +27,17 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        const dueDateTrigger = event.target.closest(".calendar-due-date-trigger");
+        if (dueDateTrigger) {
+            event.preventDefault();
+            event.stopPropagation();
+            const taskCard = dueDateTrigger.closest(".day-task-card");
+            if (taskCard) {
+                openCalendarDueDateEditor(taskCard);
+            }
+            return;
+        }
+
         const taskCard = event.target.closest(".day-task-card");
         if (taskCard && !isCalendarInteractiveElement(event.target)) {
             toggleCalendarTaskDetails(taskCard);
@@ -101,16 +112,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.addEventListener("change", function (event) {
         const prioritySelect = event.target.closest(".calendar-priority-select");
-        if (!prioritySelect) {
+        if (prioritySelect) {
+            const taskCard = prioritySelect.closest(".day-task-card");
+            if (!taskCard) {
+                return;
+            }
+
+            closeCalendarPriorityEditor(taskCard, prioritySelect.value);
+            saveCalendarTaskChanges(taskCard);
             return;
         }
 
-        const taskCard = prioritySelect.closest(".day-task-card");
+        const dueDateInput = event.target.closest(".calendar-due-date-input");
+        if (!dueDateInput) {
+            return;
+        }
+
+        const taskCard = dueDateInput.closest(".day-task-card");
         if (!taskCard) {
             return;
         }
 
-        closeCalendarPriorityEditor(taskCard, prioritySelect.value);
+        closeCalendarDueDateEditor(taskCard);
         saveCalendarTaskChanges(taskCard);
     });
 
@@ -133,6 +156,20 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 0);
     });
 
+    document.addEventListener("focusout", function (event) {
+        const dueDateInput = event.target.closest(".calendar-due-date-input");
+        if (!dueDateInput) {
+            return;
+        }
+
+        const taskCard = dueDateInput.closest(".day-task-card");
+        window.setTimeout(() => {
+            if (taskCard && !taskCard.contains(document.activeElement)) {
+                closeCalendarDueDateEditor(taskCard);
+            }
+        }, 0);
+    });
+
     document.addEventListener("submit", function (event) {
         const form = event.target;
         if (!(form instanceof HTMLFormElement)) {
@@ -146,6 +183,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (form.matches(".calendar-task-done-form")) {
+            event.preventDefault();
+            submitCalendarTaskAction(form);
+            return;
+        }
+
+        if (form.matches(".calendar-task-pending-form")) {
             event.preventDefault();
             submitCalendarTaskAction(form);
             return;
@@ -214,7 +257,7 @@ async function submitCalendarTaskAction(form) {
     }
 
     //Запазва разгъната готовата карта, когато това е нужно след refresh
-    await reloadCalendarDayTasksContent(form.matches(".calendar-task-done-form") ? result.taskId : null);
+    await reloadCalendarDayTasksContent(form.matches(".calendar-task-done-form, .calendar-task-pending-form") ? result.taskId : null);
 }
 
 //Презарежда само десния панел със задачите за избрания ден в Calendar
@@ -273,10 +316,12 @@ function saveCalendarTaskChanges(taskCard) {
     const titleValue = normalizeEditableValue(taskCard.querySelector('[data-calendar-field="title"]'));
     const descriptionValue = normalizeEditableValue(taskCard.querySelector('[data-calendar-field="description"]')) || CALENDAR_DEFAULT_DESCRIPTION;
     const prioritySelect = taskCard.querySelector(".calendar-priority-select");
+    const dueDateInput = taskCard.querySelector(".calendar-due-date-input");
 
     const titleInput = editForm.querySelector('input[name="Title"]');
     const descriptionInput = editForm.querySelector('input[name="Description"]');
     const priorityInput = editForm.querySelector('input[name="Priority"]');
+    const dueDateHiddenInput = editForm.querySelector('input[name="DueDate"]');
 
     if (titleInput) {
         titleInput.value = titleValue;
@@ -288,6 +333,10 @@ function saveCalendarTaskChanges(taskCard) {
 
     if (priorityInput && prioritySelect) {
         priorityInput.value = prioritySelect.value;
+    }
+
+    if (dueDateHiddenInput && dueDateInput) {
+        dueDateHiddenInput.value = dueDateInput.value;
     }
 
     submitCalendarTaskUpdate(editForm);
@@ -320,9 +369,32 @@ function closeCalendarPriorityEditor(taskCard, selectedValue) {
     }
 }
 
+//Отваря inline editor-а за крайната дата на главната задача
+function openCalendarDueDateEditor(taskCard) {
+    document.querySelectorAll(".day-task-card.due-date-editing").forEach(card => {
+        if (card !== taskCard) {
+            closeCalendarDueDateEditor(card);
+        }
+    });
+
+    taskCard.classList.add("due-date-editing");
+    const dueDateInput = taskCard.querySelector(".calendar-due-date-input");
+    if (dueDateInput) {
+        dueDateInput.focus();
+        if (typeof dueDateInput.showPicker === "function") {
+            dueDateInput.showPicker();
+        }
+    }
+}
+
+//Затваря inline editor-а за крайната дата
+function closeCalendarDueDateEditor(taskCard) {
+    taskCard.classList.remove("due-date-editing");
+}
+
 //Проверява дали кликът е върху интерактивен елемент в картата на главна задача
 function isCalendarInteractiveElement(element) {
-    return !!element.closest("button, a, form, input, select, textarea, label, .popup-actions, .subtask-actions, .subtask-edit-form, .inline-editable, .inline-dependency-trigger, .calendar-subtasks-panel-wrap, .calendar-inline-editable, .calendar-priority-trigger, .calendar-description-toggle");
+    return !!element.closest("button, a, form, input, select, textarea, label, .popup-actions, .subtask-actions, .subtask-edit-form, .inline-editable, .inline-dependency-trigger, .calendar-subtasks-panel-wrap, .calendar-inline-editable, .calendar-priority-trigger, .calendar-description-toggle, .calendar-due-date-trigger, .calendar-due-date-input");
 }
 
 //Разгъва или свива панела с подзадачите на избраната главна задача

@@ -27,7 +27,14 @@
 
                     @* Горна част: срок + приоритет *@
                     <div class="day-task-top">
-                        <div class="day-task-time">Until: @task.DueDate.ToString("dd/MM/yyyy HH:mm")</div>
+                        <div class="day-task-time calendar-due-date-slot">
+                            <button type="button" class="calendar-due-date-trigger">
+                                Until: @task.DueDate.ToString("dd/MM/yyyy HH:mm")
+                            </button>
+                            <input type="datetime-local"
+                                   class="form-input calendar-due-date-input"
+                                   value="@task.DueDate.ToString("yyyy-MM-ddTHH:mm")" />
+                        </div>
 
                         @* Inline редакция на приоритет *@
                         <div class="calendar-priority-slot">
@@ -90,6 +97,30 @@
                                 🧩
                             </a>
 
+                            <div class="archive-wrapper delete-wrapper @(task.Status == Status.Completed ? "archive-enabled" : "archive-disabled")">
+                                <form asp-action="Archive" method="post" class="calendar-task-archive-form calendar-task-ajax-form">
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <input type="hidden" name="year" value="@Model.Year" />
+                                    <input type="hidden" name="month" value="@Model.Month" />
+                                    <input type="hidden" name="selectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+
+                                    <button type="button"
+                                            class="option-btn option-btn-archive @(task.Status == Status.Completed ? "show-popup" : "")"
+                                            title="@(task.Status == Status.Completed ? "Archive task" : "Complete the task before archiving")"
+                                    @(task.Status == Status.Completed ? "" : "disabled")>
+                                        📦
+                                    </button>
+
+                                    <div class="delete-popup">
+                                        <span>Archive task?</span>
+                                        <div class="popup-actions">
+                                            <button type="submit" class="popup-btn popup-btn-confirm">Yes</button>
+                                            <button type="button" class="popup-btn popup-btn-cancel cancel-btn">No</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
                             @* Маркиране като завършена *@
                             <div class="done-wrapper">
                                 <form asp-action="MarkAsDone" method="post" class="calendar-task-done-form calendar-task-ajax-form">
@@ -98,11 +129,31 @@
                                     <input type="hidden" name="month" value="@Model.Month" />
                                     <input type="hidden" name="selectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
 
-                                    <button type="button" class="option-btn option-btn-success show-done-popup" title="Mark as done">&#x2705;</button>
+                                    <button type="button" class="option-btn option-btn-success show-done-popup" title="Mark as done">✓</button>
 
                                     @* Popup за потвърждение *@
                                     <div class="done-popup">
                                         <span>Mark task as done?</span>
+                                        <div class="popup-actions">
+                                            <button type="submit" class="popup-btn popup-btn-confirm">Yes</button>
+                                            <button type="button" class="popup-btn popup-btn-cancel cancel-done-btn">No</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                            @* Връщане към Pending за цялата задача и подзадачите ѝ *@
+                            <div class="done-wrapper pending-wrapper">
+                                <form asp-action="MarkAsPending" method="post" class="calendar-task-pending-form calendar-task-ajax-form">
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <input type="hidden" name="year" value="@Model.Year" />
+                                    <input type="hidden" name="month" value="@Model.Month" />
+                                    <input type="hidden" name="selectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+
+                                    <button type="button" class="option-btn option-btn-neutral show-done-popup" title="Mark as pending">⟳</button>
+
+                                    <div class="done-popup pending-popup">
+                                        <span>Mark task as pending?</span>
                                         <div class="popup-actions">
                                             <button type="submit" class="popup-btn popup-btn-confirm">Yes</button>
                                             <button type="button" class="popup-btn popup-btn-cancel cancel-done-btn">No</button>
@@ -119,37 +170,13 @@
                                     <input type="hidden" name="month" value="@Model.Month" />
                                     <input type="hidden" name="selectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
 
-                                    <button type="button" class="option-btn option-btn-danger show-popup" title="Delete task">&#x1F5D1;&#xFE0F;</button>
+                                    <button type="button" class="option-btn option-btn-danger show-popup" title="Delete task">🗑</button>
 
                                     @* Popup за потвърждение *@
                                     <div class="delete-popup">
                                         <span>Delete task?</span>
                                         <div class="popup-actions">
                                             <button type="submit" class="popup-btn popup-btn-danger">Yes</button>
-                                            <button type="button" class="popup-btn popup-btn-cancel cancel-btn">No</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-
-                            <div class="archive-wrapper delete-wrapper @(task.Status == Status.Completed ? "archive-enabled" : "archive-disabled")">
-                                <form asp-action="Archive" method="post" class="calendar-task-archive-form calendar-task-ajax-form">
-                                    <input type="hidden" name="id" value="@task.Id" />
-                                    <input type="hidden" name="year" value="@Model.Year" />
-                                    <input type="hidden" name="month" value="@Model.Month" />
-                                    <input type="hidden" name="selectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
-
-                                    <button type="button"
-                                            class="option-btn option-btn-archive @(task.Status == Status.Completed ? "show-popup" : "")"
-                                            title="@(task.Status == Status.Completed ? "Archive task" : "Complete the task before archiving")"
-                                            @(task.Status == Status.Completed ? "" : "disabled")>
-                                        📦
-                                    </button>
-
-                                    <div class="delete-popup">
-                                        <span>Archive task?</span>
-                                        <div class="popup-actions">
-                                            <button type="submit" class="popup-btn popup-btn-confirm">Yes</button>
                                             <button type="button" class="popup-btn popup-btn-cancel cancel-btn">No</button>
                                         </div>
                                     </div>
@@ -206,6 +233,8 @@
         <input type="hidden" name="year" value="@Model.Year" />
         <input type="hidden" name="month" value="@Model.Month" />
         <input type="hidden" name="selectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
-        <button type="submit" class="calendar-fab" title="Add new task">+</button>
+        <button type="submit" class="calendar-fab" title="Add new task">
+            <span class="calendar-fab-plus">+</span>
+        </button>
     </form>
 </div>
