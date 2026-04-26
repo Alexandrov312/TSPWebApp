@@ -6,6 +6,7 @@
         refreshDependencyOptions(panel.dataset.taskPanelId);
     });
 
+    //Click listener за dependency badge-ове и бутоните за показване на описание.
     document.addEventListener("click", function (event) {
         const dependencyTrigger = event.target.closest(".inline-dependency-trigger");
         if (dependencyTrigger) {
@@ -39,6 +40,7 @@
         });
     });
 
+    //Запомня оригиналния текст преди inline редакция на подзадача.
     document.addEventListener("focusin", function (event) {
         const editableField = event.target.closest(".inline-editable");
         if (!editableField) {
@@ -48,6 +50,7 @@
         editableField.dataset.originalValue = normalizeEditableValue(editableField);
     });
 
+    //Enter приключва редакцията на заглавие, Escape връща предишната стойност.
     document.addEventListener("keydown", function (event) {
         const editableField = event.target.closest(".inline-editable");
         if (!editableField) {
@@ -66,6 +69,7 @@
         }
     });
 
+    //Записва inline редакцията само ако текстът реално е променен.
     document.addEventListener("focusout", function (event) {
         const editableField = event.target.closest(".inline-editable");
         if (!editableField) {
@@ -95,6 +99,7 @@
         });
     });
 
+    //Смяната на dependency се записва веднага през съществуващата AJAX форма.
     document.addEventListener("change", function (event) {
         const dependencySelect = event.target.closest(".subtask-inline-dependency-select");
         if (!dependencySelect) {
@@ -116,6 +121,7 @@
         });
     });
 
+    //Затваря dependency select-а, когато потребителят излезе извън подзадачата.
     document.addEventListener("focusout", function (event) {
         const dependencySelect = event.target.closest(".subtask-inline-dependency-select");
         if (!dependencySelect) {
@@ -135,6 +141,7 @@
         }, 0);
     });
 
+    //Формите на подзадачите се прихващат тук, за да остане страницата на същото място.
     document.addEventListener("submit", function (event) {
         const form = event.target;
         if (!(form instanceof HTMLFormElement)) {

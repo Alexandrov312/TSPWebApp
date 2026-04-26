@@ -89,7 +89,7 @@ namespace WebApp23621759.Services
             {
                 ["dueDate"] = "\"DueDate\"",
                 ["priority"] = "\"Priority\"",
-                ["status"] = "\"Status\"",
+                ["status"] = "CASE WHEN \"IsArchived\" = FALSE AND \"Status\" <> 2 AND \"DueDate\" < NOW() THEN 3 ELSE \"Status\" END",
                 ["createdAt"] = "\"CreatedAt\""
             };
 
@@ -418,7 +418,7 @@ namespace WebApp23621759.Services
 
         private static TaskItem MapTask(NpgsqlDataReader reader)
         {
-            return new TaskItem()
+            TaskItem task = new()
             {
                 Id = reader.GetInt32(0),
                 Title = reader.GetString(1),
@@ -431,6 +431,13 @@ namespace WebApp23621759.Services
                 IsArchived = reader.GetBoolean(8),
                 UserId = reader.GetInt32(9)
             };
+
+            if (task.Status != Status.Completed && !task.IsArchived && task.DueDate < DateTime.Now)
+            {
+                task.Status = Status.Overdue;
+            }
+
+            return task;
         }
     }
 }

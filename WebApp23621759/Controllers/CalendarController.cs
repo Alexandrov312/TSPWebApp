@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApp23621759.Enums;
 using WebApp23621759.Helpers;
@@ -11,7 +11,7 @@ using WebApp23621759.Services;
 namespace WebApp23621759.Controllers
 {
     [Authorize]
-    public class CalendarController : Controller
+    public class CalendarController : PlanoraController
     {
         private readonly TaskService _taskService;
         private readonly SubTaskService _subTaskService;
@@ -64,12 +64,7 @@ namespace WebApp23621759.Controllers
                 //Ако заявката е дошла през JavaScript/fetch, връща JSON вместо redirect
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
-                    return Json(new
-                    {
-                        success = false,
-                        message = "Task was not found or does not belong to you.",
-                        notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Error)
-                    });
+                    return JsonError("Task was not found or does not belong to you.");
                 }
 
                 //При нормална заявка записва съобщение в TempData и после ще redirect-не
@@ -456,24 +451,14 @@ namespace WebApp23621759.Controllers
             var task = _taskService.GetById(taskId, userId);
             if (task == null)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = "Task was not found or does not belong to you.",
-                    notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Error)
-                });
+                return JsonError("Task was not found or does not belong to you.");
             }
 
             //Създава подзадача с начални стойности
             var createdSubTask = _subTaskService.CreateSubTask("New subtask", string.Empty, null, taskId, userId);
             if (createdSubTask == null)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = "Subtask could not be created.",
-                    notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Error)
-                });
+                return JsonError("Subtask could not be created.");
             }
 
             var syncedTask = _taskService.SyncStatusWithSubTasks(taskId, userId);
@@ -513,22 +498,12 @@ namespace WebApp23621759.Controllers
 
             if (subTask == null || subTask.UserId != userId)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = "Subtask was not found or does not belong to you.",
-                    notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Error)
-                });
+                return JsonError("Subtask was not found or does not belong to you.");
             }
 
             if (!_subTaskService.DeleteTask(id, userId))
             {
-                return Json(new
-                {
-                    success = false,
-                    message = "Subtask could not be deleted.",
-                    notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Error)
-                });
+                return JsonError("Subtask could not be deleted.");
             }
 
             //След изтриване на подзадача преизчислява състоянието на главната задача
@@ -622,15 +597,5 @@ namespace WebApp23621759.Controllers
             return model;
         }
 
-        //Помощен метод за еднакъв JSON отговор при грешка
-        private JsonResult JsonError(string message)
-        {
-            return Json(new
-            {
-                success = false,
-                message,
-                notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Error)
-            });
-        }
     }
 }

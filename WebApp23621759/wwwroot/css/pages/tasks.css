@@ -279,19 +279,19 @@ html[data-archive-view="table"] .archive-card .archive-grid.archive-view-mode {
 
 /* Status colors */
 .task-row.status-pending {
-    background-color: #f5f7fa;
+    background-color: #eef3f8;
 }
 
 .task-row.status-in-progress {
-    background-color: #e3f2fd;
+    background-color: #d9edff;
 }
 
 .task-row.status-completed {
-    background-color: #e8f5e9;
+    background-color: #dff2e2;
 }
 
 .task-row.status-overdue {
-    background-color: #fdecea;
+    background-color: #ffe5e1;
 }
 
 .task-summary-row {
@@ -487,20 +487,20 @@ html[data-archive-view="table"] .archive-card .archive-grid.archive-view-mode {
 }
 
 .task-grid-card.status-pending {
-    background: linear-gradient(145deg, #ffffff, #f5f7fa);
+    background: linear-gradient(145deg, #ffffff, #edf3f9);
 }
 
 .task-grid-card.status-in-progress {
-    background: linear-gradient(145deg, #ffffff, #eef7ff);
+    background: linear-gradient(145deg, #ffffff, #e2f1ff);
 }
 
 .task-grid-card.status-completed,
 .archive-grid-card {
-    background: linear-gradient(145deg, #ffffff, #eef8f1);
+    background: linear-gradient(145deg, #ffffff, #e5f4e9);
 }
 
 .task-grid-card.status-overdue {
-    background: linear-gradient(145deg, #ffffff, #fff0ed);
+    background: linear-gradient(145deg, #ffffff, #ffebe7);
 }
 
 .task-grid-card-topline,
@@ -1536,55 +1536,56 @@ html[data-archive-view="table"] .archive-card .archive-grid.archive-view-mode {
     min-width: 106px;
     padding: 5px 12px;
     border-radius: 999px;
-    background: #e7edf5;
-    color: #44535d;
+    background: #dde6ef;
+    color: #344550;
     font-size: 13px;
     font-weight: 700;
     line-height: 1;
+    box-shadow: inset 0 0 0 1px rgba(34, 62, 76, 0.08);
 }
 
 .task-summary-row.status-pending .task-status-badge {
-    background: #dbe3ee;
-    color: #24364f;
+    background: #cfdbe8;
+    color: #1f3550;
 }
 
 .task-summary-row.status-in-progress .task-status-badge {
-    background: #b9dcff;
-    color: #084c82;
+    background: #98cdff;
+    color: #0b456f;
 }
 
 .task-summary-row.status-completed .task-status-badge {
-    background: #c2e7ca;
-    color: #0f5b24;
+    background: #b4e1bc;
+    color: #0f5a26;
 }
 
 .task-summary-row.status-overdue .task-status-badge {
-    background: #ffc9c2;
-    color: #842118;
+    background: #ffb7ac;
+    color: #7a2118;
 }
 
 .task-grid-card.status-pending .task-status-badge,
 .archive-grid-card.status-pending .task-status-badge {
-    background: #dbe3ee;
-    color: #24364f;
+    background: #cfdbe8;
+    color: #1f3550;
 }
 
 .task-grid-card.status-in-progress .task-status-badge,
 .archive-grid-card.status-in-progress .task-status-badge {
-    background: #b9dcff;
-    color: #084c82;
+    background: #98cdff;
+    color: #0b456f;
 }
 
 .task-grid-card.status-completed .task-status-badge,
 .archive-grid-card.status-completed .task-status-badge {
-    background: #c2e7ca;
-    color: #0f5b24;
+    background: #b4e1bc;
+    color: #0f5a26;
 }
 
 .task-grid-card.status-overdue .task-status-badge,
 .archive-grid-card.status-overdue .task-status-badge {
-    background: #ffc9c2;
-    color: #842118;
+    background: #ffb7ac;
+    color: #7a2118;
 }
 
 .task-summary-row:hover td {
@@ -1948,13 +1949,13 @@ html[data-archive-view="table"] .archive-card .archive-grid.archive-view-mode {
 }
 
 .archive-task-row {
-    background: linear-gradient(90deg, #f1f8f3, #ffffff);
+    background: linear-gradient(90deg, #eaf5ed, #ffffff);
     cursor: pointer;
     transition: filter 0.18s ease, transform 0.18s ease;
 }
 
 .archive-task-row:hover td {
-    background: #edf8f1 !important;
+    background: #e3f2e7 !important;
 }
 
 .archive-task-row td:first-child {
@@ -1964,7 +1965,7 @@ html[data-archive-view="table"] .archive-card .archive-grid.archive-view-mode {
 }
 
 .archive-task-row.expanded td {
-    background: #eef8f1;
+    background: #e4f3e8;
     box-shadow: inset 0 -2px 0 rgba(47, 125, 83, 0.16);
 }
 
@@ -1976,11 +1977,60 @@ html[data-archive-view="table"] .archive-card .archive-grid.archive-view-mode {
     min-width: 106px;
     padding: 5px 12px;
     border-radius: 999px;
-    background: #cfe9d6;
-    color: #155f29;
+    background: #b4e1bc;
+    color: #0f5a26;
     font-size: 13px;
     font-weight: 700;
     line-height: 1;
+    box-shadow: inset 0 0 0 1px rgba(23, 85, 43, 0.1);
+}
+
+html[data-theme="light"] .task-row.status-pending {
+    background-color: #dde8f2;
+}
+
+html[data-theme="light"] .task-row.status-in-progress {
+    background-color: #c7e3ff;
+}
+
+html[data-theme="light"] .task-row.status-completed {
+    background-color: #cfead6;
+}
+
+html[data-theme="light"] .task-row.status-overdue {
+    background-color: #ffd7d0;
+}
+
+html[data-theme="light"] .task-grid-card.status-pending {
+    background: linear-gradient(145deg, #f8fbfe, #dce7f2);
+}
+
+html[data-theme="light"] .task-grid-card.status-in-progress {
+    background: linear-gradient(145deg, #f7fbff, #cfe5ff);
+}
+
+html[data-theme="light"] .task-grid-card.status-completed {
+    background: linear-gradient(145deg, #f8fdf9, #d4ead9);
+}
+
+html[data-theme="light"] .task-grid-card.status-overdue {
+    background: linear-gradient(145deg, #fff8f7, #ffd8d2);
+}
+
+html[data-theme="light"] .archive-grid-card {
+    background: linear-gradient(145deg, #f8fdf9, #d4ead9);
+}
+
+html[data-theme="light"] .archive-task-row {
+    background: linear-gradient(90deg, #d9eee0, #f7fbf8);
+}
+
+html[data-theme="light"] .archive-task-row:hover td {
+    background: #cfe7d7 !important;
+}
+
+html[data-theme="light"] .archive-task-row.expanded td {
+    background: #cde6d5;
 }
 
 .archive-details-row {

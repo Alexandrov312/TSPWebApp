@@ -12,8 +12,10 @@ namespace WebApp23621759.Database
 
 			UserTableInitializer.EnsureTable(connection);
 			TaskTableInitializer.EnsureTable(connection);
-			KanbanColumnTableInitializer.EnsureTable(connection);
 			SubTaskTableInitializer.EnsureTable(connection);
+            OneTimeCodeTableInitializer.EnsureTable(connection);
+            AppNotificationTableInitializer.EnsureTable(connection);
+            TaskReminderLogTableInitializer.EnsureTable(connection);
 		}
 	}
 }

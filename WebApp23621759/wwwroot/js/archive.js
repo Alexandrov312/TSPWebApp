@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
+    //Capture listener-ът хваща Yes бутона в restore popup-а, дори когато popup-ът е преместен в body.
     document.addEventListener("click", function (event) {
         const restoreConfirmButton = event.target.closest("[data-restore-confirm]");
         if (restoreConfirmButton) {
@@ -13,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }, true);
 
+    //Основен click listener за readonly details panel-и в Archive.
     document.addEventListener("click", function (event) {
         const descriptionToggle = event.target.closest("[data-archive-description-toggle]");
         if (descriptionToggle) {
@@ -45,6 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    //Restore/Delete действията в Archive са AJAX, за да се маха задачата без презареждане.
     document.addEventListener("submit", async function (event) {
         const form = event.target;
         if (!(form instanceof HTMLFormElement) || !form.matches(".archive-action-form")) {

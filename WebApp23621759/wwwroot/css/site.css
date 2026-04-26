@@ -1,4 +1,4 @@
-﻿html {
+html {
     font-size: 14px;
     position: relative;
     min-height: 100%;
@@ -13,6 +13,243 @@
 body {
     margin-bottom: 60px;
     background: linear-gradient(135deg, #dff5ec, #f6fbf8);
+}
+
+.Planora-home,
+.account-page {
+    padding: 24px 0 40px;
+}
+
+.Planora-home-hero,
+.account-page-grid {
+    display: grid;
+    gap: 24px;
+}
+
+.Planora-home-hero {
+    grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.9fr);
+    align-items: stretch;
+}
+
+.Planora-home-copy,
+.Planora-home-panel,
+.account-card {
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid #d6e5dc;
+    border-radius: 24px;
+    box-shadow: 0 18px 34px rgba(18, 60, 39, 0.08);
+}
+
+.Planora-home-copy {
+    padding: 34px;
+}
+
+.Planora-home-panel {
+    padding: 22px;
+    display: grid;
+    gap: 16px;
+    align-self: start;
+}
+
+.Planora-home-eyebrow,
+.account-page-eyebrow {
+    margin-bottom: 10px;
+    color: #4d7061;
+    font-size: 0.82rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+}
+
+.Planora-home-copy h1,
+.account-page-header h1 {
+    margin-bottom: 16px;
+    color: #173d2c;
+    font-size: clamp(2rem, 3vw, 3.2rem);
+    line-height: 1.08;
+}
+
+.Planora-home-lead,
+.account-page-description {
+    max-width: 760px;
+    color: #567167;
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+.Planora-home-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 26px;
+}
+
+.Planora-feature-card {
+    display: grid;
+    gap: 6px;
+    padding: 18px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #f7fcf9, #e6f4ec);
+    border: 1px solid #d6e5dc;
+    color: #274638;
+}
+
+.Planora-feature-card.compact {
+    padding: 16px 18px;
+}
+
+.Planora-feature-card strong {
+    font-size: 1.02rem;
+}
+
+.account-page-header {
+    margin-bottom: 22px;
+}
+
+.account-page-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.account-card {
+    padding: 24px;
+}
+
+.account-card h2 {
+    margin-bottom: 16px;
+    color: #173d2c;
+    font-size: 1.3rem;
+}
+
+.account-summary-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid #e0ece5;
+}
+
+.account-summary-item span,
+.account-summary-note {
+    color: #62796f;
+}
+
+.account-summary-item strong {
+    color: #173d2c;
+}
+
+.account-summary-note {
+    margin-top: 16px;
+    line-height: 1.6;
+}
+
+.account-form {
+    display: grid;
+    gap: 10px;
+}
+
+html[data-theme="dark"] .Planora-home-copy,
+html[data-theme="dark"] .Planora-home-panel,
+html[data-theme="dark"] .account-card {
+    background: linear-gradient(180deg, #15241c 0%, #101c16 100%) !important;
+    border-color: #2a4639 !important;
+    color: #e6f0ea;
+    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .Planora-home-copy h1,
+html[data-theme="dark"] .account-page-header h1,
+html[data-theme="dark"] .account-card h2,
+html[data-theme="dark"] .account-summary-item strong {
+    color: #f0f7f3 !important;
+}
+
+html[data-theme="dark"] .Planora-home-lead,
+html[data-theme="dark"] .account-page-description,
+html[data-theme="dark"] .account-summary-item span,
+html[data-theme="dark"] .account-summary-note,
+html[data-theme="dark"] .Planora-home-eyebrow,
+html[data-theme="dark"] .account-page-eyebrow {
+    color: #a9beb4 !important;
+}
+
+html[data-theme="dark"] .Planora-feature-card {
+    background: linear-gradient(135deg, #1d3328, #15241c) !important;
+    border-color: #314f40 !important;
+    color: #e7f4ed !important;
+}
+
+@media (max-width: 991px) {
+    .Planora-home-hero,
+    .account-page-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.navbar {
+    background: rgba(255, 255, 255, 0.88) !important;
+    backdrop-filter: blur(10px);
+}
+
+.navbar .container-fluid {
+    gap: 14px;
+}
+
+.navbar-brand {
+    font-size: 1.8rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    color: #143a2a !important;
+    padding: 10px 18px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #eff8f3, #dff0e7);
+    border: 1px solid #cfe0d6;
+    box-shadow: 0 10px 20px rgba(31, 107, 67, 0.1);
+}
+
+.navbar-nav {
+    gap: 8px;
+}
+
+.navbar .nav-link,
+.navbar .btn-link.nav-link,
+.nav-user-greeting,
+.nav-auth-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 9px 16px !important;
+    border: 1px solid #cfe0d6;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f7fcf9, #e6f4ec);
+    color: #244f38 !important;
+    font-weight: 800;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.navbar .nav-link:hover,
+.navbar .btn-link.nav-link:hover,
+.nav-auth-action:hover {
+    background: linear-gradient(135deg, #ecf8f1, #d9eee2);
+    border-color: #9cc4ac;
+    color: #163b2b !important;
+    box-shadow: 0 8px 16px rgba(31, 107, 67, 0.12);
+    transform: translateY(-1px);
+}
+
+.nav-user-greeting {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    color: #365748 !important;
+}
+
+.nav-user-greeting:hover {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    transform: none;
 }
 
 .theme-toggle-btn {
@@ -65,9 +302,45 @@ html[data-theme="dark"] .btn-link.nav-link {
     color: #e9f5ee !important;
 }
 
-html[data-theme="dark"] .nav-link:hover,
+html[data-theme="dark"] .navbar-brand {
+    color: #f2faf6 !important;
+    background: linear-gradient(135deg, #1f3529, #173024) !important;
+    border-color: #355947 !important;
+    box-shadow: 0 12px 22px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .navbar .nav-link,
+html[data-theme="dark"] .navbar .btn-link.nav-link,
+html[data-theme="dark"] .nav-user-greeting,
+html[data-theme="dark"] .nav-auth-action {
+    background: linear-gradient(135deg, #21392d, #172b21) !important;
+    border-color: #355947 !important;
+    color: #e7f4ed !important;
+    box-shadow: inset 0 0 0 1px rgba(143, 215, 173, 0.06);
+}
+
+html[data-theme="dark"] .nav-user-greeting {
+    background: transparent !important;
+    border-color: transparent !important;
+    color: #cfe0d7 !important;
+    box-shadow: none;
+}
+
+html[data-theme="dark"] .navbar .nav-link:hover,
+html[data-theme="dark"] .navbar .btn-link.nav-link:hover,
+html[data-theme="dark"] .nav-auth-action:hover,
 html[data-theme="dark"] .navbar-brand:hover {
-    color: #8fd7ad !important;
+    background: linear-gradient(135deg, #2d4c3a, #1d392b) !important;
+    border-color: #67a681 !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .nav-user-greeting:hover {
+    background: transparent !important;
+    border-color: transparent !important;
+    color: #cfe0d7 !important;
+    box-shadow: none;
 }
 
 html[data-theme="dark"] .theme-toggle-btn {
@@ -542,6 +815,13 @@ html[data-theme="dark"] .archive-description-panel {
 html[data-theme="dark"] .archive-description-box span,
 html[data-theme="dark"] .archive-description-box p {
     color: #dfece5 !important;
+}
+
+html[data-theme="dark"] .archive-empty {
+    background: #111e17 !important;
+    border: 1px solid #2f4d3f !important;
+    color: #dce9e2 !important;
+    box-shadow: inset 0 0 0 1px rgba(143, 215, 173, 0.04);
 }
 
 html[data-theme="dark"] .archive-task-row {

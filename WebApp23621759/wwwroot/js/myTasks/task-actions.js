@@ -3,6 +3,7 @@ const popupOffset = 10;
 let popupSequence = 0;
 
 document.addEventListener("DOMContentLoaded", function () {
+    //Централен click listener за главните задачи, popup-ите и grid inline редакцията.
     document.addEventListener("click", function (event) {
         const taskRow = event.target.closest(".task-summary-row");
         if (taskRow && !isTaskInteractiveElement(event.target)) {
@@ -107,6 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    //Всички форми за главни задачи минават оттук, за да няма full page reload.
     document.addEventListener("submit", async function (event) {
         const form = event.target;
         if (!(form instanceof HTMLFormElement) || !form.matches(".task-ajax-form")) {
@@ -165,6 +167,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    //Пази старата стойност на inline description, за да знаем дали има реална промяна.
     document.addEventListener("focusin", function (event) {
         const editableDescription = event.target.closest("[data-task-description-editable]");
         if (editableDescription) {
@@ -172,6 +175,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    //Enter записва inline редакция, Escape връща последната запазена стойност.
     document.addEventListener("keydown", function (event) {
         const gridInput = event.target.closest(".task-grid-card.editing input.edit-mode, .task-grid-card.editing select.edit-mode");
         if (gridInput) {
@@ -205,6 +209,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    //При напускане на поле grid edit-ът се записва автоматично, както потребителят очаква.
     document.addEventListener("focusout", async function (event) {
         const gridInput = event.target.closest(".task-grid-card.editing input.edit-mode");
         if (gridInput) {
@@ -239,6 +244,7 @@ document.addEventListener("DOMContentLoaded", function () {
         await saveTaskDetailsDescription(editableDescription, currentValue);
     });
 
+    //Select/input промени в grid card се записват веднага, без допълнителни бутони.
     document.addEventListener("change", function (event) {
         const gridInput = event.target.closest(".task-grid-card.editing input.edit-mode, .task-grid-card.editing select.edit-mode");
         if (gridInput) {

@@ -9,7 +9,7 @@ using WebApp23621759.Services;
 namespace WebApp23621759.Controllers
 {
     [Authorize]
-    public class ArchiveController : Controller
+    public class ArchiveController : PlanoraController
     {
         private readonly TaskService _taskService;
         private readonly SubTaskService _subTaskService;
@@ -20,7 +20,7 @@ namespace WebApp23621759.Controllers
             _subTaskService = subTaskService;
         }
 
-        //Показва само архивираните главни задачи на текущия потребител.
+        //ÐŸÐ¾ÐºÐ°Ð·Ð²Ð° ÑÐ°Ð¼Ð¾ Ð°Ñ€Ñ…Ð¸Ð²Ð¸Ñ€Ð°Ð½Ð¸Ñ‚Ðµ Ð³Ð»Ð°Ð²Ð½Ð¸ Ð·Ð°Ð´Ð°Ñ‡Ð¸ Ð½Ð° Ñ‚ÐµÐºÑƒÑ‰Ð¸Ñ Ð¿Ð¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ».
         public IActionResult Index()
         {
             int userId = UserHelper.GetUserId(User);
@@ -82,14 +82,5 @@ namespace WebApp23621759.Controllers
             return TaskViewModelHelper.BuildTaskItemViewModel(task, subTasks);
         }
 
-        private JsonResult JsonError(string message)
-        {
-            return Json(new
-            {
-                success = false,
-                message,
-                notificationCssClass = NotificationHelper.GetCssClass(NotificationType.Error)
-            });
-        }
     }
 }

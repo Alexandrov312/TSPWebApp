@@ -15,14 +15,24 @@
 
             <div class="form-group">
                 <label asp-for="Password">🔒 Password</label>
-                <input asp-for="Password" type="password" placeholder="Enter your password" />
+                <div class="password-peek-field" data-password-peek>
+                    <input asp-for="Password" type="password" placeholder="Enter your password" />
+                    <button type="button" class="password-peek-btn" data-password-peek-toggle aria-label="Show password">⌣</button>
+                </div>
                 <div class="field-error">
                     <span asp-validation-for="Password"></span>
                 </div>
             </div>
 
+            <div class="auth-inline-options">
+                <label class="remember-me-option">
+                    <input asp-for="RememberMe" type="checkbox" />
+                    <span>Remember me</span>
+                </label>
+            </div>
+
             <div class="forgot-password">
-                <a href="">Forgot password?</a>
+                <a asp-controller="AccountSecurity" asp-action="ForgotPassword">Forgot password?</a>
             </div>
 
             <div class="message-box">

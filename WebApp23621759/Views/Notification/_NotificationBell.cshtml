@@ -1,0 +1,56 @@
+@model WebApp23621759.Models.ViewModel.Notifications.NotificationBellViewModel
+
+<div class="notification-bell" data-notification-bell>
+    <button type="button" class="notification-bell-btn" data-notification-toggle aria-label="Open notifications">
+        <span class="notification-bell-icon" aria-hidden="true">&#128276;</span>
+        @if (Model.UnreadCount > 0)
+        {
+            <span class="notification-bell-count" data-notification-count>@Model.UnreadCount</span>
+        }
+        else
+        {
+            <span class="notification-bell-count is-hidden" data-notification-count>0</span>
+        }
+    </button>
+
+    <div class="notification-bell-panel" data-notification-panel>
+        <div class="notification-bell-header">
+            <strong>Notifications</strong>
+            <button type="button" class="notification-read-all-btn" data-notification-read-all>Mark all as read</button>
+        </div>
+
+        <div class="notification-bell-list">
+            @if (!Model.Notifications.Any())
+            {
+                <div class="notification-empty-state">No notifications yet.</div>
+            }
+            else
+            {
+                @foreach (var notification in Model.Notifications)
+                {
+                    <div class="notification-item @(notification.IsRead ? string.Empty : "is-unread")"
+                         data-notification-item
+                         data-notification-id="@notification.Id">
+                        <div class="notification-item-top">
+                            <strong>@notification.Title</strong>
+                            <div class="notification-item-actions">
+                                <span class="notification-item-time">@notification.CreatedAt.ToLocalTime().ToString("dd.MM HH:mm")</span>
+                                <button type="button"
+                                        class="notification-dismiss-btn"
+                                        data-notification-dismiss
+                                        aria-label="Close notification">
+                                    &times;
+                                </button>
+                            </div>
+                        </div>
+                        <div class="notification-item-message">@notification.Message</div>
+                        @if (!string.IsNullOrWhiteSpace(notification.TargetUrl))
+                        {
+                            <a href="@notification.TargetUrl" class="notification-item-link" data-notification-link>Open</a>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

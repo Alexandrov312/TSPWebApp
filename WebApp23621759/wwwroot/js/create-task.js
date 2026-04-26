@@ -155,6 +155,7 @@
         refreshDependencyOptions();
     }
 
+    //Добавя нова подзадача до лимита и при опит над лимита само подсказва визуално.
     addButton.addEventListener("click", function () {
         const items = getItems();
 
@@ -171,6 +172,7 @@
         refreshIndexes();
     });
 
+    //Управлява сгъването на описанието и премахването на подзадача от CreateTask формата.
     container.addEventListener("click", function (event) {
         const descriptionToggle = event.target.closest(".subtask-description-toggle");
         if (descriptionToggle) {
@@ -192,12 +194,14 @@
         }
     });
 
+    //При промяна на заглавие обновява dependency dropdown-ите, защото текстът им зависи от него.
     container.addEventListener("input", function (event) {
         if (event.target.classList.contains("subtask-title-input")) {
             refreshDependencyOptions();
         }
     });
 
+    //При смяна на dependency пресмята наново валидните опции и предотвратява цикли.
     container.addEventListener("change", function (event) {
         if (event.target.classList.contains("subtask-dependency-select")) {
             refreshDependencyOptions();

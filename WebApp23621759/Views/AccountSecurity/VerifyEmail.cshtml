@@ -1,0 +1,43 @@
+@model WebApp23621759.Models.ViewModel.Auth.VerifyEmailViewModel
+
+<div class="page-auth">
+    <div class="card-auth">
+        <h2 class="title">@Model.PageTitle</h2>
+        <p class="auth-description">
+            Enter the 6-digit code sent to <strong>@Model.Email</strong>.
+        </p>
+
+        <form asp-action="@Model.SubmitAction" asp-controller="AccountSecurity" method="post" class="auth-form">
+            <input asp-for="UserId" type="hidden" />
+            <input type="hidden" name="@Model.EmailFieldName" value="@Model.Email" />
+
+            <div class="message-box">
+                @if (ViewBag.ErrorMessage != null)
+                {
+                    <div class="error-message">@ViewBag.ErrorMessage</div>
+                }
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Code">Verification code</label>
+                <input asp-for="Code" inputmode="numeric" maxlength="6" placeholder="Enter the 6-digit code" />
+                <div class="field-error">
+                    <span asp-validation-for="Code"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="primary-btn">@Model.SubmitButtonText</button>
+        </form>
+
+        <form asp-action="@Model.ResendAction" asp-controller="AccountSecurity" method="post" class="auth-secondary-form">
+            <input type="hidden" name="userId" value="@Model.UserId" />
+            <button type="submit" class="secondary-btn">@Model.ResendButtonText</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

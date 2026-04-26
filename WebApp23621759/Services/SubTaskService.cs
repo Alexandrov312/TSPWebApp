@@ -10,12 +10,10 @@ namespace WebApp23621759.Services
     public class SubTaskService
     {
         private readonly DatabaseService _databaseService;
-        private readonly KanbanColumnService _kanbanColumnService;
 
-        public SubTaskService(DatabaseService databaseService, KanbanColumnService kanbanColumnService)
+        public SubTaskService(DatabaseService databaseService)
         {
             _databaseService = databaseService;
-            _kanbanColumnService = kanbanColumnService;
         }
 
         //Валидира целия списък с нови подзадачи преди да се запише каквото и да е в базата
@@ -93,22 +91,19 @@ namespace WebApp23621759.Services
 
         public SubTaskItem CreateSubTask(string title, string description, int? blockedBySubTaskId, int taskId, int userId)
         {
-            var pendingColumn = _kanbanColumnService.GetDefaultColumnForStatus(taskId, userId, Status.Pending);
-
             using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
             command.CommandText = @"
                 INSERT INTO ""SubTasks""
-                    (""Title"", ""Description"", ""Status"", ""CompletedAt"", ""KanbanColumnId"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId"")
+                    (""Title"", ""Description"", ""Status"", ""CompletedAt"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId"")
                 VALUES
-                    (@title, @description, @status, NULL, @kanbanColumnId, @blockedBySubTaskId, @taskId, @userId)
+                    (@title, @description, @status, NULL, @blockedBySubTaskId, @taskId, @userId)
                 RETURNING
-                    ""Id"", ""Title"", ""Description"", ""Status"", ""CompletedAt"", ""KanbanColumnId"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId"";";
+                    ""Id"", ""Title"", ""Description"", ""Status"", ""CompletedAt"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId"";";
 
             command.Parameters.AddWithValue("title", title);
             command.Parameters.AddWithValue("description", description ?? string.Empty);
             command.Parameters.AddWithValue("status", (int)Status.Pending);
-            command.Parameters.AddWithValue("kanbanColumnId", pendingColumn?.Id ?? (object)DBNull.Value);
             command.Parameters.AddWithValue("taskId", taskId);
             command.Parameters.AddWithValue("userId", userId);
             command.Parameters.AddWithValue("blockedBySubTaskId", blockedBySubTaskId > 0 ? blockedBySubTaskId.Value : (object)DBNull.Value);
@@ -124,7 +119,7 @@ namespace WebApp23621759.Services
             using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
             command.CommandText = @"
-                SELECT ""Id"", ""Title"", ""Description"", ""Status"", ""CompletedAt"", ""KanbanColumnId"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId""
+                SELECT ""Id"", ""Title"", ""Description"", ""Status"", ""CompletedAt"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId""
                 FROM ""SubTasks""
                 WHERE ""TaskId"" = @taskId
                 ORDER BY ""Id"";";
@@ -225,7 +220,7 @@ namespace WebApp23621759.Services
             using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
             command.CommandText = @"
-                SELECT ""Id"", ""Title"", ""Description"", ""Status"", ""CompletedAt"", ""KanbanColumnId"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId""
+                SELECT ""Id"", ""Title"", ""Description"", ""Status"", ""CompletedAt"", ""BlockedBySubTaskId"", ""TaskId"", ""UserId""
                 FROM ""SubTasks""
                 WHERE ""Id"" = @subTaskId
                 LIMIT 1;";
@@ -261,19 +256,7 @@ namespace WebApp23621759.Services
                 return false;
             }
 
-            var targetColumn = _kanbanColumnService.GetDefaultColumnForStatus(task.TaskId, userId, targetStatus);
-            if (targetColumn == null)
-            {
-                return false;
-            }
-
-            return SetStatusAndColumn(subTaskId, userId, targetStatus, targetColumn.Id);
-        }
-
-        public bool SetColumn(int subTaskId, int userId, KanbanColumnItem targetColumn)
-        {
-            var targetStatus = targetColumn.StatusValue;
-            return SetStatusAndColumn(subTaskId, userId, targetStatus, targetColumn.Id);
+            return SetStatusInternal(subTaskId, userId, targetStatus);
         }
 
         public bool UpdateDependency(int subTaskId, int? blockedBySubTaskId, int userId)
@@ -317,23 +300,19 @@ namespace WebApp23621759.Services
 
         public int SetAllCompletedForTask(int taskId, int userId)
         {
-            var completedColumn = _kanbanColumnService.GetDefaultColumnForStatus(taskId, userId, Status.Completed);
-
             using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
             command.CommandText = @"
                 UPDATE ""SubTasks""
                 SET
                     ""Status"" = @status,
-                    ""CompletedAt"" = NOW(),
-                    ""KanbanColumnId"" = @kanbanColumnId
+                    ""CompletedAt"" = NOW()
                 WHERE ""TaskId"" = @taskId
                   AND ""UserId"" = @userId
                   AND ""Status"" <> @completedStatus;";
 
             command.Parameters.AddWithValue("status", (int)Status.Completed);
             command.Parameters.AddWithValue("completedStatus", (int)Status.Completed);
-            command.Parameters.AddWithValue("kanbanColumnId", completedColumn?.Id ?? (object)DBNull.Value);
             command.Parameters.AddWithValue("taskId", taskId);
             command.Parameters.AddWithValue("userId", userId);
 
@@ -342,30 +321,26 @@ namespace WebApp23621759.Services
 
         public int SetAllPendingForTask(int taskId, int userId)
         {
-            var pendingColumn = _kanbanColumnService.GetDefaultColumnForStatus(taskId, userId, Status.Pending);
-
             using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
             command.CommandText = @"
                 UPDATE ""SubTasks""
                 SET
                     ""Status"" = @status,
-                    ""CompletedAt"" = NULL,
-                    ""KanbanColumnId"" = @kanbanColumnId
+                    ""CompletedAt"" = NULL
                 WHERE ""TaskId"" = @taskId
                   AND ""UserId"" = @userId
                   AND ""Status"" <> @pendingStatus;";
 
             command.Parameters.AddWithValue("status", (int)Status.Pending);
             command.Parameters.AddWithValue("pendingStatus", (int)Status.Pending);
-            command.Parameters.AddWithValue("kanbanColumnId", pendingColumn?.Id ?? (object)DBNull.Value);
             command.Parameters.AddWithValue("taskId", taskId);
             command.Parameters.AddWithValue("userId", userId);
 
             return command.ExecuteNonQuery();
         }
 
-        private bool SetStatusAndColumn(int subTaskId, int userId, Status targetStatus, int targetColumnId)
+        private bool SetStatusInternal(int subTaskId, int userId, Status targetStatus)
         {
             var task = GetById(subTaskId);
             if (task == null || task.UserId != userId)
@@ -391,14 +366,12 @@ namespace WebApp23621759.Services
                 UPDATE ""SubTasks""
                 SET
                     ""Status"" = @status,
-                    ""CompletedAt"" = @completedAt,
-                    ""KanbanColumnId"" = @kanbanColumnId
+                    ""CompletedAt"" = @completedAt
                 WHERE ""Id"" = @subTaskId
                   AND ""UserId"" = @userId;";
 
             updateCommand.Parameters.AddWithValue("status", (int)targetStatus);
             updateCommand.Parameters.AddWithValue("completedAt", targetStatus == Status.Completed ? DateTime.UtcNow : (object)DBNull.Value);
-            updateCommand.Parameters.AddWithValue("kanbanColumnId", targetColumnId);
             updateCommand.Parameters.AddWithValue("subTaskId", subTaskId);
             updateCommand.Parameters.AddWithValue("userId", userId);
 
@@ -410,8 +383,7 @@ namespace WebApp23621759.Services
 
             if (targetStatus != Status.Completed)
             {
-                var pendingColumn = _kanbanColumnService.GetDefaultColumnForStatus(task.TaskId, userId, Status.Pending);
-                ResetDependentSubTasks(connection, task.Id, userId, allSubTasks, pendingColumn?.Id);
+                ResetDependentSubTasks(connection, task.Id, userId, allSubTasks);
             }
 
             return true;
@@ -426,10 +398,9 @@ namespace WebApp23621759.Services
                 Description = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
                 Status = (Status)reader.GetInt32(3),
                 CompletedAt = reader.IsDBNull(4) ? null : reader.GetDateTime(4),
-                KanbanColumnId = reader.IsDBNull(5) ? null : reader.GetInt32(5),
-                BlockedBySubTaskId = reader.IsDBNull(6) ? null : reader.GetInt32(6),
-                TaskId = reader.GetInt32(7),
-                UserId = reader.GetInt32(8)
+                BlockedBySubTaskId = reader.IsDBNull(5) ? null : reader.GetInt32(5),
+                TaskId = reader.GetInt32(6),
+                UserId = reader.GetInt32(7)
             };
         }
 
@@ -525,7 +496,7 @@ namespace WebApp23621759.Services
             return false;
         }
 
-        private static void ResetDependentSubTasks(NpgsqlConnection connection, int rootSubTaskId, int userId, List<SubTaskItem> allSubTasks, int? pendingColumnId)
+        private static void ResetDependentSubTasks(NpgsqlConnection connection, int rootSubTaskId, int userId, List<SubTaskItem> allSubTasks)
         {
             var dependentsByParentId = allSubTasks
                 .Where(subTask => subTask.BlockedBySubTaskId.HasValue)
@@ -567,13 +538,11 @@ namespace WebApp23621759.Services
                 UPDATE ""SubTasks""
                 SET
                     ""Status"" = @status,
-                    ""CompletedAt"" = NULL,
-                    ""KanbanColumnId"" = @kanbanColumnId
+                    ""CompletedAt"" = NULL
                 WHERE ""Id"" = ANY(@subTaskIds)
                   AND ""UserId"" = @userId;";
 
             resetCommand.Parameters.AddWithValue("status", (int)Status.Pending);
-            resetCommand.Parameters.AddWithValue("kanbanColumnId", pendingColumnId.HasValue ? pendingColumnId.Value : (object)DBNull.Value);
             resetCommand.Parameters.AddWithValue("subTaskIds", descendantIds.ToArray());
             resetCommand.Parameters.AddWithValue("userId", userId);
             resetCommand.ExecuteNonQuery();

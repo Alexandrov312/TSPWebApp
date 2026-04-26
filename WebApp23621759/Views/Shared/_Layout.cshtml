@@ -1,9 +1,13 @@
-﻿<!DOCTYPE html>
+@using WebApp23621759.Helpers
+@using WebApp23621759.Models.ViewModel.Notifications
+@inject WebApp23621759.Services.AppNotificationService AppNotificationService
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - WebApp23621759</title>
+    <title>@ViewData["Title"] - Planora</title>
     <script>
         try {
             document.documentElement.dataset.mytasksView = localStorage.getItem("mytasks:viewMode") || "table";
@@ -18,11 +22,9 @@
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
-    <!-- Base -->
     <link rel="stylesheet" href="~/css/base/layout.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/base/typography.css" asp-append-version="true" />
 
-    <!-- Components -->
     <link rel="stylesheet" href="~/css/components/forms.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/components/buttons.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/components/cards.css" asp-append-version="true" />
@@ -32,13 +34,11 @@
     <link rel="stylesheet" href="~/css/components/tables.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/components/subtasks.css" asp-append-version="true" />
 
-    <!-- Pages -->
     <link rel="stylesheet" href="~/css/pages/tasks.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/auth.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/calendar.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/create-task.css" asp-append-version="true" />
 
-    <!-- Global -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/notifications.css" asp-append-version="true" />
 
@@ -53,19 +53,13 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">WebApp23621759</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Planora</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="CreateTask" asp-action="Index">Create Task</a>
                         </li>
@@ -81,25 +75,61 @@
                     </ul>
 
                     <ul class="navbar-nav ms-auto">
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            var currentUserId = UserHelper.GetUserId(User);
+                            var notificationModel = new NotificationBellViewModel
+                            {
+                                UnreadCount = AppNotificationService.GetUnreadCount(currentUserId),
+                                Notifications = AppNotificationService.GetLatestUnreadNotifications(currentUserId)
+                            };
+
+                            <li class="nav-item d-flex align-items-center me-2">
+                                <partial name="~/Views/Notification/_NotificationBell.cshtml" model="notificationModel" />
+                            </li>
+                        }
+
                         <li class="nav-item d-flex align-items-center me-2">
                             <button type="button"
                                     class="theme-toggle-btn"
                                     data-theme-toggle
                                     aria-label="Toggle dark mode">
-                                <span class="theme-toggle-icon" data-theme-icon>🌙</span>
-                                <span class="theme-toggle-text" data-theme-text>Dark</span>
+                                <span class="theme-toggle-icon" data-theme-icon aria-hidden="true"></span>
+                                <span class="theme-toggle-text" data-theme-text aria-hidden="true"></span>
                             </button>
+                            <script>
+                                (function () {
+                                    const button = document.currentScript.previousElementSibling;
+                                    if (!button) {
+                                        return;
+                                    }
+
+                                    const isDark = document.documentElement.dataset.theme === "dark";
+                                    const icon = button.querySelector("[data-theme-icon]");
+                                    const text = button.querySelector("[data-theme-text]");
+                                    if (icon) {
+                                        icon.textContent = isDark ? "\u2600\uFE0F" : "\uD83C\uDF19";
+                                    }
+                                    if (text) {
+                                        text.textContent = isDark ? "Light" : "Dark";
+                                    }
+                                })();
+                            </script>
                         </li>
 
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item d-flex align-items-center me-2">
-                                <span class="nav-link text-dark">Hello, @User.Identity.Name</span>
+                                <a class="nav-link text-dark nav-user-greeting"
+                                   asp-controller="AccountSecurity"
+                                   asp-action="Profile">
+                                    Hello, @User.Identity.Name
+                                </a>
                             </li>
 
                             <li class="nav-item">
                                 <form asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-link nav-link text-dark" style="text-decoration: none;">
+                                    <button type="submit" class="btn btn-link nav-link text-dark nav-auth-action">
                                         Logout
                                     </button>
                                 </form>
@@ -108,14 +138,13 @@
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Login" asp-action="Index">Login</a>
+                                <a class="nav-link text-dark nav-auth-action" asp-controller="Login" asp-action="Index">Login</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Register" asp-action="Index">Register</a>
+                                <a class="nav-link text-dark nav-auth-action" asp-controller="Register" asp-action="Index">Register</a>
                             </li>
                         }
                     </ul>
-
                 </div>
             </div>
         </nav>
@@ -126,11 +155,6 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - WebApp23621759 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

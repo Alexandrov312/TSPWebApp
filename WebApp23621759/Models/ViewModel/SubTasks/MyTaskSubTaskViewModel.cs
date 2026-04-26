@@ -12,7 +12,6 @@ namespace WebApp23621759.Models.ViewModel.SubTasks
         public string Description { get; set; } = string.Empty;
         public Status Status { get; set; }
         public DateTime? CompletedAt { get; set; }
-        public int? KanbanColumnId { get; set; }
         public int? BlockedBySubTaskId { get; set; }
         public string? BlockedByTitle { get; set; }
         public List<SubTaskDependencyOptionViewModel> DependencyOptions { get; set; } = new();

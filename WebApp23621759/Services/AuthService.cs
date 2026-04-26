@@ -7,15 +7,14 @@ namespace WebApp23621759.Services
 {
     public class AuthService
     {
-        public async Task SignInAsync(HttpContext context, User user)
+        public async Task SignInAsync(HttpContext context, User user, bool rememberMe = false)
         {
             //Списък с данни за логнатия потребител - тип:стойност
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
+                new Claim(ClaimTypes.Email, user.Email)
             };
 
             //Данните на потребителя ще се запазят чрез cookie authentication
@@ -24,6 +23,12 @@ namespace WebApp23621759.Services
             //Обектът, който представя логнатия потребител като цяло.
             var principal = new ClaimsPrincipal(identity);
 
+            var authenticationProperties = new AuthenticationProperties
+            {
+                IsPersistent = rememberMe,
+                ExpiresUtc = rememberMe ? DateTimeOffset.UtcNow.AddDays(30) : null
+            };
+
             //Логва потребителя в системата и запазва информацията за него чрез cookie
             //1. ASP.NET взима principal
             //2. Сериализира данните за него
@@ -31,7 +36,7 @@ namespace WebApp23621759.Services
             //4. Изпраща cookie към браузъра
             //5. Браузърът я пази
             //6. При следваща заявка браузърът я изпраща обратно
-            await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+            await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authenticationProperties);
         }
     }
 }

@@ -20,6 +20,31 @@
 .auth-form {
     display: flex;
     flex-direction: column;
+    gap: 8px;
+}
+
+.auth-description {
+    margin-bottom: 18px;
+    color: #587169;
+}
+
+.auth-inline-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.remember-me-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #23463d;
+}
+
+.auth-secondary-form {
+    margin-top: 14px;
 }
 
 .forgot-password {
@@ -42,3 +67,76 @@
         text-decoration: none;
         font-weight: 600;
     }
+
+.password-peek-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-peek-field input {
+    padding-right: 48px;
+}
+
+.password-peek-btn {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    color: transparent;
+    font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif;
+    font-size: 0;
+    line-height: 1;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    touch-action: none;
+    transition: none;
+}
+
+.password-peek-btn:active {
+    transform: translateY(-50%);
+}
+
+.password-peek-btn::before {
+    content: "👁";
+    display: block;
+    width: 18px;
+    height: 18px;
+    color: #557368;
+    font-size: 16px;
+    line-height: 18px;
+    text-align: center;
+}
+
+.password-peek-btn[data-peek-state="visible"]::before {
+    content: "⌣";
+}
+
+.password-peek-btn:hover,
+.password-peek-btn:focus-visible {
+    outline: none;
+}
+
+html[data-theme="dark"] .password-peek-btn {
+    color: transparent;
+}
+
+html[data-theme="dark"] .password-peek-btn:hover,
+html[data-theme="dark"] .password-peek-btn:focus-visible {
+    outline: none;
+}
+
+html[data-theme="dark"] .password-peek-btn::before {
+    color: #a9beb4;
+}

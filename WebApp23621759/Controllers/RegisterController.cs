@@ -1,22 +1,28 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using WebApp23621759.Services;
-using System.Security.Claims;
+using WebApp23621759.Enums;
+using WebApp23621759.Helpers;
 using WebApp23621759.Models.Entities;
 using WebApp23621759.Models.ViewModel.Auth;
+using WebApp23621759.Services;
 
 namespace WebApp23621759.Controllers
 {
     public class RegisterController : Controller
     {
         private readonly UserService _userService;
-        private readonly AuthService _authService;
-        public RegisterController(UserService userService, AuthService authService)
+        private readonly OneTimeCodeService _oneTimeCodeService;
+        private readonly EmailService _emailService;
+
+        public RegisterController(
+            UserService userService,
+            OneTimeCodeService oneTimeCodeService,
+            EmailService emailService)
         {
             _userService = userService;
-            _authService = authService; 
+            _oneTimeCodeService = oneTimeCodeService;
+            _emailService = emailService;
         }
+
         [HttpGet]
         public IActionResult Index()
         {
@@ -32,18 +38,33 @@ namespace WebApp23621759.Controllers
             }
 
             var hash = PasswordService.Hash(model.Password);
-            User user = _userService.CreateUser(model.Username, model.Email, hash, false);
+            User user = _userService.CreateUser(model.Username, model.Email, hash);
 
             if (user == null)
             {
-                ViewBag.ErrorMessage = "User could not be created";
+                ViewBag.ErrorMessage = "Username or email already exists.";
                 return View(model);
             }
 
-            //Запазване на данните на потребителя в бисквитка
-            await _authService.SignInAsync(HttpContext, user);
+            string verificationCode = _oneTimeCodeService.CreateCode(user.Id, user.Email, OneTimeCodeService.EmailVerificationPurpose);
+            bool emailSent = await _emailService.SendAccountVerificationCodeAsync(
+                user.Email,
+                user.Username,
+                verificationCode);
 
-            return RedirectToAction("Index", "Home");
+            if (!emailSent)
+            {
+                _userService.DeleteUser(user.Id);
+                ViewBag.ErrorMessage = "The verification email could not be sent, so the account was not created.";
+                return View(model);
+            }
+
+            NotificationHelper.AddNotification(
+                TempData,
+                "Your account was created. Check your email and enter the verification code.",
+                NotificationType.Success);
+
+            return RedirectToAction("VerifyEmail", "AccountSecurity", new { userId = user.Id });
         }
 
         [HttpGet]

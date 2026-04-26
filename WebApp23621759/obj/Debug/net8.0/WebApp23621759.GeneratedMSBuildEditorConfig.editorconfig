@@ -18,6 +18,22 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = C:\Projects\VS Projects\6tiSemestar\WebApp23621759\WebApp23621759
 build_property._RazorSourceGeneratorDebug = 
 
+[C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/AccountSecurity/ForgotPassword.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFNlY3VyaXR5XEZvcmdvdFBhc3N3b3JkLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/AccountSecurity/Profile.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFNlY3VyaXR5XFByb2ZpbGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/AccountSecurity/ResetPassword.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFNlY3VyaXR5XFJlc2V0UGFzc3dvcmQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/AccountSecurity/VerifyEmail.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFNlY3VyaXR5XFZlcmlmeUVtYWlsLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/Archive/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXJjaGl2ZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -42,10 +58,6 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/Home/Privacy.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
 [C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/Login/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTG9naW5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -60,6 +72,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/MyTasks/_TaskSubTasksPanel.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTXlUYXNrc1xfVGFza1N1YlRhc2tzUGFuZWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/Notification/_NotificationBell.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTm90aWZpY2F0aW9uXF9Ob3RpZmljYXRpb25CZWxsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Projects/VS Projects/6tiSemestar/WebApp23621759/WebApp23621759/Views/Register/Index.cshtml]

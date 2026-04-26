@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
+    //Click listener за inline editor-и, card expand и Calendar action controls.
     document.addEventListener("click", function (event) {
         const priorityTrigger = event.target.closest(".calendar-priority-trigger");
         if (priorityTrigger) {
@@ -52,6 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    //Пази старата стойност на inline полетата, за да се записват само реални промени.
     document.addEventListener("focusin", function (event) {
         const editableField = event.target.closest(".calendar-inline-editable");
         if (!editableField) {
@@ -61,6 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
         editableField.dataset.originalValue = normalizeEditableValue(editableField);
     });
 
+    //Enter записва inline редакция, Escape възстановява последната запазена стойност.
     document.addEventListener("keydown", function (event) {
         const editableField = event.target.closest(".calendar-inline-editable");
         if (!editableField) {
@@ -79,6 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    //При напускане на inline поле Calendar записва задачата през AJAX.
     document.addEventListener("focusout", function (event) {
         const editableField = event.target.closest(".calendar-inline-editable");
         if (!editableField) {
@@ -110,6 +114,7 @@ document.addEventListener("DOMContentLoaded", function () {
         saveCalendarTaskChanges(taskCard);
     });
 
+    //Priority и due date editor-ите се записват веднага при избор на нова стойност.
     document.addEventListener("change", function (event) {
         const prioritySelect = event.target.closest(".calendar-priority-select");
         if (prioritySelect) {
@@ -137,6 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
         saveCalendarTaskChanges(taskCard);
     });
 
+    //Затваря priority editor-а само ако focus-ът е напуснал цялата task карта.
     document.addEventListener("focusout", function (event) {
         const prioritySelect = event.target.closest(".calendar-priority-select");
         if (!prioritySelect) {
@@ -156,6 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 0);
     });
 
+    //Затваря due date editor-а след като browser-ът приключи смяната на focus.
     document.addEventListener("focusout", function (event) {
         const dueDateInput = event.target.closest(".calendar-due-date-input");
         if (!dueDateInput) {
@@ -170,6 +177,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 0);
     });
 
+    //Всички Calendar форми се прихващат тук, за да се презарежда само десният панел.
     document.addEventListener("submit", function (event) {
         const form = event.target;
         if (!(form instanceof HTMLFormElement)) {
