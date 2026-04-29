@@ -60,6 +60,19 @@ namespace WebApp23621759.Controllers
 
             if (!user.IsEmailConfirmed)
             {
+                _oneTimeCodeService.DeleteExpiredCodes();
+                user = _userService.GetById(user.Id);
+
+                if (user == null)
+                {
+                    NotificationHelper.AddNotification(
+                        TempData,
+                        "The verification code has expired and the unverified account has been deleted. Please sign up again.",
+                        NotificationType.Warning);
+
+                    return RedirectToAction("Index", "Register");
+                }
+
                 string verificationCode = _oneTimeCodeService.CreateCode(user.Id, user.Email, OneTimeCodeService.EmailVerificationPurpose);
                 await _emailService.SendEmailAsync(
                     user.Email,

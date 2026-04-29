@@ -1,6 +1,11 @@
 @using WebApp23621759.Helpers
 @model List<WebApp23621759.Models.ViewModel.Tasks.MyTaskItemViewModel>
 
+@{
+    string currentSort = ViewBag.CurrentSort ?? "completedAt:DESC";
+    string[] sortColumns = TaskSortHelper.ArchiveColumns;
+}
+
 <div class="page tasks-page archive-page">
     <div class="panel-card tasks-card archive-card">
         <div class="tasks-card-header archive-header">
@@ -12,6 +17,50 @@
             <div class="view-toggle" data-view-toggle="archive">
                 <button type="button" class="view-toggle-btn active" data-view-mode-button="table">Table</button>
                 <button type="button" class="view-toggle-btn" data-view-mode-button="grid">Grid</button>
+            </div>
+        </div>
+
+        <div class="table-toolbar archive-toolbar">
+            <div class="table-actions">
+                <a asp-action="Index"
+                   asp-route-sort="@TaskSortHelper.GetNextSort(currentSort, "dueDate", sortColumns)"
+                   class="sort-action @(string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "dueDate", sortColumns)) ? "" : "active")">
+                    Due Date @TaskSortHelper.GetArrow(currentSort, "dueDate", sortColumns)
+                    @if (!string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "dueDate", sortColumns)))
+                    {
+                        <span class="sort-priority">@TaskSortHelper.GetSortPriority(currentSort, "dueDate", sortColumns)</span>
+                    }
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-sort="@TaskSortHelper.GetNextSort(currentSort, "priority", sortColumns)"
+                   class="sort-action @(string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "priority", sortColumns)) ? "" : "active")">
+                    Priority @TaskSortHelper.GetArrow(currentSort, "priority", sortColumns)
+                    @if (!string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "priority", sortColumns)))
+                    {
+                        <span class="sort-priority">@TaskSortHelper.GetSortPriority(currentSort, "priority", sortColumns)</span>
+                    }
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-sort="@TaskSortHelper.GetNextSort(currentSort, "status", sortColumns)"
+                   class="sort-action @(string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "status", sortColumns)) ? "" : "active")">
+                    Status @TaskSortHelper.GetArrow(currentSort, "status", sortColumns)
+                    @if (!string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "status", sortColumns)))
+                    {
+                        <span class="sort-priority">@TaskSortHelper.GetSortPriority(currentSort, "status", sortColumns)</span>
+                    }
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-sort="@TaskSortHelper.GetNextSort(currentSort, "completedAt", sortColumns)"
+                   class="sort-action @(string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "completedAt", sortColumns)) ? "" : "active")">
+                    Completed Date @TaskSortHelper.GetArrow(currentSort, "completedAt", sortColumns)
+                    @if (!string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "completedAt", sortColumns)))
+                    {
+                        <span class="sort-priority">@TaskSortHelper.GetSortPriority(currentSort, "completedAt", sortColumns)</span>
+                    }
+                </a>
             </div>
         </div>
 

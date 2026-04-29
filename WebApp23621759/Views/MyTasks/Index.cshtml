@@ -7,61 +7,7 @@
     int? initialKanbanTaskId = ViewBag.InitialKanbanTaskId;
     string initialKanbanSource = ViewBag.KanbanSource ?? "mytasks";
     string initialKanbanReturnUrl = ViewBag.KanbanReturnUrl ?? string.Empty;
-
-    List<(string Column, string Direction)> GetSortRules()
-    {
-        return currentSort
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(rule => rule.Split(':', StringSplitOptions.TrimEntries))
-            .Where(parts => parts.Length > 0)
-            .Select(parts => (
-                Column: parts[0],
-                Direction: parts.ElementAtOrDefault(1)?.Equals("DESC", StringComparison.OrdinalIgnoreCase) == true ? "DESC" : "ASC"))
-            .Where(rule => new[] { "dueDate", "priority", "status", "createdAt" }.Contains(rule.Column))
-            .GroupBy(rule => rule.Column)
-            .Select(group => group.First())
-            .ToList();
-    }
-
-    string GetNextSort(string column)
-    {
-        var rules = GetSortRules();
-        int index = rules.FindIndex(rule => rule.Column == column);
-
-        if (index < 0)
-        {
-            rules.Add((column, "ASC"));
-        }
-        else if (rules[index].Direction == "ASC")
-        {
-            rules[index] = (column, "DESC");
-        }
-        else
-        {
-            rules.RemoveAt(index);
-        }
-
-        return rules.Count == 0
-            ? "none"
-            : string.Join(",", rules.Select(rule => $"{rule.Column}:{rule.Direction}"));
-    }
-
-    string GetArrow(string column)
-    {
-        var rule = GetSortRules().FirstOrDefault(rule => rule.Column == column);
-        if (string.IsNullOrEmpty(rule.Column))
-        {
-            return "";
-        }
-
-        return rule.Direction == "ASC" ? " ↑" : " ↓";
-    }
-
-    string GetSortPriority(string column)
-    {
-        int index = GetSortRules().FindIndex(rule => rule.Column == column);
-        return index < 0 ? "" : (index + 1).ToString();
-    }
+    string[] sortColumns = TaskSortHelper.MyTasksColumns;
 
     var initialKanbanTask = initialKanbanTaskId.HasValue
         ? Model.FirstOrDefault(task => task.Task.Id == initialKanbanTaskId.Value)
@@ -91,42 +37,42 @@
             <div class="table-toolbar">
                 <div class="table-actions">
                     <a asp-action="Index"
-                       asp-route-sort="@GetNextSort("dueDate")"
-                       class="sort-action @(string.IsNullOrEmpty(GetSortPriority("dueDate")) ? "" : "active")">
-                        Due Date @GetArrow("dueDate")
-                        @if (!string.IsNullOrEmpty(GetSortPriority("dueDate")))
+                       asp-route-sort="@TaskSortHelper.GetNextSort(currentSort, "dueDate", sortColumns)"
+                       class="sort-action @(string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "dueDate", sortColumns)) ? "" : "active")">
+                        Due Date @TaskSortHelper.GetArrow(currentSort, "dueDate", sortColumns)
+                        @if (!string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "dueDate", sortColumns)))
                         {
-                            <span class="sort-priority">@GetSortPriority("dueDate")</span>
+                            <span class="sort-priority">@TaskSortHelper.GetSortPriority(currentSort, "dueDate", sortColumns)</span>
                         }
                     </a>
 
                     <a asp-action="Index"
-                       asp-route-sort="@GetNextSort("priority")"
-                       class="sort-action @(string.IsNullOrEmpty(GetSortPriority("priority")) ? "" : "active")">
-                        Priority @GetArrow("priority")
-                        @if (!string.IsNullOrEmpty(GetSortPriority("priority")))
+                       asp-route-sort="@TaskSortHelper.GetNextSort(currentSort, "priority", sortColumns)"
+                       class="sort-action @(string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "priority", sortColumns)) ? "" : "active")">
+                        Priority @TaskSortHelper.GetArrow(currentSort, "priority", sortColumns)
+                        @if (!string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "priority", sortColumns)))
                         {
-                            <span class="sort-priority">@GetSortPriority("priority")</span>
+                            <span class="sort-priority">@TaskSortHelper.GetSortPriority(currentSort, "priority", sortColumns)</span>
                         }
                     </a>
 
                     <a asp-action="Index"
-                       asp-route-sort="@GetNextSort("status")"
-                       class="sort-action @(string.IsNullOrEmpty(GetSortPriority("status")) ? "" : "active")">
-                        Status @GetArrow("status")
-                        @if (!string.IsNullOrEmpty(GetSortPriority("status")))
+                       asp-route-sort="@TaskSortHelper.GetNextSort(currentSort, "status", sortColumns)"
+                       class="sort-action @(string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "status", sortColumns)) ? "" : "active")">
+                        Status @TaskSortHelper.GetArrow(currentSort, "status", sortColumns)
+                        @if (!string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "status", sortColumns)))
                         {
-                            <span class="sort-priority">@GetSortPriority("status")</span>
+                            <span class="sort-priority">@TaskSortHelper.GetSortPriority(currentSort, "status", sortColumns)</span>
                         }
                     </a>
 
                     <a asp-action="Index"
-                       asp-route-sort="@GetNextSort("createdAt")"
-                       class="sort-action @(string.IsNullOrEmpty(GetSortPriority("createdAt")) ? "" : "active")">
-                        Created Date @GetArrow("createdAt")
-                        @if (!string.IsNullOrEmpty(GetSortPriority("createdAt")))
+                       asp-route-sort="@TaskSortHelper.GetNextSort(currentSort, "createdAt", sortColumns)"
+                       class="sort-action @(string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "createdAt", sortColumns)) ? "" : "active")">
+                        Created Date @TaskSortHelper.GetArrow(currentSort, "createdAt", sortColumns)
+                        @if (!string.IsNullOrEmpty(TaskSortHelper.GetSortPriority(currentSort, "createdAt", sortColumns)))
                         {
-                            <span class="sort-priority">@GetSortPriority("createdAt")</span>
+                            <span class="sort-priority">@TaskSortHelper.GetSortPriority(currentSort, "createdAt", sortColumns)</span>
                         }
                     </a>
                 </div>

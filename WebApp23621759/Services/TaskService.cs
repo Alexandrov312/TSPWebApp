@@ -64,7 +64,7 @@ namespace WebApp23621759.Services
             using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
 
-            string orderByClause = BuildOrderByClause(sortRules);
+            string orderByClause = BuildOrderByClause(sortRules, false);
 
             command.CommandText = $@"
                 SELECT ""Id"", ""Title"", ""Description"", ""DueDate"", ""CreatedAt"", ""CompletedAt"", ""Status"", ""Priority"", ""IsArchived"", ""UserId""
@@ -83,14 +83,15 @@ namespace WebApp23621759.Services
             return tasks;
         }
 
-        private static string BuildOrderByClause(string sortRules)
+        private static string BuildOrderByClause(string sortRules, bool archivedOnly)
         {
             var allowedColumns = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 ["dueDate"] = "\"DueDate\"",
                 ["priority"] = "\"Priority\"",
                 ["status"] = "CASE WHEN \"IsArchived\" = FALSE AND \"Status\" <> 2 AND \"DueDate\" < NOW() THEN 3 ELSE \"Status\" END",
-                ["createdAt"] = "\"CreatedAt\""
+                ["createdAt"] = "\"CreatedAt\"",
+                ["completedAt"] = "\"CompletedAt\""
             };
 
             var orderParts = new List<string>();
@@ -109,6 +110,12 @@ namespace WebApp23621759.Services
                     : "ASC";
 
                 orderParts.Add($"{column} {direction}");
+            }
+
+            if (archivedOnly && orderParts.Count == 0)
+            {
+                orderParts.Add("\"CompletedAt\" DESC NULLS LAST");
+                orderParts.Add("\"DueDate\" DESC");
             }
 
             orderParts.Add("\"Id\" ASC");
@@ -130,15 +137,21 @@ namespace WebApp23621759.Services
 
         public List<TaskItem> GetArchivedTasksByUserId(int userId)
         {
+            return GetArchivedTasksByUserId(userId, "completedAt:DESC");
+        }
+
+        public List<TaskItem> GetArchivedTasksByUserId(int userId, string sortRules)
+        {
             var tasks = new List<TaskItem>();
 
             using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
-            command.CommandText = @"
+            string orderByClause = BuildOrderByClause(sortRules, true);
+            command.CommandText = $@"
                 SELECT ""Id"", ""Title"", ""Description"", ""DueDate"", ""CreatedAt"", ""CompletedAt"", ""Status"", ""Priority"", ""IsArchived"", ""UserId""
                 FROM ""Tasks""
                 WHERE ""UserId"" = @userId AND ""IsArchived"" = TRUE
-                ORDER BY ""CompletedAt"" DESC NULLS LAST, ""DueDate"" DESC;";
+                ORDER BY {orderByClause};";
 
             command.Parameters.AddWithValue("@userId", userId);
 

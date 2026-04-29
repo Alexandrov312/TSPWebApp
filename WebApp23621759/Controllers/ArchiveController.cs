@@ -21,13 +21,17 @@ namespace WebApp23621759.Controllers
         }
 
         //ÐŸÐ¾ÐºÐ°Ð·Ð²Ð° ÑÐ°Ð¼Ð¾ Ð°Ñ€Ñ…Ð¸Ð²Ð¸Ñ€Ð°Ð½Ð¸Ñ‚Ðµ Ð³Ð»Ð°Ð²Ð½Ð¸ Ð·Ð°Ð´Ð°Ñ‡Ð¸ Ð½Ð° Ñ‚ÐµÐºÑƒÑ‰Ð¸Ñ Ð¿Ð¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ».
-        public IActionResult Index()
+        public IActionResult Index(string sortBy = "completedAt", string direction = "DESC", string? sort = null)
         {
             int userId = UserHelper.GetUserId(User);
-            var tasks = _taskService.GetArchivedTasksByUserId(userId)
+            string sortRules = string.IsNullOrWhiteSpace(sort) ? $"{sortBy}:{direction}" : sort;
+            var tasks = _taskService.GetArchivedTasksByUserId(userId, sortRules)
                 .Select(BuildTaskItemViewModel)
                 .ToList();
 
+            ViewBag.CurrentSortBy = sortBy;
+            ViewBag.CurrentDirection = direction;
+            ViewBag.CurrentSort = sortRules;
             return View(tasks);
         }
 

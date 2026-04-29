@@ -26,7 +26,7 @@ namespace WebApp23621759.Services
         //Генерира нов 6-цифрен код и инвалидира старите активни кодове от същия тип.
         public string CreateCode(int userId, string email, string purpose)
         {
-            DeleteExpiredCodes();
+            DeleteExpiredCodesOnly();
 
             int expirationMinutes = purpose == PasswordResetPurpose
                 ? _reminderSettings.PasswordResetCodeMinutes
@@ -151,13 +151,46 @@ namespace WebApp23621759.Services
         public int DeleteExpiredCodes()
         {
             using var connection = _databaseService.GetOpenConnection();
+            using var deleteCodesCommand = connection.CreateCommand();
+            DateTime now = DateTime.UtcNow;
+            deleteCodesCommand.CommandText = @"
+                DELETE FROM ""OneTimeCodes""
+                WHERE ""ExpiresAt"" <= @now;";
+            deleteCodesCommand.Parameters.AddWithValue("now", now);
+            int deletedCodes = deleteCodesCommand.ExecuteNonQuery();
+
+            //Ако акаунтът не е потвърден и вече няма активен код за верификация,
+            //премахваме и самия акаунт, за да не остават висящи регистрации.
+            using var deleteUsersCommand = connection.CreateCommand();
+            deleteUsersCommand.CommandText = @"
+                DELETE FROM ""Users"" u
+                WHERE u.""IsEmailConfirmed"" = FALSE
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM ""OneTimeCodes"" c
+                      WHERE c.""UserId"" = u.""Id""
+                        AND c.""Purpose"" = @emailVerificationPurpose
+                        AND c.""IsUsed"" = FALSE
+                        AND c.""ExpiresAt"" > @now
+                  );";
+            deleteUsersCommand.Parameters.AddWithValue("emailVerificationPurpose", EmailVerificationPurpose);
+            deleteUsersCommand.Parameters.AddWithValue("now", now);
+            int deletedUsers = deleteUsersCommand.ExecuteNonQuery();
+
+            return deletedCodes + deletedUsers;
+        }
+
+        //При създаване на нов код чистим само изтеклите кодове,
+        //за да не изтрием потребителя точно преди повторно изпращане.
+        private int DeleteExpiredCodesOnly()
+        {
+            using var connection = _databaseService.GetOpenConnection();
             using var command = connection.CreateCommand();
             command.CommandText = @"
                 DELETE FROM ""OneTimeCodes""
                 WHERE ""ExpiresAt"" <= @now;";
 
             command.Parameters.AddWithValue("now", DateTime.UtcNow);
-
             return command.ExecuteNonQuery();
         }
 
